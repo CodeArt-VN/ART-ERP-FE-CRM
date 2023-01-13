@@ -1,0 +1,111 @@
+<ion-header>
+	<app-list-toolbar pageTitle="{{'erp.app.pages.crm.mcp.page-title' | translate}}" [ShowFeature]="false" [pageConfig]="pageConfig" [selectedItems]="selectedItems" [query]="query" (add)="add()" (refresh)="refresh()" (export)="export()" (import)="import($event)" (help)="help()" (unselect)="unselect()" (archiveItems)="archiveItems()" (deleteItems)="deleteItems()" (changeBranch)="changeBranch($event)"></app-list-toolbar>
+
+	<section class="table">
+		<header class="bold ion-hide-sm-down">
+			<div class="col-checkbox cell"></div>
+			<div class="col-id cell ion-hide-sm-down" (click)="sortToggle('Sort')">
+				{{'erp.app.pages.crm.mcp.id' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.Sort" [name]="sort.Sort == 'Sort'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Id" name="search" color="primary"></ion-icon>
+			</div>
+			<div class="col-name cell" (click)="sortToggle('Name')">
+				{{'erp.app.pages.crm.mcp.name' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.Name" [name]="sort.Name == 'Name'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Name" name="search" color="primary"></ion-icon>
+			</div>
+			<div class="col-id cell ion-hide-sm-down">
+				{{'erp.app.pages.crm.mcp.number-of-customer' | translate}}
+			</div>
+			<div class="col-code cell ion-hide-sm-down" (click)="sortToggle('SellerName')">
+				{{'erp.app.pages.crm.mcp.seller-name' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.SellerName" [name]="sort.SellerName == 'SellerName'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.SellerName" name="search" color="primary"></ion-icon>
+			</div>
+
+			<div class="col-code cell ion-hide-sm-down">
+				{{'erp.app.pages.crm.mcp.vehicle-name' | translate}}
+			</div>
+
+			<!-- <div class="col-code cell ion-hide-sm-down">Hashtag</div> -->
+			<!-- <div class="col-code cell" (click)="sortToggle('Code')">Đơn vị
+				<ion-icon class="min-btn" *ngIf="sort.Code" [name]="sort.Code == 'Code'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Code_eq" name="search" color="primary"></ion-icon>
+			</div> -->
+
+		</header>
+		<form (submit)="refresh()" action="#">
+			<header class="filter" *ngIf="pageConfig.isShowSearch">
+				<div class="col-checkbox cell"></div>
+				<div class="col-id cell ion-hide-sm-down">
+					<input [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Id" class="c-input" [ngClass]="{active: query.Id}" type="text">
+					<ion-icon class="min-btn" (click)="query.Id=''; refresh()" *ngIf="query.Id" name="close-circle-outline"></ion-icon>
+				</div>
+				<div class="col-name cell">
+					<input [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Name" class="c-input" [ngClass]="{active: query.Name}" type="text">
+					<ion-icon class="min-btn" (click)="query.Name=''; refresh()" *ngIf="query.Name" name="close-circle-outline"></ion-icon>
+				</div>
+				<div class="col-id cell ion-hide-sm-down">
+
+				</div>
+				<div class="col-code cell ion-hide-sm-down">
+					<input [ngModelOptions]="{standalone: true}" [(ngModel)]="query.SellerName" class="c-input" [ngClass]="{active: query.SellerName}" type="text">
+					<ion-icon class="min-btn" (click)="query.SellerName=''; refresh()" *ngIf="query.SellerName" name="close-circle-outline"></ion-icon>
+				</div>
+
+				<div class="col-code cell ion-hide-sm-down">
+
+				</div>
+
+				<button mat-raised-button type="submit" style="display:none">Search</button>
+			</header>
+		</form>
+	</section>
+</ion-header>
+
+<ion-content appScrollbarTheme class="header-table">
+	<app-page-message [itemsLength]="items.length" [showSpinner]="pageConfig.showSpinner"></app-page-message>
+
+	<div *ngIf="items.length && pageConfig.showSpinner==false">
+		<section class="table">
+			<ion-virtual-scroll [items]="items" approxItemHeight="27px">
+				<ng-container *virtualItem="let i; let itemBounds = bounds; let j = index;">
+					<div class="row" [ngClass]="{odd: j % 2 != 0}" [ngClass]="{selected: i.checked}">
+						<div class="col-checkbox cell">
+							<input (click)="changeSelection(i, $event)" class="c-checkbox" [(ngModel)]="i.checked" type="checkbox">
+						</div>
+						<div class="col-id cell ion-hide-sm-down">
+							<a [routerLink]="['/'+pageConfig.pageName+'/'+i.Id]">{{i.Id}}</a>
+						</div>
+						<div class="col-name cell">
+							<a [routerLink]="['/'+this.pageConfig.pageName+'/'+i.Id]">
+								{{i.Name}}
+							</a>
+						</div>
+						<div (click)="nav(this.pageConfig.pageName+'/'+i.Id,'forward')" class="col-id cell ion-hide-sm-down">
+							{{i.NumberOfCustomer}}
+						</div>
+
+						<div class="col-code cell ion-hide-sm-down clickable">
+							
+								{{i.SellerName}}
+							<a [routerLink]="['/staff/'+i.IDSeller]">
+								&nbsp;<ion-icon name="open-outline"></ion-icon>
+							</a>
+						</div>
+
+						<div class="col-code cell ion-hide-sm-down">
+							{{i.VehicleName}}
+						</div>
+
+					</div>
+				</ng-container>
+			</ion-virtual-scroll>
+		</section>
+
+	</div>
+
+	<ion-infinite-scroll color="primary" threshold="20%" (ionInfinite)="loadData($event)" [disabled]="!pageConfig.infiniteScroll || pageConfig.isEndOfData">
+		<ion-infinite-scroll-content loadingSpinner="dots"></ion-infinite-scroll-content>
+	</ion-infinite-scroll>
+</ion-content>

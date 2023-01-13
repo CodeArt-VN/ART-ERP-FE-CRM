@@ -1,0 +1,245 @@
+<ion-header>
+	<app-list-toolbar [pageTitle]="numberOfDinnerPax + 'P - '+ numberOfReal+'Đ - '+numberOfKid+'T - '+numberOfForeigner+'N'" [pageConfig]="pageConfig" [ShowFeature]="false" [ShowArchive]="false" [ShowHelp]="false" [selectedItems]="selectedItems" [query]="query" (add)="add()" (refresh)="refresh()" (export)="export()" (import)="import($event)" (help)="help()" (unselect)="unselect()" (archiveItems)="archiveItems()" (deleteItems)="deleteItems()" (changeBranch)="changeBranch($event)"></app-list-toolbar>
+</ion-header>
+
+<ion-content appScrollbarTheme class="scrollx">
+	<section class="table responsive">
+		<header class="bold">
+			<div class="col-checkbox cell"></div>
+			<!-- <div class="col-id cell" (click)="sortToggle('Id')">
+				Id
+				<ion-icon class="min-btn" *ngIf="sort.Id" [name]="sort.Id == 'Id'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Id" name="search" color="primary"></ion-icon>
+			</div> -->
+			
+			
+			<div class="col-date cell" (click)="sortToggle('PartyDate')">
+				{{'erp.app.pages.crm.attendance-booking.party-date' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.PartyDate" [name]="sort.PartyDate == 'PartyDate'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.PartyDate" name="search" color="primary"></ion-icon>
+			</div>
+			<div class="col-remark cell" (click)="sortToggle('CustomerName')">
+				{{'erp.app.pages.crm.attendance-booking.customer-name' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.CustomerName" [name]="sort.CustomerName == 'CustomerName'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.CustomerName" name="search" color="primary"></ion-icon>
+			</div>
+			
+			<div class="col-code cell phone" (click)="sortToggle('Phone')">
+				{{'erp.app.pages.crm.attendance-booking.phone' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.Phone" [name]="sort.Phone == 'Phone'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Phone" name="search" color="primary"></ion-icon>
+			</div>
+			<div class="col-code cell" (click)="sortToggle('RegisteredTable')">
+				{{'erp.app.pages.crm.attendance-booking.registered-table' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.RegisteredTable" [name]="sort.RegisteredTable == 'RegisteredTable'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.RegisteredTable" name="search" color="primary"></ion-icon>
+			</div>
+			<div class="col-number cell" (click)="sortToggle('DinnerPax')">
+				{{'erp.app.pages.crm.attendance-booking.dinner-pax' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.DinnerPax" [name]="sort.DinnerPax == 'DinnerPax'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.DinnerPax" name="search" color="primary"></ion-icon>
+			</div>
+			<div class="col-number cell" (click)="sortToggle('RealField')">
+				{{'erp.app.pages.crm.attendance-booking.real-field' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.RealField" [name]="sort.RealField == 'RealField'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.RealField" name="search" color="primary"></ion-icon>
+			</div>
+			<div class="col-number cell" (click)="sortToggle('Kids')">
+				{{'erp.app.pages.crm.attendance-booking.kids' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.Kids" [name]="sort.Kids == 'Kids'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Kids" name="search" color="primary"></ion-icon>
+			</div>
+			<div class="col-number cell" (click)="sortToggle('ForeignerNo')">
+				{{'erp.app.pages.crm.attendance-booking.foreigner-no' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.ForeignerNo" [name]="sort.ForeignerNo == 'ForeignerNo'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.ForeignerNo" name="search" color="primary"></ion-icon>
+			</div>
+			
+			
+
+			<div class="col-code cell" (click)="sortToggle('TypeOfParty')">
+				{{'erp.app.pages.crm.attendance-booking.type-of-party' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.TypeOfParty" [name]="sort.TypeOfParty == 'TypeOfParty'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.TypeOfParty" name="search" color="primary"></ion-icon>
+			</div>
+			<div class="col-remark cell">
+				{{'erp.app.pages.crm.attendance-booking.remark' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.CustomerName" [name]="sort.CustomerName == 'CustomerName'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.CustomerName" name="search" color="primary"></ion-icon>
+			</div>
+			<div class="col-code cell" (click)="sortToggle('DiningCard')">
+				{{'erp.app.pages.crm.attendance-booking.dining-card' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.DiningCard" [name]="sort.DiningCard == 'DiningCard'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.DiningCard" name="search" color="primary"></ion-icon>
+			</div>
+			<div class="col-code cell" (click)="sortToggle('NoRecords')">
+				{{'erp.app.pages.crm.attendance-booking.no-records' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.NoRecords" [name]="sort.NoRecords == 'NoRecords'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.NoRecords" name="search" color="primary"></ion-icon>
+			</div>
+			<div class="col-code cell" (click)="sortToggle('CustomerGroup')">
+				{{'erp.app.pages.crm.attendance-booking.customer-group' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.CustomerGroup" [name]="sort.CustomerGroup == 'CustomerGroup'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.CustomerGroup" name="search" color="primary"></ion-icon>
+			</div>
+			<div class="col-code cell" (click)="sortToggle('CustomerType')">
+				{{'erp.app.pages.crm.attendance-booking.customer-type' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.CustomerType" [name]="sort.CustomerType == 'CustomerType'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.CustomerType" name="search" color="primary"></ion-icon>
+			</div>
+			<div class="col-status cell" (click)="sortToggle('Status')">
+				{{'erp.app.pages.crm.attendance-booking.status' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.Status" [name]="sort.Status == 'Status'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Status" name="search" color="primary"></ion-icon>
+			</div>
+		</header>
+		<form (keydown)="onKeydown($event)"  action="#">
+			<header class="filter" *ngIf="pageConfig.isShowSearch">
+				<div class="col-checkbox cell empty"></div>
+				<!-- <div class="col-id cell">
+					<ion-text>{{'erp.app.pages.crm.attendance-booking.id' | translate}}</ion-text>
+					<input placeholder="{{'erp.app.pages.crm.attendance-booking.id' | translate}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Id" class="c-input no-check-dirty" [ngClass]="{active: query.Id}" type="search">
+					<ion-icon class="min-btn" (click)="query.Id=''; refresh()" *ngIf="query.Id" name="close-circle-outline"></ion-icon>
+				</div> -->
+				
+				
+				<div class="col-date cell">
+					<ion-text>{{'erp.app.pages.crm.attendance-booking.party-date' | translate}}</ion-text>
+					<input placeholder="{{'erp.app.pages.crm.attendance-booking.party-date' | translate}}" [ngModelOptions]="{standalone: true}" (change)="refresh();" [(ngModel)]="query.PartyDate" class="c-input no-check-dirty" [ngClass]="{active: query.PartyDate}" type="date">
+					<ion-icon class="min-btn" (click)="query.PartyDate=''; refresh()" *ngIf="query.PartyDate" name="close-circle-outline"></ion-icon>
+				</div>
+				<div class="col-remark cell">
+					<ion-text>{{'erp.app.pages.crm.attendance-booking.customer-name' | translate}}</ion-text>
+					<input (keydown)="onKeydown($event)" type="search" placeholder="{{'erp.app.pages.crm.attendance-booking.customer-name' | translate}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.CustomerName" class="c-input no-check-dirty" [ngClass]="{active: query.CustomerName}" >
+					<ion-icon class="min-btn" (click)="query.CustomerName=''; refresh()" *ngIf="query.CustomerName" name="close-circle-outline"></ion-icon>
+				</div>
+				<div class="col-code cell phone">
+					<ion-text>{{'erp.app.pages.crm.attendance-booking.phone' | translate}}</ion-text>
+					<input (keydown)="onKeydown($event)" placeholder="{{'erp.app.pages.crm.attendance-booking.phone' | translate}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Phone" class="c-input no-check-dirty" [ngClass]="{active: query.Phone}" type="search">
+					<ion-icon class="min-btn" (click)="query.Phone=''; refresh()" *ngIf="query.Phone" name="close-circle-outline"></ion-icon>
+				</div>
+				<div class="col-code cell">
+					<ion-text>{{'erp.app.pages.crm.attendance-booking.registered-table' | translate}}</ion-text>
+					<input placeholder="{{'erp.app.pages.crm.attendance-booking.registered-table' | translate}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.RegisteredTable" class="c-input no-check-dirty" [ngClass]="{active: query.RegisteredTable}" type="search">
+					<ion-icon class="min-btn" (click)="query.RegisteredTable=''; refresh()" *ngIf="query.RegisteredTable" name="close-circle-outline"></ion-icon>
+				</div>
+				<div class="col-number cell empty"></div>
+				<div class="col-number cell empty"></div>
+				<div class="col-number cell empty"></div>
+				<div class="col-number cell empty"></div>
+				
+				<div class="col-code cell">
+					<ion-text>{{'erp.app.pages.crm.attendance-booking.type-of-party' | translate}}</ion-text>
+					<select (change)="refresh()" class="c-input no-check-dirty c-dropdown" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.TypeOfParty" [ngClass]="{active: query.TypeOfParty}">
+						<option value="">{{'erp.app.pages.crm.attendance-booking.type-of-party' | translate}}</option>
+						<option *ngFor="let t of PartyMenuList" [value]="t.Code">{{t.Name}}</option>
+					</select>
+					<ion-icon class="min-btn" (click)="query.TypeOfParty=''; refresh()" name="close-circle-outline"></ion-icon>
+				</div>
+				
+				<div class="col-remark cell">
+					<ion-text>{{'erp.app.pages.crm.attendance-booking.remark' | translate}}</ion-text>
+					<input (keydown)="onKeydown($event)" placeholder="{{'erp.app.pages.crm.attendance-booking.remark' | translate}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Remark" class="c-input no-check-dirty" [ngClass]="{active: query.Remark}" type="search">
+					<ion-icon class="min-btn" (click)="query.Remark=''; refresh()" *ngIf="query.Remark" name="close-circle-outline"></ion-icon>
+				</div>
+				<div class="col-code cell">
+					<ion-text>{{'erp.app.pages.crm.attendance-booking.dining-card' | translate}}</ion-text>
+					<input (keydown)="onKeydown($event)" placeholder="{{'erp.app.pages.crm.attendance-booking.dining-card' | translate}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.DiningCard" class="c-input no-check-dirty" [ngClass]="{active: query.DiningCard}" type="search">
+					<ion-icon class="min-btn" (click)="query.DiningCard=''; refresh()" *ngIf="query.DiningCard" name="close-circle-outline"></ion-icon>
+				</div>
+				<div class="col-code cell">
+					<ion-text>{{'erp.app.pages.crm.attendance-booking.no-records' | translate}}</ion-text>
+					<input (keydown)="onKeydown($event)" placeholder="{{'erp.app.pages.crm.attendance-booking.no-records' | translate}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.NoRecords" class="c-input no-check-dirty" [ngClass]="{active: query.NoRecords}" type="search">
+					<ion-icon class="min-btn" (click)="query.NoRecords=''; refresh()" *ngIf="query.NoRecords" name="close-circle-outline"></ion-icon>
+				</div>
+				<div class="col-code cell">
+					<ion-text>{{'erp.app.pages.crm.attendance-booking.customer-group' | translate}}</ion-text>
+					<select (change)="refresh()" class="c-input no-check-dirty c-dropdown" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.CustomerGroup" [ngClass]="{active: query.CustomerGroup}">
+						<option value="">{{'erp.app.pages.crm.attendance-booking.customer-group' | translate}}</option>
+						<option *ngFor="let t of AttendanceGroup" [value]="t.Code">{{t.Name}}</option>
+					</select>
+					<ion-icon class="min-btn" (click)="query.CustomerGroup=''; refresh()" name="close-circle-outline"></ion-icon>
+				</div>
+				<div class="col-code cell">
+					<ion-text>{{'erp.app.pages.crm.attendance-booking.customer-type' | translate}}</ion-text>
+					<select (change)="refresh()" class="c-input no-check-dirty c-dropdown" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.CustomerType" [ngClass]="{active: query.CustomerType}">
+						<option value="">{{'erp.app.pages.crm.attendance-booking.customer-type' | translate}}</option>
+						<option *ngFor="let t of AttendanceType" [value]="t.Code">{{t.Name}}</option>
+					</select>
+					<ion-icon class="min-btn" (click)="query.CustomerType=''; refresh()" name="close-circle-outline"></ion-icon>
+				</div>
+				<div class="col-status cell">
+					<ion-text>{{'erp.app.pages.crm.attendance-booking.status' | translate}}</ion-text>
+					<select (change)="refresh()" class="c-input c-dropdown no-check-dirty" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Status" [ngClass]="{active: query.Status}">
+						<option value="">{{'erp.app.pages.crm.attendance-booking.status' | translate}}</option>
+						<option *ngFor="let t of statusList" [value]="t.Code">{{t.Name}}</option>
+					</select>
+					<ion-icon class="min-btn" (click)="query.Status=''; refresh()"  name="close-circle-outline"></ion-icon>
+				</div>
+				<button mat-raised-button type="submit" style="display:none">Search</button>
+			</header>
+		</form>
+		
+		<app-page-message [itemsLength]="items.length" [showSpinner]="pageConfig.showSpinner"></app-page-message>
+		<ion-virtual-scroll [items]="items" approxItemHeight="27px">
+			<ng-container *virtualItem="let i; let itemBounds = bounds; let j = index;">
+				<div class="row clickable" [ngClass]="{odd: j % 2 != 0}" [ngClass]="{selected: i.checked}" (click)="nav('attendance-booking/'+i.Id,'forward')">
+					<!--  showModal(i)-->
+					<div class="col-checkbox cell">
+						<input (click)="changeSelection(i, $event)" class="c-checkbox" [(ngModel)]="i.checked" type="checkbox">
+					</div>
+					<!-- <div  class="col-id cell">
+						{{i.Id}}
+					</div> -->
+					
+					<div class="col-date cell">{{i.PartyDateText}}</div>
+					<div class="col-remark cell">{{i.CustomerName}}</div>
+					<div class="col-code cell phone">{{i.Phone}}</div>
+					<div class="col-code cell"><span *ngIf="i.RegisteredTable" class="regis">{{i.RegisteredTable}}</span></div>
+					<div class="col-number cell kid">
+						<ion-text color="primary" *ngIf="i.DinnerPax">
+							<b>{{i.DinnerPax}}</b>	
+						</ion-text>
+					</div>
+					<div class="col-number cell">
+						<ion-text color="success" *ngIf="i.RealField">
+							<b>{{i.RealField}}</b>
+						</ion-text>
+						<ion-text color="warning" class="small-kid" *ngIf="i.Kids">+{{i.Kids}}<small>T</small></ion-text>
+						<ion-text color="danger" class="small-kid" *ngIf="i.ForeignerNo">+{{i.ForeignerNo}}<small>N</small></ion-text>
+						<span class="small-kid" *ngIf="i.RealField || i.Kids || i.ForeignerNo">/</span>
+						<span class="small-kid" >{{i.DinnerPax}}</span>
+					</div>
+					<div class="col-number cell kid">
+						<ion-text color="warning" *ngIf="i.Kids">
+							<b>{{i.Kids}}</b>	
+						</ion-text>
+					</div>
+					<div class="col-number cell kid">
+						<ion-text color="danger" *ngIf="i.ForeignerNo">
+							<b>{{i.ForeignerNo}}</b>	
+						</ion-text>
+					</div>
+					<div class="col-code cell"><span *ngIf="i.TypeOfPartyText">{{i.TypeOfPartyText}}</span></div>
+					<div class="col-remark cell remark">{{i.Remark}}</div>
+					<div class="col-code cell dinning-card"><span *ngIf="i.DiningCard">{{i.DiningCard}}</span></div>
+					<div class="col-code cell dinning-card"><span *ngIf="i.NoRecords">{{i.NoRecords}}</span></div>
+					<div class="col-code cell"><span *ngIf="i.CustomerGroup">{{i.CustomerGroup}}</span></div>
+					<div class="col-code cell"><span *ngIf="i.CustomerType">{{i.CustomerType}}</span></div>
+					<div class="col-status cell">
+						<span class="bar-holder">
+							<ion-text class="bar-title" [color]="i.StatusColor">{{i.StatusText}}</ion-text>
+							<span class="bar" [ngClass]="{active: s.Code==i.Status}" [ngStyle]="{'background-color': 'var(--ion-color-'+s.Color+')'}" *ngFor="let s of statusList" [title]="s.Name"></span>
+						</span>
+					</div>
+					<hr>
+					
+				</div>
+			</ng-container>
+		</ion-virtual-scroll>
+	</section>
+	
+	<ion-infinite-scroll color="primary" threshold="20%" (ionInfinite)="loadData($event)" [disabled]="!pageConfig.infiniteScroll || pageConfig.isEndOfData">
+		<ion-infinite-scroll-content loadingSpinner="dots"></ion-infinite-scroll-content>
+	</ion-infinite-scroll>
+</ion-content>
