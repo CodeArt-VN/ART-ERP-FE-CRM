@@ -266,83 +266,9 @@ export class MCPDetailPage extends PageBase {
 		this.import(event);
 	}
 
-    async import(event) {
-        if (event.target.files.length == 0)
-            return;
-
-        const loading = await this.loadingController.create({
-            cssClass: 'my-custom-class',
-            message: 'Vui lòng chờ import dữ liệu'
-        });
-        await loading.present().then(() => {
-            this.routeDetailProvider.import(event.target.files[0])
-                .then((resp:any) => {
-                    this.refresh();
-                    if (loading) loading.dismiss();
-
-                    if (resp.ErrorList && resp.ErrorList.length) {
-                        let message = '';
-                        for (let i = 0; i < resp.ErrorList.length && i <= 5; i++)
-                            if (i == 5) message += '<br> Còn nữa...';
-                            else {
-                                const e = resp.ErrorList[i];
-                                message += '<br> ' + e.Id + '. Tại dòng ' + e.Line + ': ' + e.Message;
-                            }
-
-                        this.alertCtrl.create({
-                            header: 'Có lỗi import dữ liệu',
-                            subHeader: 'Bạn có muốn xem lại các mục bị lỗi?',
-                            message: 'Có ' + resp.ErrorList.length + ' lỗi khi import:' + message,
-                            cssClass: 'alert-text-left',
-                            buttons: [
-                                { text: 'Không', role: 'cancel', handler: () => { } },
-                                {
-                                    text: 'Có', cssClass: 'success-btn', handler: () => {
-                                        this.downloadURLContent(ApiSetting.mainService.base + resp.FileUrl);
-                                    }
-                                }
-                            ]
-                        }).then(alert => {
-                            alert.present();
-                        })
-                    }
-                    else {
-                        this.env.showMessage('Đã import xong!', 'success');
-                    }
-                })
-                .catch(err => {
-                    if (err.statusText == "Conflict") {
-                        // var contentDispositionHeader = err.headers.get('Content-Disposition');
-                        // var result = contentDispositionHeader.split(';')[1].trim().split('=')[1];
-                        // this.downloadContent(result.replace(/"/g, ''),err._body);
-                        this.downloadURLContent(ApiSetting.mainService.base + err._body);
-                    }
-                    //console.log(err);
-                    if (loading) loading.dismiss();
-                })
-        })
-    }
-
     async export() {
-
-        if (this.submitAttempt) return;
-        this.submitAttempt = true;
-
-        const loading = await this.loadingController.create({
-            cssClass: 'my-custom-class',
-            message: 'Vui lòng chờ export dữ liệu'
-        });
-        await loading.present().then(() => {
-            //this.addInfo();
-
-            this.routeDetailProvider.export({IDRoute: this.id}).then((response: any) => {
-                this.downloadURLContent(ApiSetting.mainService.base + response);
-                if (loading) loading.dismiss();
-                this.submitAttempt = false;
-            }).catch(err => {
-                this.submitAttempt = false;
-            });
-        })
+        this.query.Id = this.item.Id;
+        super.export();
     }
 
     filter(ev) {

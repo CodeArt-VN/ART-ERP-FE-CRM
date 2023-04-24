@@ -9,6 +9,7 @@
 				<ion-icon class="min-btn" *ngIf="sort.Sort" [name]="sort.Sort == 'Sort'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Id" name="search" color="primary"></ion-icon>
 			</div>
+			
 			<div class="col-name cell" (click)="sortToggle('Name')">
 				{{'erp.app.pages.crm.mcp.name' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.Name" [name]="sort.Name == 'Name'?'arrow-down': 'arrow-up'"></ion-icon>
@@ -27,11 +28,12 @@
 				{{'erp.app.pages.crm.mcp.vehicle-name' | translate}}
 			</div>
 
-			<!-- <div class="col-code cell ion-hide-sm-down">Hashtag</div> -->
-			<!-- <div class="col-code cell" (click)="sortToggle('Code')">Đơn vị
+		
+			<div class="col-code cell ion-hide-sm-down" (click)="sortToggle('Code')">
+				{{'Code' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.Code" [name]="sort.Code == 'Code'?'arrow-down': 'arrow-up'"></ion-icon>
-				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Code_eq" name="search" color="primary"></ion-icon>
-			</div> -->
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Code" name="search" color="primary"></ion-icon>
+			</div>
 
 		</header>
 		<form (submit)="refresh()" action="#">
@@ -41,6 +43,7 @@
 					<input [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Id" class="c-input" [ngClass]="{active: query.Id}" type="text">
 					<ion-icon class="min-btn" (click)="query.Id=''; refresh()" *ngIf="query.Id" name="close-circle-outline"></ion-icon>
 				</div>
+				
 				<div class="col-name cell">
 					<input [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Name" class="c-input" [ngClass]="{active: query.Name}" type="text">
 					<ion-icon class="min-btn" (click)="query.Name=''; refresh()" *ngIf="query.Name" name="close-circle-outline"></ion-icon>
@@ -53,10 +56,15 @@
 					<ion-icon class="min-btn" (click)="query.SellerName=''; refresh()" *ngIf="query.SellerName" name="close-circle-outline"></ion-icon>
 				</div>
 
+
+
 				<div class="col-code cell ion-hide-sm-down">
 
 				</div>
-
+				<div class="col-code cell ion-hide-sm-down">
+					<input [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Code" class="c-input" [ngClass]="{active: query.Code}" type="text">
+					<ion-icon class="min-btn" (click)="query.Code=''; refresh()" *ngIf="query.Code" name="close-circle-outline"></ion-icon>
+				</div>
 				<button mat-raised-button type="submit" style="display:none">Search</button>
 			</header>
 		</form>
@@ -77,6 +85,7 @@
 						<div class="col-id cell ion-hide-sm-down">
 							<a [routerLink]="['/'+pageConfig.pageName+'/'+i.Id]">{{i.Id}}</a>
 						</div>
+						
 						<div class="col-name cell">
 							<a [routerLink]="['/'+this.pageConfig.pageName+'/'+i.Id]">
 								{{i.Name}}
@@ -97,7 +106,11 @@
 						<div class="col-code cell ion-hide-sm-down">
 							{{i.VehicleName}}
 						</div>
-
+						<div class="col-code cell ion-hide-sm-down">
+							<a [routerLink]="['/'+this.pageConfig.pageName+'/'+i.Id]">
+								{{i.Code}}
+							</a>
+						</div>
 					</div>
 				</ng-container>
 			</ion-virtual-scroll>
