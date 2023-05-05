@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { NavController, ModalController, AlertController, LoadingController, PopoverController } from '@ionic/angular';
 import { EnvService } from 'src/app/services/core/env.service';
 import { PageBase } from 'src/app/page-base';
-import { BRA_BranchProvider, CRM_ContactProvider, SYS_StatusProvider } from 'src/app/services/static/services.service';
+import { BRA_BranchProvider, CRM_ContactProvider } from 'src/app/services/static/services.service';
 import { Location } from '@angular/common';
 import { lib } from 'src/app/services/static/global-functions';
 import { ApiSetting } from 'src/app/services/static/api-setting';
@@ -17,7 +17,6 @@ export class OutletPage extends PageBase {
     statusList = [];
     constructor(
         public pageProvider: CRM_ContactProvider,
-        public statusProvider: SYS_StatusProvider,
         public branchProvider: BRA_BranchProvider,
         public modalController: ModalController,
         public popoverCtrl: PopoverController,
@@ -25,7 +24,6 @@ export class OutletPage extends PageBase {
         public loadingController: LoadingController,
         public env: EnvService,
         public navCtrl: NavController,
-        public location: Location,
     ) {
         super();
     }
