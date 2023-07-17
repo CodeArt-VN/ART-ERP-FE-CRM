@@ -6,8 +6,6 @@ import { IonicModule } from '@ionic/angular';
 import { ShareModule } from 'src/app/share.module';
 import { BusinessPartnerDetailPage } from './business-partner-detail.page';
 import { FileUploadModule } from 'ng2-file-upload';
-import { NgSelectModule } from '@ng-select/ng-select';
-import { NgOptionHighlightModule } from '@ng-select/ng-option-highlight';
 import { BusinessPartnerComponentsModule } from './components/business-partner-components.module';
 import { MapCompsModule } from 'src/app/components/map-comps/map-comps.module';
 
@@ -27,8 +25,6 @@ const routes: Routes = [
     BusinessPartnerComponentsModule,
     MapCompsModule,
     FileUploadModule,
-    NgSelectModule,
-    NgOptionHighlightModule,
     ShareModule,
     RouterModule.forChild(routes)
   ],
