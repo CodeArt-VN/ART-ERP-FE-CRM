@@ -90,7 +90,7 @@ export class MCPDetailPage extends PageBase {
         this.vehicleProvider.read({ IDParent: 3 }).then(response => {
             this.vehicleList = response['data'];
         });
-        this.branchProvider.read({ IDType: 115 }).then(response => {
+        this.branchProvider.read({ Type: 'Warehouse' }).then(response => {
             this.wareHouseList = response['data'];
         });
 
