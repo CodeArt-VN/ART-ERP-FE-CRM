@@ -72,7 +72,7 @@ export class MCPDetailPage extends PageBase {
             Name: ['', Validators.required],
             Remark: [''],
             Sort: [''],
-            IsDisabled: [''],
+            IsDisabled: new FormControl({ value: '', disabled: true }),
             StartDate: ['']
 
         });

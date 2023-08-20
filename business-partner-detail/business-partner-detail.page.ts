@@ -38,19 +38,26 @@ export class BusinessPartnerDetailPage extends PageBase {
         this.pageConfig.isDetailPage = true;
         this.id = this.route.snapshot.paramMap.get('id');
         this.formGroup = formBuilder.group({
-            IDBranch: [''],
-            IDParent: [''],
+            IDBranch: new FormControl({ value: this.env.selectedBranch, disabled: false }),
             Id: new FormControl({ value: '', disabled: true }),
-            Code: [''],
+            Code: new FormControl(),
+            Name: new FormControl(),
+            Remark: new FormControl(),
+            Sort: [''],
+            IsDisabled: new FormControl({ value: '', disabled: true }),
+            CreatedBy: new FormControl({ value: '', disabled: true }),
+            CreatedDate: new FormControl({ value: '', disabled: true }),
+            ModifiedBy: new FormControl({ value: '', disabled: true }),
+            ModifiedDate: new FormControl({ value: '', disabled: true }),
+
+            IDParent: [''],
             Title: [''],
-            Name: ['', Validators.required],
             IDOwner: [''],
             CompanyName: [''],
             TaxCode: [''],
             Fax: [''],
             Website: [''],
             BillingAddress: [''],
-
             IDIndividual: [''],
             IDSource: [''],
             IDSector: [''],
@@ -58,21 +65,16 @@ export class BusinessPartnerDetailPage extends PageBase {
             IDRating: [''],
             NumberOfEmployees: [''],
             AnnualRevenue: [''],
-
             BankAccount: [''],
             BankName: [''],
-
             IsPersonal: [''],
-            Remark: [''],
-
             WorkPhone: [''],
             OtherPhone: [''],
             DoNotCall: [''],
             Email: [''],
             HasOptedOutOfEmail: [''],
 
-            Sort: [''],
-            IsDisabled: [''],
+            
 
             IsBranch: new FormControl({ value: '', disabled: true }),
             IsStaff: new FormControl({ value: '', disabled: true }),
