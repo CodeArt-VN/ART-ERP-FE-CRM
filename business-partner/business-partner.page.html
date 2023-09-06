@@ -52,16 +52,6 @@
 				<ion-icon class="min-btn" *ngIf="sort.IsCarrier" [name]="sort.IsCarrier == 'IsCarrier'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.IsCarrier" name="search" color="primary"></ion-icon>
 			</div>
-			<!-- <div class="col-id cell ion-hide-sm-down" (click)="sortToggle('IsCustomer')">
-				Customer
-				<ion-icon class="min-btn" *ngIf="sort.IsCustomer" [name]="sort.IsCustomer == 'IsCustomer'?'arrow-down': 'arrow-up'"></ion-icon>
-				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.IsCustomer" name="search" color="primary"></ion-icon>
-			</div>
-			<div class="col-id cell ion-hide-sm-down" (click)="sortToggle('IsDistributor')">
-				Distributor
-				<ion-icon class="min-btn" *ngIf="sort.IsDistributor" [name]="sort.IsDistributor == 'IsDistributor'?'arrow-down': 'arrow-up'"></ion-icon>
-				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.IsDistributor" name="search" color="primary"></ion-icon>
-			</div> -->
 			<div class="col-id cell ion-hide-sm-down" (click)="sortToggle('IsBranch')">
 				{{'erp.app.pages.crm.business-partner.branch' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.IsBranch" [name]="sort.IsBranch == 'IsBranch'?'arrow-down': 'arrow-up'"></ion-icon>
@@ -74,12 +64,6 @@
 			</div>
 
 
-
-			<!-- <div class="col-code cell ion-hide-sm-down">Hashtag</div> -->
-			<!-- <div class="col-code cell" (click)="sortToggle('Code')">Đơn vị
-				<ion-icon class="min-btn" *ngIf="sort.Code" [name]="sort.Code == 'Code'?'arrow-down': 'arrow-up'"></ion-icon>
-				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Code_eq" name="search" color="primary"></ion-icon>
-			</div> -->
 
 		</header>
 		<form (submit)="refresh()" action="#">
@@ -121,33 +105,12 @@
 				<div class="col-id cell cell-btn ion-hide-sm-down" (click)="query.IsCarrier=query.IsCarrier===true?false:(query.IsCarrier===false? '': true); refresh()">
 					<ion-icon class="min-btn" [name]="query.IsCarrier===true?'checkmark-outline':(query.IsCarrier===false?'ban-outline':'checkmark-done-outline')"></ion-icon>
 				</div>
-				<!-- <div class="col-id cell cell-btn ion-hide-sm-down" (click)="query.IsCustomer=query.IsCustomer===true?false:(query.IsCustomer===false? '': true); refresh()">
-					<ion-icon  class="min-btn" [name]="query.IsCustomer===true?'checkmark-outline':(query.IsCustomer===false?'ban-outline':'checkmark-done-outline')"></ion-icon>
-				</div>
-				<div class="col-id cell cell-btn ion-hide-sm-down" (click)="query.IsDistributor=query.IsDistributor===true?false:(query.IsDistributor===false? '': true); refresh()">
-					<ion-icon  class="min-btn" [name]="query.IsDistributor===true?'checkmark-outline':(query.IsDistributor===false?'ban-outline':'checkmark-done-outline')"></ion-icon>
-				</div> -->
-
 				<div class="col-id cell cell-btn ion-hide-sm-down" (click)="query.IsBranch=query.IsBranch===true?false:(query.IsBranch===false? '': true); refresh()">
 					<ion-icon class="min-btn" [name]="query.IsBranch===true?'checkmark-outline':(query.IsBranch===false?'ban-outline':'checkmark-done-outline')"></ion-icon>
 				</div>
 				<div class="col-id cell cell-btn ion-hide-sm-down" (click)="query.IsStaff=query.IsStaff===true?false:(query.IsStaff===false? '': true); refresh()">
 					<ion-icon class="min-btn" [name]="query.IsStaff===true?'checkmark-outline':(query.IsStaff===false?'ban-outline':'checkmark-done-outline')"></ion-icon>
 				</div>
-
-
-				<!-- <div class="col-code cell">
-					<select (change)="refresh()" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.IDWorkPhone" class="c-input c-dropdown" [ngClass]="{active: query.IDWorkPhone}">
-						<option [disabled]="t.Flag" *ngFor="let t of departmentList" [value]="t.Query">{{t.NamePadding}}</option>
-					</select>
-					<ion-icon class="min-btn" (click)="query.IDWorkPhone=''; refresh()" *ngIf="query.IDWorkPhone" name="close-circle-outline"></ion-icon>
-				</div> -->
-				<!-- <div class="col-code cell">
-					<select (change)="refresh()" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.IDJobTitle" class="c-input c-dropdown" [ngClass]="{active: query.IDJobTitle}">
-						<option [disabled]="!t.Flag" *ngFor="let t of branchList" [value]="t.Id">{{t.NamePadding}}</option>
-					</select>
-					<ion-icon class="min-btn" (click)="query.IDJobTitle=''; refresh()" *ngIf="query.IDJobTitle" name="close-circle-outline"></ion-icon>
-				</div> -->
 
 				<button mat-raised-button type="submit" style="display:none">Search</button>
 			</header>
@@ -160,61 +123,52 @@
 
 	<div *ngIf="items.length && pageConfig.showSpinner==false">
 		<section class="table">
-			<ion-virtual-scroll [items]="items" approxItemHeight="27px">
-				<ng-container *virtualItem="let i; let itemBounds = bounds; let j = index;">
-					<div class="row" [ngClass]="{odd: j % 2 != 0}" [ngClass]="{selected: i.checked}" [ngStyle]="{'border-left': 'solid 5px rgba(var(--ion-color-' + i.StatusColor + '-rgb, 0, 0, 0), 1)'}">
-						<div class="col-checkbox cell">
-							<input (click)="changeSelection(i, $event)" class="c-checkbox" [(ngModel)]="i.checked" type="checkbox">
-						</div>
-						<div (click)="nav(this.pageConfig.pageName+'/'+i.Id,'forward')" class="col-id cell ion-hide-sm-down">
-							{{i.Id}}
-						</div>
-						<div class="col-checkbox cell">
-							<ion-icon class="min-btn" [color]="i.IsPersonal?'success':'warning'" [name]="i.IsPersonal?'person-outline':'business-outline'"></ion-icon>
-						</div>
 
-						<div class="col-status cell">
-							<span class="bar-holder">
-								<ion-text class="bar-title" [color]="i.StatusColor">{{i.StatusText}}</ion-text>
-								<span class="bar" [ngClass]="{active: s.Code==i.Status}" [ngStyle]="{'background-color': 'var(--ion-color-'+s.Color+')'}" *ngFor="let s of statusList" [title]="s.Name"></span>
-							</span>
-						</div>
+			<div *ngFor="let i of items; let j = index;" class="row" [ngClass]="{odd: j % 2 != 0}" [ngClass]="{selected: i.checked}" [ngStyle]="{'border-left': 'solid 5px rgba(var(--ion-color-' + i.StatusColor + '-rgb, 0, 0, 0), 1)'}">
+				<div class="col-checkbox cell">
+					<input (click)="changeSelection(i, $event)" class="c-checkbox" [(ngModel)]="i.checked" type="checkbox">
+				</div>
+				<div (click)="nav(this.pageConfig.pageName+'/'+i.Id,'forward')" class="col-id cell ion-hide-sm-down">
+					{{i.Id}}
+				</div>
+				<div class="col-checkbox cell">
+					<ion-icon class="min-btn" [color]="i.IsPersonal?'success':'warning'" [name]="i.IsPersonal?'person-outline':'business-outline'"></ion-icon>
+				</div>
 
-						<div (click)="nav(this.pageConfig.pageName+'/'+i.Id,'forward')" class="col-name cell">
-							{{i.Name}}
-						</div>
-						<div class="col-code cell ion-hide-sm-down">{{i.WorkPhone}}</div>
+				<div class="col-status cell">
+					<span class="bar-holder">
+						<ion-text class="bar-title" [color]="i.StatusColor">{{i.StatusText}}</ion-text>
+						<span class="bar" [ngClass]="{active: s.Code==i.Status}" [ngStyle]="{'background-color': 'var(--ion-color-'+s.Color+')'}" *ngFor="let s of statusList" [title]="s.Name"></span>
+					</span>
+				</div>
 
-						<div class="col-id cell ion-hide-sm-down">
-							<ion-icon class="min-btn" *ngIf="i.IsOutlets" name="checkmark"></ion-icon>
-						</div>
-						<div class="col-id cell ion-hide-sm-down">
-							<ion-icon class="min-btn" *ngIf="i.IsStorer" name="checkmark"></ion-icon>
-						</div>
-						<div class="col-id cell ion-hide-sm-down">
-							<ion-icon class="min-btn" *ngIf="i.IsVendor" name="checkmark"></ion-icon>
-						</div>
-						<div class="col-id cell ion-hide-sm-down">
-							<ion-icon class="min-btn" *ngIf="i.IsCarrier" name="checkmark"></ion-icon>
-						</div>
-						<!-- <div class="col-id cell ion-hide-sm-down">
-							<ion-icon class="min-btn" *ngIf="i.IsCustomer" name="checkmark"></ion-icon>
-						</div>
-						<div class="col-id cell ion-hide-sm-down">
-							<ion-icon class="min-btn" *ngIf="i.IsDistributor" name="checkmark"></ion-icon>
-						</div> -->
-						<div class="col-id cell ion-hide-sm-down">
-							<ion-icon class="min-btn" *ngIf="i.IsBranch" name="checkmark"></ion-icon>
-						</div>
-						<div class="col-id cell ion-hide-sm-down">
-							<ion-icon class="min-btn" *ngIf="i.IsStaff" name="checkmark"></ion-icon>
-						</div>
+				<div (click)="nav(this.pageConfig.pageName+'/'+i.Id,'forward')" class="col-name cell">
+					{{i.Name}}
+				</div>
+				<div class="col-code cell ion-hide-sm-down">{{i.WorkPhone}}</div>
 
-						<!-- <div class="col-code cell">{{i.JobTitle}}</div> -->
-						<!-- <div class="col-code cell">{{i.Branch}}</div> -->
-					</div>
-				</ng-container>
-			</ion-virtual-scroll>
+				<div class="col-id cell ion-hide-sm-down">
+					<ion-icon class="min-btn" *ngIf="i.IsOutlets" name="checkmark"></ion-icon>
+				</div>
+				<div class="col-id cell ion-hide-sm-down">
+					<ion-icon class="min-btn" *ngIf="i.IsStorer" name="checkmark"></ion-icon>
+				</div>
+				<div class="col-id cell ion-hide-sm-down">
+					<ion-icon class="min-btn" *ngIf="i.IsVendor" name="checkmark"></ion-icon>
+				</div>
+				<div class="col-id cell ion-hide-sm-down">
+					<ion-icon class="min-btn" *ngIf="i.IsCarrier" name="checkmark"></ion-icon>
+				</div>
+
+				<div class="col-id cell ion-hide-sm-down">
+					<ion-icon class="min-btn" *ngIf="i.IsBranch" name="checkmark"></ion-icon>
+				</div>
+				<div class="col-id cell ion-hide-sm-down">
+					<ion-icon class="min-btn" *ngIf="i.IsStaff" name="checkmark"></ion-icon>
+				</div>
+
+
+			</div>
 		</section>
 	</div>
 

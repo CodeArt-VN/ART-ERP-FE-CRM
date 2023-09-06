@@ -81,50 +81,46 @@
 		</form>
 
 		<app-page-message [itemsLength]="items.length" [showSpinner]="pageConfig.showSpinner"></app-page-message>
-		<ion-virtual-scroll [items]="items" approxItemHeight="55px" *ngIf="items.length && pageConfig.showSpinner==false">
-			<ng-container *virtualItem="let i; let itemBounds = bounds; let j = index;">
-				<div class="row" [ngClass]="{odd: j % 2 != 0}" [ngClass]="{selected: i.checked}">
-					<div class="col-checkbox cell">
-						<input (click)="changeSelection(i, $event)" class="c-checkbox" [(ngModel)]="i.checked" type="checkbox">
-					</div>
-					<div (click)="nav(this.pageConfig.pageName+'/'+i.Id,'forward')" class="col-id cell">
-						<a [routerLink]="['/'+pageConfig.pageName+'/'+i.Id]">{{i.Id}}</a>
-					</div>
-					
-					<div class="col-icon cell">
-						<ion-icon class="min-btn" [color]="i.IsPersonal?'success':'warning'" [name]="i.IsPersonal?'person-outline':'business-outline'"></ion-icon>
+		<div *ngFor="let i of items; let j = index;" class="row" [ngClass]="{odd: j % 2 != 0}" [ngClass]="{selected: i.checked}">
+			<div class="col-checkbox cell">
+				<input (click)="changeSelection(i, $event)" class="c-checkbox" [(ngModel)]="i.checked" type="checkbox">
+			</div>
+			<div (click)="nav(this.pageConfig.pageName+'/'+i.Id,'forward')" class="col-id cell">
+				<a [routerLink]="['/'+pageConfig.pageName+'/'+i.Id]">{{i.Id}}</a>
+			</div>
+
+			<div class="col-icon cell">
+				<ion-icon class="min-btn" [color]="i.IsPersonal?'success':'warning'" [name]="i.IsPersonal?'person-outline':'business-outline'"></ion-icon>
+			</div>
+
+			<div class="col-seperator"></div>
+
+			<div class="col-name cell">
+				<div>
+					<span class="outlet-name" (click)="nav(this.pageConfig.pageName+'/'+i.Id,'forward')">{{i.Name}}</span>
+
+					<div class="address" *ngFor="let a of i.Addresses">
+						<ion-text color="medium">
+							<ion-icon color="success" name="call" *ngIf="a.Phone1"></ion-icon>
+							<span *ngIf="a.Contact">
+								<b>{{a.Contact}}</b> <a [href]="'tel:'+a.Phone1" *ngIf="a.Phone1"> {{a.Phone1}}</a> <br>
+							</span>
+							<span>{{a.AddressLine1}}, {{a.Ward}}, {{a.District}}</span>
+						</ion-text>
 					</div>
 
-					<div class="col-seperator"></div>
-
-					<div  class="col-name cell">
-						<div>
-							<span class="outlet-name" (click)="nav(this.pageConfig.pageName+'/'+i.Id,'forward')">{{i.Name}}</span>
-							
-							<div class="address" *ngFor="let a of i.Addresses">
-								<ion-text color="medium"> 
-									<ion-icon color="success" name="call" *ngIf="a.Phone1"></ion-icon>
-									<span *ngIf="a.Contact">
-										<b>{{a.Contact}}</b> <a [href]="'tel:'+a.Phone1" *ngIf="a.Phone1"> {{a.Phone1}}</a>  <br>
-									</span>
-									<span>{{a.AddressLine1}}, {{a.Ward}}, {{a.District}}</span>
-								</ion-text>
-							</div>
-						
-						</div>
-					</div>
-					<div class="col-saleMan cell"> {{i._Owner? i._Owner.FullName :''}}</div>
-					<div class="col-code col-vendorCode cell"><span *ngIf="i.Code">{{i.Code}}</span></div>
-
-					<div class="col-status cell">
-						<span class="bar-holder">
-							<ion-text class="bar-title" [color]="i.StatusColor">{{i.StatusText}}</ion-text>
-							<span class="bar" [ngClass]="{active: s.Code==i.Status}" [ngStyle]="{'background-color': 'var(--ion-color-'+s.Color+')'}" *ngFor="let s of statusList" [title]="s.Name"></span>
-						</span>
-					</div>
 				</div>
-			</ng-container>
-		</ion-virtual-scroll>
+			</div>
+			<div class="col-saleMan cell"> {{i._Owner? i._Owner.FullName :''}}</div>
+			<div class="col-code col-vendorCode cell"><span *ngIf="i.Code">{{i.Code}}</span></div>
+
+			<div class="col-status cell">
+				<span class="bar-holder">
+					<ion-text class="bar-title" [color]="i.StatusColor">{{i.StatusText}}</ion-text>
+					<span class="bar" [ngClass]="{active: s.Code==i.Status}" [ngStyle]="{'background-color': 'var(--ion-color-'+s.Color+')'}" *ngFor="let s of statusList" [title]="s.Name"></span>
+				</span>
+			</div>
+		</div>
 	</section>
 
 	<ion-infinite-scroll color="primary" threshold="20%" (ionInfinite)="loadData($event)" [disabled]="!pageConfig.infiniteScroll || pageConfig.isEndOfData">

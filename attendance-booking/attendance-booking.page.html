@@ -12,13 +12,6 @@
 	<section class="table responsive">
 		<header class="bold">
 			<div class="col-checkbox cell"></div>
-			<!-- <div class="col-id cell" (click)="sortToggle('Id')">
-				Id
-				<ion-icon class="min-btn" *ngIf="sort.Id" [name]="sort.Id == 'Id'?'arrow-down': 'arrow-up'"></ion-icon>
-				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Id" name="search" color="primary"></ion-icon>
-			</div> -->
-			
-			
 			<div class="col-date cell" (click)="sortToggle('PartyDate')">
 				{{'erp.app.pages.crm.attendance-booking.party-date' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.PartyDate" [name]="sort.PartyDate == 'PartyDate'?'arrow-down': 'arrow-up'"></ion-icon>
@@ -60,9 +53,6 @@
 				<ion-icon class="min-btn" *ngIf="sort.ForeignerNo" [name]="sort.ForeignerNo == 'ForeignerNo'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.ForeignerNo" name="search" color="primary"></ion-icon>
 			</div>
-			
-			
-
 			<div class="col-code cell" (click)="sortToggle('TypeOfParty')">
 				{{'erp.app.pages.crm.attendance-booking.type-of-party' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.TypeOfParty" [name]="sort.TypeOfParty == 'TypeOfParty'?'arrow-down': 'arrow-up'"></ion-icon>
@@ -102,13 +92,6 @@
 		<form (keydown)="onKeydown($event)"  action="#">
 			<header class="filter" *ngIf="pageConfig.isShowSearch">
 				<div class="col-checkbox cell empty"></div>
-				<!-- <div class="col-id cell">
-					<ion-text>{{'erp.app.pages.crm.attendance-booking.id' | translate}}</ion-text>
-					<input placeholder="{{'erp.app.pages.crm.attendance-booking.id' | translate}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Id" class="c-input no-check-dirty" [ngClass]="{active: query.Id}" type="search">
-					<ion-icon class="min-btn" (click)="query.Id=''; refresh()" *ngIf="query.Id" name="close-circle-outline"></ion-icon>
-				</div> -->
-				
-				
 				<div class="col-date cell">
 					<ion-text>{{'erp.app.pages.crm.attendance-booking.party-date' | translate}}</ion-text>
 					<input placeholder="{{'erp.app.pages.crm.attendance-booking.party-date' | translate}}" [ngModelOptions]="{standalone: true}" (change)="refresh();" [(ngModel)]="query.PartyDate" class="c-input no-check-dirty" [ngClass]="{active: query.PartyDate}" type="date">
@@ -187,16 +170,15 @@
 		</form>
 		
 		<app-page-message [itemsLength]="items.length" [showSpinner]="pageConfig.showSpinner"></app-page-message>
-		<ion-virtual-scroll [items]="items" approxItemHeight="27px">
-			<ng-container *virtualItem="let i; let itemBounds = bounds; let j = index;">
-				<div class="row clickable" [ngClass]="{odd: j % 2 != 0}" [ngClass]="{selected: i.checked}" (click)="nav('attendance-booking/'+i.Id,'forward')">
-					<!--  showModal(i)-->
+		
+	
+
+				<div *ngFor="let i of items; let j = index;" class="row clickable" [ngClass]="{odd: j % 2 != 0}" [ngClass]="{selected: i.checked}" (click)="nav('attendance-booking/'+i.Id,'forward')">
+					
 					<div class="col-checkbox cell">
 						<input (click)="changeSelection(i, $event)" class="c-checkbox" [(ngModel)]="i.checked" type="checkbox">
 					</div>
-					<!-- <div  class="col-id cell">
-						{{i.Id}}
-					</div> -->
+					
 					
 					<div class="col-date cell">{{i.PartyDateText}}</div>
 					<div class="col-remark cell">{{i.CustomerName}}</div>
@@ -241,8 +223,6 @@
 					<hr>
 					
 				</div>
-			</ng-container>
-		</ion-virtual-scroll>
 	</section>
 	
 	<ion-infinite-scroll color="primary" threshold="20%" (ionInfinite)="loadData($event)" [disabled]="!pageConfig.infiniteScroll || pageConfig.isEndOfData">
