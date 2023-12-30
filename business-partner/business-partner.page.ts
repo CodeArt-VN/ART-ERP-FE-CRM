@@ -6,6 +6,7 @@ import { BRA_BranchProvider, CRM_ContactProvider } from 'src/app/services/static
 import { Location } from '@angular/common';
 import { lib } from 'src/app/services/static/global-functions';
 import { ApiSetting } from 'src/app/services/static/api-setting';
+import { FormBuilder, FormControl } from '@angular/forms';
 
 @Component({
     selector: 'app-business-partner',
@@ -54,6 +55,7 @@ export class BusinessPartnerPage extends PageBase {
         public env: EnvService,
         public navCtrl: NavController,
         public location: Location,
+        public formBuilder: FormBuilder,
     ) {
         super();
     }
@@ -358,90 +360,104 @@ export class BusinessPartnerPage extends PageBase {
     }
    
     changeSelected(selectedModel){
-          this.mergeModel.Code =selectedModel.Code;
-          this.mergeModel.Name= selectedModel.Name;
-          this.mergeModel.WorkPhone= selectedModel.WorkPhone;
-          this.mergeModel.TaxCode= selectedModel.TaxCode;
-          this.mergeModel.BillingAddress= selectedModel.BillingAddress;
-          this.mergeModel.CompanyName= selectedModel.CompanyName;
-          this.mergeModel.Email= selectedModel.Email;
-          this.mergeModel.Id= selectedModel.Id;
-          this.mergeModel.IsPersonal= selectedModel.IsPersonal;
+        //   this.mergeModel.Code =selectedModel.Code;
+        //   this.mergeModel.Name= selectedModel.Name;
+        //   this.mergeModel.WorkPhone= selectedModel.WorkPhone;
+        //   this.mergeModel.TaxCode= selectedModel.TaxCode;
+        //   this.mergeModel.BillingAddress= selectedModel.BillingAddress;
+        //   this.mergeModel.CompanyName= selectedModel.CompanyName;
+        //   this.mergeModel.Email= selectedModel.Email;
+        //   this.mergeModel.Id= selectedModel.Id;
+        //   this.mergeModel.IsPersonal= selectedModel.IsPersonal;
           
-          this.mergeModel.Address.Id = selectedModel.Addresses[0]?.Id
-          this.mergeModel.Address.AddressLine1 = selectedModel.Addresses[0]?.AddressLine1;
-          this.mergeModel.Address.AddressLine2 = selectedModel.Addresses[0]?.AddressLine2;
-          this.mergeModel.Address.Contact = selectedModel.Addresses[0]?.Contact;
-          this.mergeModel.Address.Country = selectedModel.Addresses[0]?.Country;
-          this.mergeModel.Address.Phone1 = selectedModel.Addresses[0]?.Phone1;
-          this.mergeModel.Address.Phone2 = selectedModel.Addresses[0]?.Phone2;
-          this.mergeModel.Address.Province = selectedModel.Addresses[0]?.Province;
-          this.mergeModel.Address.Ward = selectedModel.Addresses[0]?.Ward;
-     //   this.mergeModel={...selectedModel};
-          console.log(  this.mergeModel)
-        }
+        //   this.mergeModel.Address.AddressLine1 = selectedModel.Addresses[0]?.AddressLine1;
+        //   this.mergeModel.Address.AddressLine2 = selectedModel.Addresses[0]?.AddressLine2;
+        //   this.mergeModel.Address.Contact = selectedModel.Addresses[0]?.Contact;
+        //   this.mergeModel.Address.Country = selectedModel.Addresses[0]?.Country;
+        //   this.mergeModel.Address.Phone1 = selectedModel.Addresses[0]?.Phone1;
+        //   this.mergeModel.Address.Phone2 = selectedModel.Addresses[0]?.Phone2;
+        //   this.mergeModel.Address.Province = selectedModel.Addresses[0]?.Province;
+        //   this.mergeModel.Address.Ward = selectedModel.Addresses[0]?.Ward;
+        this.mergeModel={...selectedModel};
+        this.formGroup =this.formBuilder.group({
+            Id: new FormControl({ value:  this.mergeModel.Id, disabled: true }),
+            Code: [this.mergeModel.Code],
+            BillingAddress: [this.mergeModel.BillingAddress] ,
+            CompanyName: [this.mergeModel.CompanyName] ,
+            Email: [this.mergeModel.Email] ,
+            IsPersonal: [this.mergeModel.IsPersonal] ,
+            TaxCode: [this.mergeModel.TaxCode] ,
+            WorkPhone: [this.mergeModel.WorkPhone] ,
+            MergedItems:[[]],
+            IsDisabled: new FormControl({ value: '', disabled: true }),
+            IsDeleted: new FormControl({ value: '', disabled: true }),
+            CreatedBy: new FormControl({ value: '', disabled: true }),
+            CreatedDate: new FormControl({ value: '', disabled: true }),
+            ModifiedBy: new FormControl({ value: '', disabled: true }),
+            ModifiedDate: new FormControl({ value: '', disabled: true }),
+        })
+    }
     mergeContact(){
         // so sánh với selected hiện tại 
-        let obj:any={};
-        obj.Id =  this.mergeModel.Id;
-        obj.MergedItems =   this.selectedItems.map(({ Id }) => Id).filter(x=>x!= obj.Id);
-        let selectedMergeModel = this.selectedItems.find(x=>x.Id == obj.Id);
-        if(this.mergeModel.Address.Id){
-            obj.Addresses = [{Id : this.mergeModel.Address.Id }];
-        }
-        if(this.mergeModel.Code != selectedMergeModel.Code ){
-            obj.Code = this.mergeModel.Code
-        } 
-        if(this.mergeModel.Name != selectedMergeModel.Name ){
-            obj.Name = this.mergeModel.Name
-        }
-        if(this.mergeModel.WorkPhone != selectedMergeModel.WorkPhone ){
-            obj.WorkPhone = this.mergeModel.WorkPhone
-        } 
-        if(this.mergeModel.TaxCode != selectedMergeModel.TaxCode ){
-        obj.TaxCode = this.mergeModel.TaxCode
-        } 
-        if(this.mergeModel.BillingAddress != selectedMergeModel.BillingAddress ){
-            obj.BillingAddress = this.mergeModel.BillingAddress
-        }  
-        if(this.mergeModel.Email != selectedMergeModel.Email ){
-            obj.Email = this.mergeModel.Email
-        }  
-        if(this.mergeModel.IsPersonal != selectedMergeModel.IsPersonal ){
-            obj.IsPersonal = this.mergeModel.IsPersonal
-        }  
-        if(this.mergeModel.IsPersonal != selectedMergeModel.IsPersonal ){
-            obj.IsPersonal = this.mergeModel.IsPersonal
-        }  
-        if(this.mergeModel.Address.AddressLine1 != selectedMergeModel.Addresses[0]?.AddressLine1 ){
-            obj.Addresses [0].AddressLine1 = this.mergeModel.Address.AddressLine1
-        }  
-        if(this.mergeModel.Address.AddressLine2 != selectedMergeModel.Addresses[0]?.AddressLine2 ){
-            obj.Addresses [0].AddressLine2 = this.mergeModel.Address.AddressLine2
-        }  
-        if(this.mergeModel.Address.Contact != selectedMergeModel.Addresses[0]?.Contact ){
-            obj.Addresses [0].Contact = this.mergeModel.Address.Contact
-        }  
-        if(this.mergeModel.Address.Country != selectedMergeModel.Addresses[0]?.Country ){
-            obj.Addresses [0].Country = this.mergeModel.Address.Country
-        }  
-        if(this.mergeModel.Address.Phone1 != selectedMergeModel.Addresses[0]?.Phone1 ){
-            obj.Addresses [0].Phone1 = this.mergeModel.Address.Phone1
-        }  
-        if(this.mergeModel.Address.Phone2 != selectedMergeModel.Addresses[0]?.Phone2 ){
-            obj.Addresses [0].Phone2 = this.mergeModel.Address.Phone2
-        }  
-        if(this.mergeModel.Address.Province != selectedMergeModel.Addresses[0]?.Province ){
-            obj.Addresses [0].Province = this.mergeModel.Address.Province
-        }  
-        if(this.mergeModel.Address.Ward != selectedMergeModel.Addresses[0]?.Ward ){
-            obj.Addresses [0].Ward = this.mergeModel.Address.Ward
-        }  
+        //  let obj:any={};
+        //  obj.Id =  this.mergeModel.Id;
+        this.formGroup.get('MergedItems').setValue(this.selectedItems.map(({ Id }) => Id).filter(x=>x!=this.mergeModel.Id));
+      
+        // let selectedMergeModel = this.selectedItems.find(x=>x.Id == obj.Id);
+        // obj.Addresses = [{ }];
+        // if(this.mergeModel.Code != selectedMergeModel.Code ){
+        //     obj.Code = this.mergeModel.Code
+        // } 
+        // if(this.mergeModel.Name != selectedMergeModel.Name ){
+        //     obj.Name = this.mergeModel.Name
+        // }
+        // if(this.mergeModel.WorkPhone != selectedMergeModel.WorkPhone ){
+        //     obj.WorkPhone = this.mergeModel.WorkPhone
+        // } 
+        // if(this.mergeModel.TaxCode != selectedMergeModel.TaxCode ){
+        // obj.TaxCode = this.mergeModel.TaxCode
+        // } 
+        // if(this.mergeModel.BillingAddress != selectedMergeModel.BillingAddress ){
+        //     obj.BillingAddress = this.mergeModel.BillingAddress
+        // }  
+        // if(this.mergeModel.Email != selectedMergeModel.Email ){
+        //     obj.Email = this.mergeModel.Email
+        // }  
+        // if(this.mergeModel.IsPersonal != selectedMergeModel.IsPersonal ){
+        //     obj.IsPersonal = this.mergeModel.IsPersonal
+        // }  
+        // if(this.mergeModel.IsPersonal != selectedMergeModel.IsPersonal ){
+        //     obj.IsPersonal = this.mergeModel.IsPersonal
+        // }  
+        // if(this.mergeModel.Address.AddressLine1 != selectedMergeModel.Addresses[0]?.AddressLine1 ){
+        //     obj.Addresses [0].AddressLine1 = this.mergeModel.Address.AddressLine1
+        // }  
+        // if(this.mergeModel.Address.AddressLine2 != selectedMergeModel.Addresses[0]?.AddressLine2 ){
+        //     obj.Addresses [0].AddressLine2 = this.mergeModel.Address.AddressLine2
+        // }  
+        // if(this.mergeModel.Address.Contact != selectedMergeModel.Addresses[0]?.Contact ){
+        //     obj.Addresses [0].Contact = this.mergeModel.Address.Contact
+        // }  
+        // if(this.mergeModel.Address.Country != selectedMergeModel.Addresses[0]?.Country ){
+        //     obj.Addresses [0].Country = this.mergeModel.Address.Country
+        // }  
+        // if(this.mergeModel.Address.Phone1 != selectedMergeModel.Addresses[0]?.Phone1 ){
+        //     obj.Addresses [0].Phone1 = this.mergeModel.Address.Phone1
+        // }  
+        // if(this.mergeModel.Address.Phone2 != selectedMergeModel.Addresses[0]?.Phone2 ){
+        //     obj.Addresses [0].Phone2 = this.mergeModel.Address.Phone2
+        // }  
+        // if(this.mergeModel.Address.Province != selectedMergeModel.Addresses[0]?.Province ){
+        //     obj.Addresses [0].Province = this.mergeModel.Address.Province
+        // }  
+        // if(this.mergeModel.Address.Ward != selectedMergeModel.Addresses[0]?.Ward ){
+        //     obj.Addresses [0].Ward = this.mergeModel.Address.Ward
+        // }  
         let apiPath = { method: "POST", url: function () { return ApiSetting.apiDomain("CRM/Contact/Merge") } };
-        this.pageProvider.commonService.connect(apiPath.method, apiPath.url(),obj).toPromise().then((data: any) => {
+        this.pageProvider.commonService.connect(apiPath.method, apiPath.url(),this.formGroup.getRawValue()).toPromise().then((data: any) => {
             console.log(data)
         })
-        console.log(obj)
+        console.log()
     }
    
 }

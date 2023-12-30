@@ -282,7 +282,7 @@
 							</ion-radio-group>
 						</ion-row>
 						<ion-row class="merge-row">
-							<ion-radio-group [(ngModel)]="mergeModel.Code">
+							<ion-radio-group [>
 							  <ion-item lines="none"  *ngFor="let select of selectedItems">
 								<ion-radio  *ngIf="select.Code" [value]="select.Code" >{{select.Code}}</ion-radio>
 							  </ion-item>
@@ -337,7 +337,7 @@
 									</ion-item>
 								</ion-radio-group>
 							</ion-row>
-							<ion-row class="merge-row">
+							<!-- <ion-row class="merge-row">
 								<ion-radio-group [(ngModel)]="mergeModel.Address.AddressLine1">
 									<ion-item lines="none" *ngFor="let select of selectedItems">
 										<ion-radio *ngIf="select.Addresses.length && select.Addresses[0].AddressLine1"  [value]="select.Addresses[0].AddressLine1" >{{select.Addresses[0].AddressLine1}}</ion-radio>
@@ -392,7 +392,7 @@
 										<ion-radio *ngIf="select.Addresses.length && select.Addresses[0].Province"  [value]="select.Addresses[0].Province" >{{select.Addresses[0].Ward}}</ion-radio>
 									</ion-item>
 								</ion-radio-group>
-							</ion-row>
+							</ion-row> -->
 					</ion-col>
 				
 					</ion-row>
