@@ -379,25 +379,6 @@ export class BusinessPartnerPage extends PageBase {
           this.mergeModel.Address.Phone2 = selectedModel.Addresses[0]?.Phone2;
           this.mergeModel.Address.Province = selectedModel.Addresses[0]?.Province;
           this.mergeModel.Address.Ward = selectedModel.Addresses[0]?.Ward;
-        // this.mergeModel={...selectedModel};
-        // this.formGroup = this.formBuilder.group({
-        //     Id: new FormControl({ value: '', disabled: true }),
-        //     Name: [selectedModel.Name],
-        //     WorkPhone: [ selectedModel.WorkPhone],
-        //     TaxCode: [selectedModel.TaxCode],
-        //     BillingAddress: [selectedModel.BillingAddress],
-        //     CompanyName: [selectedModel.CompanyName],
-        //     Email: [selectedModel.Email],
-        //     IsPersonal: [selectedModel.IsPersonal],
-        //     Addresses: [selectedModel.Addressed],
-        //     IsDisabled: new FormControl({ value: '', disabled: true }),
-        //     IsDeleted: new FormControl({ value: '', disabled: true }),
-        //     CreatedBy: new FormControl({ value: '', disabled: true }),
-        //     CreatedDate: new FormControl({ value: '', disabled: true }),
-        //     ModifiedBy: new FormControl({ value: '', disabled: true }),
-        //     ModifiedDate: new FormControl({ value: '', disabled: true }),
-       
-        // });
           console.log(  this.mergeModel)
         }
     mergeContact(){
