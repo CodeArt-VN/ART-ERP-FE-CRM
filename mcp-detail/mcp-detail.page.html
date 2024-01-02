@@ -22,21 +22,37 @@
                         </div> -->
 
                         <div class="c-control">
-                            <label class="c-label" for="Code">{{'erp.app.common.dto.code' | translate}} <small *ngIf="item.Id">Id: {{item.Id}}</small>
+                            <label class="c-label" for="Code">{{'Code' | translate}} <small *ngIf="item.Id">Id: {{item.Id}}</small>
                                 <span *ngIf="!formGroup.controls.Code.valid && !formGroup.controls.Code.pending && (formGroup.controls.Code.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                             </label>
                             <input (change)="saveChange()" class="c-input" id="Code" formControlName="Code" type="text">
                         </div>
 
                         <div class="c-control">
-                            <label class="c-label" for="Name">{{'erp.app.pages.crm.mcp.name-detail' | translate}}
+                            <label class="c-label" for="Name">{{'Name' | translate}}
                                 <span *ngIf="!formGroup.controls.Name.valid && !formGroup.controls.Name.pending && (formGroup.controls.Name.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                             </label>
                             <input (change)="saveChange()" class="c-input" id="Name" formControlName="Name" type="text">
                         </div>
 
+                        
+
+                        <!-- <div class="c-control">
+                            <label class="c-label" for="IDWarehouse">{{'Warehouse' | translate}}</label>
+                            <ng-select class="c-input" (change)="saveChange()" #IDWarehouse formControlName="IDWarehouse" labelForId="IDWarehouse" [items]="wareHouseList" bindLabel="Name" bindValue="Id" placeholder="{{'erp.app.pages.crm.mcp.id-warehouse-placeholder' | translate}}">
+                                <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
+                                    <div *ngIf="i">
+                                        <div><span [ngOptionHighlight]="search">{{i.Name}}</span></div>
+                                    </div>
+                                </ng-template>
+                            </ng-select>
+                        </div> -->
+
+                    </ion-col>
+                    <ion-col size="12" size-sm size-xl="4">
+
                         <div class="c-control">
-                            <label class="c-label" for="IDSeller">{{'erp.app.pages.crm.mcp.salesman' | translate}}
+                            <label class="c-label" for="IDSeller">{{'Salesman' | translate}}
                                 <span *ngIf="!formGroup.controls.IDSeller.valid && !formGroup.controls.IDSeller.pending && (formGroup.controls.IDSeller.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                             </label>
                             <ng-select (change)="saveChange()" class="c-input" #IDSeller formControlName="IDSeller" labelForId="IDSeller" [items]="salesmanList$ | async" [typeahead]="salesmanListInput$" [loading]='salesmanListLoading' [virtualScroll]="true" bindLabel="FullName" bindValue="Id" placeholder="{{'erp.app.pages.crm.mcp.salesman-placeholder' | translate}}">
@@ -47,23 +63,9 @@
                                     </div>
                                 </ng-template>
                             </ng-select>
-
                         </div>
 
-                        <div class="c-control">
-                            <label class="c-label" for="IDWarehouse">{{'erp.app.pages.crm.mcp.id-warehouse' | translate}}</label>
-                            <ng-select class="c-input" (change)="saveChange()" #IDWarehouse formControlName="IDWarehouse" labelForId="IDWarehouse" [items]="wareHouseList" bindLabel="Name" bindValue="Id" placeholder="{{'erp.app.pages.crm.mcp.id-warehouse-placeholder' | translate}}">
-                                <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
-                                    <div *ngIf="i">
-                                        <div><span [ngOptionHighlight]="search">{{i.Name}}</span></div>
-                                    </div>
-                                </ng-template>
-                            </ng-select>
-                        </div>
-
-                    </ion-col>
-                    <ion-col size="12" size-sm size-xl="4">
-                        <div class="c-control">
+                        <!-- <div class="c-control">
                             <label class="c-label" for="IDVehicleForUrgent">{{'erp.app.pages.crm.mcp.id-vehicle-for-urgent' | translate}}</label>
                             <ng-select (change)="changedVehicle()" class="c-input" #IDVehicleForUrgent formControlName="IDVehicleForUrgent" labelForId="IDVehicleForUrgent" [items]="vehicleList" bindLabel="Name" bindValue="Id" placeholder="{{'erp.app.pages.crm.mcp.id-vehicle-placeholder' | translate}}">
                                 <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
@@ -107,31 +109,10 @@
                             </ng-select>
                         </div>
 
-                        <!-- <div class="c-control">
-                            <label class="c-label" for="IDShipper">{{'erp.app.pages.crm.mcp.id-shipper' | translate}}
-                                <span *ngIf="!formGroup.controls.IDShipper.valid && !formGroup.controls.IDShipper.pending && (formGroup.controls.IDShipper.dirty || submitAttempt)" ion-text color="danger">(*)</span>
-                            </label>
-                            <ng-select (change)="saveChange()" class="c-input" #IDShipper formControlName="IDShipper" labelForId="IDShipper" [items]="shipperList$ | async" [typeahead]="shipperListInput$" [loading]='shipperListLoading' [virtualScroll]="true" bindLabel="FullName" bindValue="Id" placeholder="{{'erp.app.pages.crm.mcp.shipper-list-placeholder' | translate}}">
-                                <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
-                                    <div *ngIf="i">
-                                        <div><span [ngOptionHighlight]="search">{{i.FullName}}</span></div>
-                                        <small>#<b><span class="important" [ngOptionHighlight]="search">{{i.Id}} - {{i.Code}}</span></b> <span *ngIf="i.Phone"> | {{'erp.app.pages.crm.mcp.phone' | translate}}: <b [ngOptionHighlight]="search">{{i.Phone}}</b></span></small>
-                                    </div>
-                                </ng-template>
-                            </ng-select>
-                        </div>
-
-                        <div class="c-control">
-                            <label class="c-label" for="StartDate">{{'erp.app.pages.crm.mcp.start-date' | translate}} <small>Start date</small>
-                                <span *ngIf="!formGroup.controls.StartDate.valid && !formGroup.controls.StartDate.pending && (formGroup.controls.StartDate.dirty || submitAttempt)" ion-text color="danger">(*)</span>
-                            </label>
-                            <input (change)="saveChange()" class="c-input" id="StartDate" formControlName="StartDate" [ngModel]="item.StartDate | date:'yyyy-MM-dd'" type="date" [min]="minDOB" [max]="maxDOB">
-                        </div> -->
-
                         <div class="c-control">
                             <label class="c-label" for=""></label>
                             <ion-button *ngIf="!item.Id && pageConfig.canAdd" expand="block" (click)="saveChange()" [disabled]="!formGroup.dirty">{{'erp.app.pages.crm.mcp.add-route' | translate}}</ion-button>
-                        </div>
+                        </div> -->
 
                     </ion-col>
                 </ion-row>
