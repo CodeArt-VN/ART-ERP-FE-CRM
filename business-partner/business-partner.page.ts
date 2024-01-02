@@ -62,8 +62,6 @@ export class BusinessPartnerPage extends PageBase {
 
     departmentList = [];
     preLoadData() {
-      //  this.query.WorkPhone='';
-     //   this.query.TaxCode='';
         if (!this.sort.Id) {
             this.sort.Id = 'Id';
             this.sortToggle('Id', true);
@@ -333,20 +331,18 @@ export class BusinessPartnerPage extends PageBase {
         }
     }
 
-    handleChange(e){
+    changeDuplicateKeywork(e){
         if (e.target.value=='WorkPhone'){
-            this.query.WorkPhone='WorkPhone';
            this.findByValue = 'WorkPhone';
-           this.query.TaxCode =undefined;
+           this.query.TaxCode_eq =undefined;
         }
         else{
-            this.query.TaxCode = 'TaxCode'
             this.findByValue = 'TaxCode'
-            this.query.WorkPhone=undefined;
+            this.query.WorkPhone_eq=undefined;
           }
         console.log(e);
     }
-    findBy(){
+    findByDuplicate(){
         let q = {"FindBy": this.findByValue};
         this.query.IgnoredBranch = true;
         let apiPath = { method: "GET", url: function () { return ApiSetting.apiDomain("CRM/Contact/FindDuplicates") } };

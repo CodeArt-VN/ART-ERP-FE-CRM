@@ -10,6 +10,11 @@
 ion-grid.merge-modal ion-row{
     min-height:50px;
 }
+ion-list {
+    ion-item{
+        cursor:pointer;
+      }
+}
 .merge-row {
     min-height: 50px;
     align-content: center;
@@ -33,12 +38,11 @@ ion-grid.merge-modal ion-row{
             color:black;
             border-color: transparent;
           }
+          
         
         ion-avatar{
             margin:0 auto;
         }
     }
+   
 }
-
-  
- 

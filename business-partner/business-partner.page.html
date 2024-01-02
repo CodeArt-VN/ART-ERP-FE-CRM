@@ -120,14 +120,12 @@
 
 <ion-content appScrollbarTheme class="header-table">
 	<app-page-message [itemsLength]="items.length" [showSpinner]="pageConfig.showSpinner"></app-page-message>
-	<ion-fab *ngIf="pageConfig.isShowFeature" class="feature" vertical="top" horizontal="end" slot="fixed">
-		<div class="ion-padding">
-			<ion-header>
-				<ion-toolbar>
-				  <ion-title>File Duplicate</ion-title>
-				</ion-toolbar>
-			  </ion-header>
-			<ion-radio-group  (ionChange)="handleChange($event)">
+	<ion-fab *ngIf="pageConfig.isShowFeature && pageConfig.canMerge " class="feature" vertical="top" horizontal="end" slot="fixed">
+		<ion-list-header class="ion-padding">
+			<ion-label>Files Duplicate</ion-label>
+		</ion-list-header>
+		
+			<ion-radio-group  (ionChange)="changeDuplicateKeywork($event)">
 				<ion-item >
 					<ion-radio slot="start" aria-label="Danger" [value]="'WorkPhone'" color="primary" class="radio-icon" mode="md"></ion-radio>
 					<ion-label style="white-space: normal;">WorkPhone</ion-label>
@@ -137,22 +135,17 @@
 					<ion-label style="white-space: normal;">TaxCode</ion-label>
 				</ion-item>
 			</ion-radio-group>
-			<ion-button (click)="findBy()">Filter</ion-button>
-
-			<ng-container >
-				<ion-grid>
-					<ion-row *ngIf="filesDuplicate.length">
-						<ion-col *ngIf="findByValue=='TaxCode'">TaxCode</ion-col>
-						<ion-col *ngIf="findByValue=='WorkPhone'">WorkPhone</ion-col>
-						<ion-col >Count</ion-col>
-					</ion-row>
-					<ion-row *ngFor="let i of filesDuplicate">
-						<ion-col *ngIf="findByValue=='TaxCode'" clickable (click)="query.TaxCode=i.Value;refresh()">{{i.Value}}</ion-col>
-						<ion-col *ngIf="findByValue=='WorkPhone'"clickable (click)="query.WorkPhone=i.Value;refresh()">{{i.Value}}</ion-col>
-						<ion-col >{{i.Count}}</ion-col>
-					</ion-row>
-				</ion-grid>
-			</ng-container>
+			<div>
+			<ion-button (click)="findByDuplicate()" expand="block">Filter</ion-button>
+			</div>
+			<ion-list  *ngFor="let i of filesDuplicate">
+				<ion-item lines="inset">
+					<ion-icon slot="start" name="search" size="large"></ion-icon>
+					<ion-label *ngIf="findByValue=='TaxCode'" clickable (click)="query.TaxCode_eq=i.Value;refresh()">{{i.Value}}</ion-label>
+					<ion-label *ngIf="findByValue=='WorkPhone'"clickable (click)="query.WorkPhone_eq=i.Value;refresh()">{{i.Value}}</ion-label>
+					<ion-note >{{i.Count}}</ion-note>
+				</ion-item>
+			  </ion-list>
 			<!-- <ion-list>
 				<ion-item>
 					<ion-radio slot="start" aria-label="Danger" color="danger" class="radio-icon" [value]="t" mode="md"></ion-radio>
@@ -161,7 +154,6 @@
 					<ion-radio slot="start" aria-label="Success" color="success" class="radio-icon" [value]="t" mode="md"></ion-radio>
 				</ion-item>
 			</ion-list> -->
-		</div>
 	</ion-fab>
 	<div *ngIf="items.length && pageConfig.showSpinner==false">
 		<section class="table">
@@ -213,10 +205,28 @@
 			</div>
 		</section>
 	</div>
-	<ion-modal #modal [isOpen]="isShowMergePopup" (willDismiss)="isShowMergePopup = false; ">
+
+	<ion-modal #mergeModal [isOpen]="isShowMergePopup" class="modal90" (willDismiss)="isShowMergePopup = false; ">
 		<ng-template>
-			<ion-content>
-				<ion-grid merge-modal>
+			
+	<ion-header>
+		<ion-toolbar>
+			<ion-buttons slot="start" class="ion-hide-sm-down_">
+				<ion-button color="dark" class="ion-hide-sm-down">
+					Merge contacts
+				</ion-button>
+			</ion-buttons>
+		   
+			<ion-buttons slot="primary">
+				<ion-button title="{{'erp.app.pages.shipping.shipment-modal.close-modal' | translate}}" color="secondary" (click)="isShowMergePopup= false">
+					<ion-icon slot="icon-only" name="close"></ion-icon>
+				</ion-button>
+			</ion-buttons>
+		</ion-toolbar>
+
+	</ion-header>
+			<ion-content  appScrollbarTheme class="scrollx" >
+				<ion-grid class="merge-modal" >
 					<ion-row>
 						<ion-col size="2">
 							<ion-row class="merge-row avatar">
@@ -271,8 +281,8 @@
 								Province
 							</ion-row>
 						</ion-col>
-						<ion-col size="10" style="overflow:scroll">
-							<ion-row class="merge-row">
+						<ion-col size="10" appScrollbarTheme class="scrollx  inner-scroll" style="max-width: 1440px;margin: auto;width: 100%;position: sticky;left: 0;">
+							<ion-row class="merge-row ">
 								<ion-radio-group style="display:flex" >
 								<ion-item  *ngFor="let select of selectedItems">
 									<ion-avatar (click)="changeSelected(select)" [ngStyle]="{'border': select.Id == mergeModel.Id ? '2px solid blue' : ''}">
@@ -396,7 +406,10 @@
 						</ion-col>
 					</ion-row>
 				</ion-grid>
-				<ion-button color="primary" (click)="mergeContact()">Merge</ion-button>
+				<div>
+					<ion-button color="primary" (click)="mergeContact()" expand="block">Merge</ion-button>
+				</div>
+			
 			</ion-content>
 		</ng-template>
 	</ion-modal>
