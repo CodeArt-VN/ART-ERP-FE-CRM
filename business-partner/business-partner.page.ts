@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Renderer2 } from '@angular/core';
 import { NavController, ModalController, AlertController, LoadingController, PopoverController } from '@ionic/angular';
 import { EnvService } from 'src/app/services/core/env.service';
 import { PageBase } from 'src/app/page-base';
@@ -6,6 +6,7 @@ import { BRA_BranchProvider, CRM_ContactProvider } from 'src/app/services/static
 import { Location } from '@angular/common';
 import { lib } from 'src/app/services/static/global-functions';
 import { ApiSetting } from 'src/app/services/static/api-setting';
+import { FormBuilder, FormControl, Validators } from '@angular/forms';
 
 @Component({
     selector: 'app-business-partner',
@@ -15,14 +16,44 @@ import { ApiSetting } from 'src/app/services/static/api-setting';
 export class BusinessPartnerPage extends PageBase {
     branchList = [];
     statusList = [];
+    filesDuplicate=[];
+    findByValue;
+    isShowMergePopup = false;
+    formMerge:any
+    mergeModel={
+        Code :'',
+        Name:'',
+        WorkPhone:'',
+        TaxCode:'',
+        Id:0,
+        Address:{
+            AddressLine1:'',
+            AddressLine2:'',
+            Contact:'',
+            Country:'',
+            District:'',
+            Id:'',
+            Phone1:'',
+            Phone2:'',
+            Province:'',
+            Ward:''
+        },
+        BillingAddress:'',
+        Email:'',
+        CompanyName:'',
+        IsPersonal:false,
+    } ;
+
     constructor(
+        private renderer: Renderer2,
         public pageProvider: CRM_ContactProvider,
         public branchProvider: BRA_BranchProvider,
         public modalController: ModalController,
 		public popoverCtrl: PopoverController,
         public alertCtrl: AlertController,
-        public loadingController: LoadingController,
+         public loadingController: LoadingController,
         public env: EnvService,
+        public formBuilder: FormBuilder,
         public navCtrl: NavController,
         public location: Location,
     ) {
@@ -31,6 +62,8 @@ export class BusinessPartnerPage extends PageBase {
 
     departmentList = [];
     preLoadData() {
+      //  this.query.WorkPhone='';
+     //   this.query.TaxCode='';
         if (!this.sort.Id) {
             this.sort.Id = 'Id';
             this.sortToggle('Id', true);
@@ -299,4 +332,128 @@ export class BusinessPartnerPage extends PageBase {
             })
         }
     }
+
+    handleChange(e){
+        if (e.target.value=='WorkPhone'){
+            this.query.WorkPhone='WorkPhone';
+           this.findByValue = 'WorkPhone';
+           this.query.TaxCode =undefined;
+        }
+        else{
+            this.query.TaxCode = 'TaxCode'
+            this.findByValue = 'TaxCode'
+            this.query.WorkPhone=undefined;
+          }
+        console.log(e);
+    }
+    findBy(){
+        let q = {"FindBy": this.findByValue};
+        this.query.IgnoredBranch = true;
+        let apiPath = { method: "GET", url: function () { return ApiSetting.apiDomain("CRM/Contact/FindDuplicates") } };
+        this.pageProvider.commonService.connect(apiPath.method, apiPath.url(),q).toPromise().then((data: any) => {
+        this.filesDuplicate = data;
+        })
+    }
+    showMergePopup(e){
+        this.isShowMergePopup= true;
+        this.changeSelected(this.selectedItems[0])
+    }
+   
+    changeSelected(selectedModel){
+          this.mergeModel.Code =selectedModel.Code;
+          this.mergeModel.Name= selectedModel.Name;
+          this.mergeModel.WorkPhone= selectedModel.WorkPhone;
+          this.mergeModel.TaxCode= selectedModel.TaxCode;
+          this.mergeModel.BillingAddress= selectedModel.BillingAddress;
+          this.mergeModel.CompanyName= selectedModel.CompanyName;
+          this.mergeModel.Email= selectedModel.Email;
+          this.mergeModel.Id= selectedModel.Id;
+          this.mergeModel.IsPersonal= selectedModel.IsPersonal;
+          
+          this.mergeModel.Address.Id = selectedModel.Addresses[0]?.Id
+          this.mergeModel.Address.AddressLine1 = selectedModel.Addresses[0]?.AddressLine1;
+          this.mergeModel.Address.AddressLine2 = selectedModel.Addresses[0]?.AddressLine2;
+          this.mergeModel.Address.Contact = selectedModel.Addresses[0]?.Contact;
+          this.mergeModel.Address.Country = selectedModel.Addresses[0]?.Country;
+          this.mergeModel.Address.Phone1 = selectedModel.Addresses[0]?.Phone1;
+          this.mergeModel.Address.Phone2 = selectedModel.Addresses[0]?.Phone2;
+          this.mergeModel.Address.Province = selectedModel.Addresses[0]?.Province;
+          this.mergeModel.Address.Ward = selectedModel.Addresses[0]?.Ward;
+          console.log(  this.mergeModel)
+        }
+    mergeContact(){
+        // so sánh với selected hiện tại 
+        let obj:any={};
+        obj.Id =  this.mergeModel.Id;
+        obj.MergedItems =   this.selectedItems.map(({ Id }) => Id).filter(x=>x!= obj.Id);
+        let selectedMergeModel = this.selectedItems.find(x=>x.Id == obj.Id);
+        let address:any ={};
+        //obj.QueryStrings={key:''}
+        if(this.mergeModel.Code != selectedMergeModel.Code ){
+            obj.Code = this.mergeModel.Code;
+        } 
+        if(this.mergeModel.Name != selectedMergeModel.Name ){
+            obj.Name = this.mergeModel.Name;
+        }
+        if(this.mergeModel.WorkPhone != selectedMergeModel.WorkPhone ){
+            obj.WorkPhone = this.mergeModel.WorkPhone;
+        } 
+        if(this.mergeModel.TaxCode != selectedMergeModel.TaxCode ){
+        obj.TaxCode = this.mergeModel.TaxCode;
+        } 
+        if(this.mergeModel.BillingAddress != selectedMergeModel.BillingAddress ){
+            obj.BillingAddress = this.mergeModel.BillingAddress;
+        }  
+        if(this.mergeModel.Email != selectedMergeModel.Email ){
+            obj.Email = this.mergeModel.Email;
+        }  
+        if(this.mergeModel.IsPersonal != selectedMergeModel.IsPersonal ){
+            obj.IsPersonal = this.mergeModel.IsPersonal;
+        }  
+        if(this.mergeModel.IsPersonal != selectedMergeModel.IsPersonal ){
+            obj.IsPersonal = this.mergeModel.IsPersonal;
+        }  
+        if(this.mergeModel.Address.AddressLine1 != selectedMergeModel.Addresses[0]?.AddressLine1 ){
+            address.AddressLine1 = this.mergeModel.Address.AddressLine1;
+        }  
+        if(this.mergeModel.Address.AddressLine2 != selectedMergeModel.Addresses[0]?.AddressLine2 ){
+            address.AddressLine2= this.mergeModel.Address.AddressLine2;
+        }  
+        if(this.mergeModel.Address.Contact != selectedMergeModel.Addresses[0]?.Contact ){
+            address.Contact = this.mergeModel.Address.Contact;
+        }  
+        if(this.mergeModel.Address.Country != selectedMergeModel.Addresses[0]?.Country ){
+            address.Country = this.mergeModel.Address.Country
+        }  
+        if(this.mergeModel.Address.Phone1 != selectedMergeModel.Addresses[0]?.Phone1 ){
+            address.Phone1= this.mergeModel.Address.Phone1;
+        }  
+        if(this.mergeModel.Address.Phone2 != selectedMergeModel.Addresses[0]?.Phone2 ){
+            address.Phone2 = this.mergeModel.Address.Phone2;
+        }  
+        if(this.mergeModel.Address.Province != selectedMergeModel.Addresses[0]?.Province ){
+            address.Province = this.mergeModel.Address.Province;
+        }  
+        if(this.mergeModel.Address.Ward != selectedMergeModel.Addresses[0]?.Ward ){
+            address.Ward = this.mergeModel.Address.Ward;
+        }  
+        if(address != null  && address != undefined){
+            obj.Address = address;
+            obj.Address.IDPartner= obj.Id;
+            if(!selectedMergeModel.Addresses.length || !selectedMergeModel.Addresses[0].Id){
+               
+                obj.Address.Id = 0;
+            }
+            else{
+                obj.Address.Id = selectedMergeModel.Addresses[0].Id;
+            }
+           
+        }
+        let apiPath = { method: "POST", url: function () { return ApiSetting.apiDomain("CRM/Contact/Merge") } };
+        this.pageProvider.commonService.connect(apiPath.method, apiPath.url(),obj).toPromise().then((data: any) => {
+            this.isShowMergePopup= false;
+            this.refresh();
+        })
+    }
+   
 }
