@@ -75,7 +75,7 @@ export class MCPDetailPage extends PageBase {
             IDVehicleForWholeSale: [''],
             IDShipper: [''],
             IDParent: [''],
-            IDWarehouse: ['', Validators.required],
+            IDWarehouse: [''],
             StartDate: ['']
         });
 

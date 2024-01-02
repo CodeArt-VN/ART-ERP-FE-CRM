@@ -23,12 +23,6 @@
 				<ion-icon class="min-btn" *ngIf="sort.SellerName" [name]="sort.SellerName == 'SellerName'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.SellerName" name="search" color="primary"></ion-icon>
 			</div>
-
-			<div class="col-code cell ion-hide-sm-down">
-				{{'erp.app.pages.crm.mcp.vehicle-name' | translate}}
-			</div>
-
-		
 			<div class="col-code cell ion-hide-sm-down" (click)="sortToggle('Code')">
 				{{'Code' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.Code" [name]="sort.Code == 'Code'?'arrow-down': 'arrow-up'"></ion-icon>
@@ -56,11 +50,6 @@
 					<ion-icon class="min-btn" (click)="query.SellerName=''; refresh()" *ngIf="query.SellerName" name="close-circle-outline"></ion-icon>
 				</div>
 
-
-
-				<div class="col-code cell ion-hide-sm-down">
-
-				</div>
 				<div class="col-code cell ion-hide-sm-down">
 					<input [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Code" class="c-input" [ngClass]="{active: query.Code}" type="text">
 					<ion-icon class="min-btn" (click)="query.Code=''; refresh()" *ngIf="query.Code" name="close-circle-outline"></ion-icon>
@@ -94,15 +83,10 @@
 						</div>
 
 						<div class="col-code cell ion-hide-sm-down clickable">
-							
 								{{i.SellerName}}
 							<a [routerLink]="['/staff/'+i.IDSeller]">
 								&nbsp;<ion-icon name="open-outline"></ion-icon>
 							</a>
-						</div>
-
-						<div class="col-code cell ion-hide-sm-down">
-							{{i.VehicleName}}
 						</div>
 						<div class="col-code cell ion-hide-sm-down">
 							<a [routerLink]="['/'+this.pageConfig.pageName+'/'+i.Id]">

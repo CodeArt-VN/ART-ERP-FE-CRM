@@ -6,7 +6,6 @@ import { IonicModule } from '@ionic/angular';
 import { ShareModule } from 'src/app/share.module';
 import { MCPDetailPage } from './mcp-detail.page';
 import { FileUploadModule } from 'ng2-file-upload';
-import { MCPCustomerPickerModalPage } from '../mcp-customer-picker-modal/mcp-customer-picker-modal.page';
 import { MapCompsModule } from '../../../components/map-comps/map-comps.module';
 
 const routes: Routes = [
@@ -27,6 +26,6 @@ const routes: Routes = [
     ShareModule,
     RouterModule.forChild(routes)
   ],
-  declarations: [MCPDetailPage, MCPCustomerPickerModalPage]
+  declarations: [MCPDetailPage]
 })
 export class MCPDetailPageModule { }
