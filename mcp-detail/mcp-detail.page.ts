@@ -56,25 +56,27 @@ export class MCPDetailPage extends PageBase {
         this.pageConfig.isDetailPage = true;
         this.id = this.route.snapshot.paramMap.get('id');
         this.formGroup = formBuilder.group({
-            IDBranch: [''],
-            IDSeller: ['', Validators.required],
+            IDBranch: new FormControl({ value: this.env.selectedBranch, disabled: false }),
+            Id: new FormControl({ value: '', disabled: true }),
+            Code: new FormControl('',Validators.required),
+            Name: new FormControl('',Validators.required),
+            Remark: new FormControl(),
+            CreatedBy: new FormControl({ value: '', disabled: true }),
+            CreatedDate: new FormControl({ value: '', disabled: true }),
+            ModifiedBy: new FormControl({ value: '', disabled: true }),
+            ModifiedDate: new FormControl({ value: '', disabled: true }),
+            Sort: new FormControl(),
+            IsDisabled: new FormControl({ value: '', disabled: true }),
 
+            IDSeller: ['', Validators.required],
             IDVehicle: [''],
             IDVehicleForSample: [''],
             IDVehicleForUrgent: [''],
             IDVehicleForWholeSale: [''],
-
             IDShipper: [''],
             IDParent: [''],
             IDWarehouse: ['', Validators.required],
-            Id: new FormControl({ value: '', disabled: true }),
-            Code: ['', Validators.required],
-            Name: ['', Validators.required],
-            Remark: [''],
-            Sort: [''],
-            IsDisabled: new FormControl({ value: '', disabled: true }),
             StartDate: ['']
-
         });
 
         let cYear = (new Date()).getFullYear();
