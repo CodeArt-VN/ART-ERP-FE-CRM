@@ -218,75 +218,75 @@
 			<ion-content>
 				<ion-grid merge-modal>
 					<ion-row>
-					<ion-col size="2">
-						<ion-row class="merge-row avatar">
-							
-						</ion-row>
-						<ion-row class="merge-row">
-							Code
-						</ion-row>
-						<ion-row class="merge-row">
-							Name
-						</ion-row>
-						<ion-row class="merge-row name">
-							WorkPhone
-						</ion-row>
-						<ion-row class="merge-row">
-							TaxCode
-						</ion-row>
-						<ion-row class="merge-row">
-							BillingAddress
-						</ion-row>
-						<ion-row class="merge-row">
-							CompanyName
-						</ion-row>
-						<ion-row class="merge-row">
-							Email
-						</ion-row>
-						<ion-row class="merge-row">
-							IsPersonal
-						</ion-row>
-						<ion-row class="merge-row">
-							AddressLine 1
-						</ion-row>
-						<ion-row class="merge-row">
-							AddressLine 2
-						</ion-row>
-						<ion-row class="merge-row">
-							Contact
-						</ion-row>
-						<ion-row class="merge-row">
-							Country
-						</ion-row>
-						<ion-row class="merge-row">
-							Phone 1
-						</ion-row>
-						<ion-row class="merge-row">
-							Phone 2
-						</ion-row>
-						<ion-row class="merge-row">
-							Ward
-						</ion-row>
-						<ion-row class="merge-row">
-							Province
-						</ion-row>
-					</ion-col>
-					<ion-col size="10" style="overflow:scroll">
-						<ion-row class="merge-row">
-							<ion-radio-group style="display:flex" >
-							  <ion-item  *ngFor="let select of selectedItems">
-								<ion-avatar (click)="changeSelected(select)" [ngStyle]="{'border': select.Id == mergeModel.Id ? '2px solid blue' : ''}">
-									<img  src="https://ionicframework.com/docs/img/demos/avatar.svg" />
-								  </ion-avatar>
-							  </ion-item>
-							</ion-radio-group>
-						</ion-row>
-						<ion-row class="merge-row">
-							<ion-radio-group [>
-							  <ion-item lines="none"  *ngFor="let select of selectedItems">
-								<ion-radio  *ngIf="select.Code" [value]="select.Code" >{{select.Code}}</ion-radio>
-							  </ion-item>
-							</ion-radio-group>
+						<ion-col size="2">
+							<ion-row class="merge-row avatar">
+								
+							</ion-row>
+							<ion-row class="merge-row">
+								Code
+							</ion-row>
+							<ion-row class="merge-row">
+								Name
+							</ion-row>
+							<ion-row class="merge-row name">
+								WorkPhone
+							</ion-row>
+							<ion-row class="merge-row">
+								TaxCode
+							</ion-row>
+							<ion-row class="merge-row">
+								BillingAddress
+							</ion-row>
+							<ion-row class="merge-row">
+								CompanyName
+							</ion-row>
+							<ion-row class="merge-row">
+								Email
+							</ion-row>
+							<ion-row class="merge-row">
+								IsPersonal
+							</ion-row>
+							<ion-row class="merge-row">
+								AddressLine 1
+							</ion-row>
+							<ion-row class="merge-row">
+								AddressLine 2
+							</ion-row>
+							<ion-row class="merge-row">
+								Contact
+							</ion-row>
+							<ion-row class="merge-row">
+								Country
+							</ion-row>
+							<ion-row class="merge-row">
+								Phone 1
+							</ion-row>
+							<ion-row class="merge-row">
+								Phone 2
+							</ion-row>
+							<ion-row class="merge-row">
+								Ward
+							</ion-row>
+							<ion-row class="merge-row">
+								Province
+							</ion-row>
+						</ion-col>
+						<ion-col size="10" style="overflow:scroll">
+							<ion-row class="merge-row">
+								<ion-radio-group style="display:flex" >
+								<ion-item  *ngFor="let select of selectedItems">
+									<ion-avatar (click)="changeSelected(select)" [ngStyle]="{'border': select.Id == mergeModel.Id ? '2px solid blue' : ''}">
+										<img  src="https://ionicframework.com/docs/img/demos/avatar.svg" />
+									</ion-avatar>
+								</ion-item>
+								</ion-radio-group>
+							</ion-row>
+							<ion-row class="merge-row">
+								<ion-radio-group [(ngModel)]="mergeModel.Code" >
+									<ion-item lines="none"  *ngFor="let select of selectedItems">
+										<ion-radio  *ngIf="select.Code" [value]="select.Code" >{{select.Code}}</ion-radio>
+									</ion-item>
+								</ion-radio-group>
 							</ion-row>
 							<ion-row class="merge-row">
 								<ion-radio-group [(ngModel)]="mergeModel.Name">
@@ -337,7 +337,7 @@
 									</ion-item>
 								</ion-radio-group>
 							</ion-row>
-							<!-- <ion-row class="merge-row">
+							<ion-row class="merge-row">
 								<ion-radio-group [(ngModel)]="mergeModel.Address.AddressLine1">
 									<ion-item lines="none" *ngFor="let select of selectedItems">
 										<ion-radio *ngIf="select.Addresses.length && select.Addresses[0].AddressLine1"  [value]="select.Addresses[0].AddressLine1" >{{select.Addresses[0].AddressLine1}}</ion-radio>
@@ -392,9 +392,8 @@
 										<ion-radio *ngIf="select.Addresses.length && select.Addresses[0].Province"  [value]="select.Addresses[0].Province" >{{select.Addresses[0].Ward}}</ion-radio>
 									</ion-item>
 								</ion-radio-group>
-							</ion-row> -->
-					</ion-col>
-				
+							</ion-row>
+						</ion-col>
 					</ion-row>
 				</ion-grid>
 				<ion-button color="primary" (click)="mergeContact()">Merge</ion-button>
