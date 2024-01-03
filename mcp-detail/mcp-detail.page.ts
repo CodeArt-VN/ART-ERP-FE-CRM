@@ -68,6 +68,7 @@ export class MCPDetailPage extends PageBase {
             Sort: new FormControl(),
             IsDisabled: new FormControl({ value: '', disabled: true }),
 
+            Type: new FormControl('MCP',Validators.required),
             IDSeller: ['', Validators.required],
             IDVehicle: [''],
             IDVehicleForSample: [''],

@@ -28,5 +28,6 @@ export class MCPPage extends PageBase {
         public location: Location,
     ) {
         super();
+        this.query.Type = 'MCP';
     }
 }
