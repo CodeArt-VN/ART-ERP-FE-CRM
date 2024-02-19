@@ -192,7 +192,7 @@ export class BusinessPartnerPage extends PageBase {
                                     if (publishEventCode) {
                                         this.env.publishEvent({ Code: publishEventCode });
                                     }
-                                    this.env.showTranslateMessage('erp.app.pages.sale.sale-order.message.save-complete', 'success');
+                                    this.env.showTranslateMessage('Saving completed!', 'success');
                                     this.submitAttempt = false;
 
                                 }).catch(err => {
@@ -215,7 +215,7 @@ export class BusinessPartnerPage extends PageBase {
 
         let itemsCanNotProcess = this.selectedItems.filter(i => !(i.Status == "Submitted"));
         if (itemsCanNotProcess.length == this.selectedItems.length) {
-            this.env.showTranslateMessage('erp.app.pages.crm.business-partner.message.approve-business-partner-error', 'warning');
+            this.env.showTranslateMessage('Selected Business Partners Cannot Be Approved. Submitted Business Partners Only!', 'warning');
         }
         else {
             itemsCanNotProcess.forEach(i => {
@@ -257,7 +257,7 @@ export class BusinessPartnerPage extends PageBase {
                                         if (publishEventCode) {
                                             this.env.publishEvent({ Code: publishEventCode });
                                         }
-                                        this.env.showTranslateMessage('erp.app.pages.sale.sale-order.message.save-complete', 'success');
+                                        this.env.showTranslateMessage('Saving completed!', 'success');
                                         this.submitAttempt = false;
 
                                     }).catch(err => {
@@ -277,7 +277,7 @@ export class BusinessPartnerPage extends PageBase {
     disapproveBusinessPartner() {
         let itemsCanNotProcess = this.selectedItems.filter(i => !(i.Status == 'Submitted' || i.Status == 'Approved'));
         if (itemsCanNotProcess.length == this.selectedItems.length) {
-            this.env.showTranslateMessage('erp.app.pages.crm.business-partner.message.disapprove-business-partner-error', 'warning');
+            this.env.showTranslateMessage('Selected Business Partners Cannot Be Disapproved. Submitted Business Partners Only!', 'warning');
         }
         else {
             itemsCanNotProcess.forEach(i => {
@@ -319,7 +319,7 @@ export class BusinessPartnerPage extends PageBase {
                                         if (publishEventCode) {
                                             this.env.publishEvent({ Code: publishEventCode });
                                         }
-                                        this.env.showTranslateMessage('erp.app.pages.sale.sale-order.message.save-complete', 'success');
+                                        this.env.showTranslateMessage('Saving completed!', 'success');
                                         this.submitAttempt = false;
 
                                     }).catch(err => {

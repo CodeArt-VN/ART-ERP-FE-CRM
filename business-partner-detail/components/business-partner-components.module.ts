@@ -14,6 +14,7 @@ import { BpOutletInfoComponent } from './bp-outlet-info/bp-outlet-info.component
 import { BPItemsComponent } from './bp-items/bp-items.component';
 import { RouterModule } from '@angular/router';
 import { MapCompsModule } from 'src/app/components/map-comps/map-comps.module';
+import { BpTaxAddressComponent } from './bp-tax-address/bp-tax-address.component';
 
 
 
@@ -33,6 +34,7 @@ import { MapCompsModule } from 'src/app/components/map-comps/map-comps.module';
 		BpContactPointComponent,
 		BpStorerInfoComponent,
 		BpAddressComponent,
+		BpTaxAddressComponent,
 		BpMapComponent,
 		BpOutletInfoComponent,
 		BPItemsComponent,
@@ -43,6 +45,7 @@ import { MapCompsModule } from 'src/app/components/map-comps/map-comps.module';
 		BpContactPointComponent,
 		BpStorerInfoComponent,
 		BpAddressComponent,
+		BpTaxAddressComponent,
 		BpMapComponent,
 		BpOutletInfoComponent,
 		BPItemsComponent

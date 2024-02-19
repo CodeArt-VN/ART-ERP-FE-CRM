@@ -4,18 +4,18 @@
     <ion-row class="hr-group">
       <ion-col size="12" size-sm="12" size-md="12" size-xl="3">
         <ion-list-header class="ion-no-padding">
-          <ion-label color="primary">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.page-title' | translate}}</ion-label>
+          <ion-label color="primary">{{'General' | translate}}</ion-label>
         </ion-list-header>
       </ion-col>
       <ion-col size="12" size-sm="6" size-xl="4">
         <div class="c-control">
-          <label class="c-label" for="StandardCarrierAlphaCode">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.standard-carrier-alpha-code' | translate}}
+          <label class="c-label" for="StandardCarrierAlphaCode">{{'StandardCarrierAlphaCode' | translate}}
             <span *ngIf="!formGroup.controls.StandardCarrierAlphaCode.valid && !formGroup.controls.StandardCarrierAlphaCode.pending && (formGroup.controls.StandardCarrierAlphaCode.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
           <input (change)="saveChange()" class="c-input" id="StandardCarrierAlphaCode" formControlName="StandardCarrierAlphaCode">
         </div>
         <div class="c-control">
-          <label class="c-label" for="CreditLimit">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.credit-limit' | translate}} <small>{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.credit-limit-meaning' | translate}}</small>
+          <label class="c-label" for="CreditLimit">{{'CreditLimit' | translate}} <small>{{'Maximum amount of the owner credit limit' | translate}}</small>
             <span *ngIf="!formGroup.controls.CreditLimit.valid && !formGroup.controls.CreditLimit.pending && (formGroup.controls.CreditLimit.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
           <input (change)="saveChange()" class="c-input" id="CreditLimit" formControlName="CreditLimit" mask="separator.9" thousandSeparator="," [allowNegativeNumbers]="false" type="tel">
@@ -23,7 +23,7 @@
       </ion-col>
       <ion-col size="12" size-sm="6" size-xl="4">
         <div class="c-control">
-          <label class="c-label" for="IDCartonGroup">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.carton-group' | translate}}
+          <label class="c-label" for="IDCartonGroup">{{'Carton group' | translate}}
             <span *ngIf="!formGroup.controls.IDCartonGroup.valid && !formGroup.controls.IDCartonGroup.pending && (formGroup.controls.IDCartonGroup.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
           <input (change)="saveChange()" class="c-input" id="IDCartonGroup" formControlName="IDCartonGroup">
@@ -35,14 +35,14 @@
     <ion-row class="hr-group">
       <ion-col size="12" size-sm="12" size-md="12" size-xl="3">
         <ion-list-header class="ion-no-padding">
-          <ion-label color="primary">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.task' | translate}}</ion-label>
+          <ion-label color="primary">{{'Task' | translate}}</ion-label>
         </ion-list-header>
       </ion-col>
       <ion-col size="12" size-sm="12" size-xl="8">
         <div class="c-control">
           <span class="no-warp">
             <input (change)="saveChange()" class="c-checkbox" id="isActivated" formControlName="isActivated" type="checkbox">
-            <label class="c-label checkbox" for="isActivated">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.activate' | translate}}
+            <label class="c-label checkbox" for="isActivated">{{'Activate' | translate}}
               <span *ngIf="!formGroup.controls.isActivated.valid && !formGroup.controls.isActivated.pending && (formGroup.controls.isActivated.dirty || submitAttempt)" ion-text color="danger">(*)</span>
             </label>
           </span>
@@ -50,13 +50,13 @@
         <div class="c-control">
           <span class="no-warp">
             <input (change)="saveChange()" class="c-checkbox" id="IsEnablePacking" formControlName="IsEnablePacking" type="checkbox">
-            <label class="c-label checkbox" for="IsEnablePacking">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.is-enable-packing' | translate}}
+            <label class="c-label checkbox" for="IsEnablePacking">{{'Enable packing' | translate}}
               <span *ngIf="!formGroup.controls.IsEnablePacking.valid && !formGroup.controls.IsEnablePacking.pending && (formGroup.controls.IsEnablePacking.dirty || submitAttempt)" ion-text color="danger">(*)</span>
             </label>
           </span>
           <span class="no-warp">
             <input (change)="saveChange()" class="c-checkbox" id="IsQCInspectAtPack" formControlName="IsQCInspectAtPack" type="checkbox">
-            <label class="c-label checkbox" for="IsQCInspectAtPack">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.is-qc-inspect-at-pack' | translate}}
+            <label class="c-label checkbox" for="IsQCInspectAtPack">{{'QC Inspect at pack' | translate}}
               <span *ngIf="!formGroup.controls.IsQCInspectAtPack.valid && !formGroup.controls.IsQCInspectAtPack.pending && (formGroup.controls.IsQCInspectAtPack.dirty || submitAttempt)" ion-text color="danger">(*)</span>
             </label>
           </span>
@@ -64,7 +64,7 @@
         <div class="c-control">
           <span class="no-warp">
             <input (change)="saveChange()" class="c-checkbox" id="IsAllowMultiZoneRainbowPallet" formControlName="IsAllowMultiZoneRainbowPallet" type="checkbox">
-            <label class="c-label checkbox" for="IsAllowMultiZoneRainbowPallet">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.is-allow-multi-zone-rainbow-pallet' | translate}}
+            <label class="c-label checkbox" for="IsAllowMultiZoneRainbowPallet">{{'Allow multi zone rainbow pallet' | translate}}
               <span *ngIf="!formGroup.controls.IsAllowMultiZoneRainbowPallet.valid && !formGroup.controls.IsAllowMultiZoneRainbowPallet.pending && (formGroup.controls.IsAllowMultiZoneRainbowPallet.dirty || submitAttempt)" ion-text color="danger">(*)</span>
             </label>
           </span>
@@ -72,7 +72,7 @@
         <div class="c-control">
           <span class="no-warp">
             <input (change)="saveChange()" class="c-checkbox" id="AllowCommingledLPN" formControlName="AllowCommingledLPN" type="checkbox">
-            <label class="c-label checkbox" for="AllowCommingledLPN">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.allow-commingled-lpn' | translate}}
+            <label class="c-label checkbox" for="AllowCommingledLPN">{{'Allow commingled LPN' | translate}}
               <span *ngIf="!formGroup.controls.AllowCommingledLPN.valid && !formGroup.controls.AllowCommingledLPN.pending && (formGroup.controls.AllowCommingledLPN.dirty || submitAttempt)" ion-text color="danger">(*)</span>
             </label>
           </span>
@@ -80,7 +80,7 @@
       </ion-col>
       <ion-col size="12" size-sm="6" size-xl="4" offset-xl="3">
         <div class="c-control">
-          <label class="c-label" for="DefaultItemRotation">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.default-item-rotation' | translate}}
+          <label class="c-label" for="DefaultItemRotation">{{'Default item rotation' | translate}}
             <span *ngIf="!formGroup.controls.DefaultItemRotation.valid && !formGroup.controls.DefaultItemRotation.pending && (formGroup.controls.DefaultItemRotation.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
           <select (change)="saveChange()" class="c-input c-dropdown" formControlName="DefaultItemRotation">
@@ -88,37 +88,37 @@
           </select>
         </div>
         <div class="c-control">
-          <label class="c-label" for="DefaultRotation">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.default-rotation' | translate}}
+          <label class="c-label" for="DefaultRotation">{{'Default rotation' | translate}}
             <span *ngIf="!formGroup.controls.DefaultRotation.valid && !formGroup.controls.DefaultRotation.pending && (formGroup.controls.DefaultRotation.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
           <select (change)="saveChange()" class="c-input c-dropdown" formControlName="DefaultRotation">
-            <option value="FIFO">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.fifo' | translate}}</option>
-            <option value="LIFO">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.lifo' | translate}}</option>
+            <option value="FIFO">{{'FIFO' | translate}}</option>
+            <option value="LIFO">{{'LIFO' | translate}}</option>
           </select>
         </div>
         <div class="c-control">
-          <label class="c-label" for="DefaultStrategy">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.default-strategy' | translate}}
+          <label class="c-label" for="DefaultStrategy">{{'Default strategy' | translate}}
             <span *ngIf="!formGroup.controls.DefaultStrategy.valid && !formGroup.controls.DefaultStrategy.pending && (formGroup.controls.DefaultStrategy.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
           <select (change)="saveChange()" class="c-input c-dropdown" formControlName="DefaultStrategy">
-            <option [value]="1">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.std-option' | translate}}</option>
+            <option [value]="1">{{'Std' | translate}}</option>
           </select>
         </div>
         <div class="c-control">
-          <label class="c-label" for="DefaultPutawayStrategy">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.default-putaway-strategy' | translate}}
+          <label class="c-label" for="DefaultPutawayStrategy">{{'Default putaway strategy' | translate}}
             <span *ngIf="!formGroup.controls.DefaultPutawayStrategy.valid && !formGroup.controls.DefaultPutawayStrategy.pending && (formGroup.controls.DefaultPutawayStrategy.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
           <select (change)="saveChange()" class="c-input c-dropdown" formControlName="DefaultPutawayStrategy">
-            <option [value]="1">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.std-option' | translate}}</option>
+            <option [value]="1">{{'Std' | translate}}</option>
           </select>
         </div>
       </ion-col>
       <ion-col size="12" size-sm="6" size-xl="4">
         <div class="c-control">
-          <label class="c-label" for="DefaultInboundQCLocation">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.default-inbound-qc-location' | translate}}
+          <label class="c-label" for="DefaultInboundQCLocation">{{'Default inbound QC location' | translate}}
             <span *ngIf="!formGroup.controls.DefaultInboundQCLocation.valid && !formGroup.controls.DefaultInboundQCLocation.pending && (formGroup.controls.DefaultInboundQCLocation.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
-          <ng-select class="c-input" (change)="saveChange();" labelForId="DefaultInboundQCLocation" formControlName="DefaultInboundQCLocation" [items]="locationList" [virtualScroll]="true" bindLabel="Name" bindValue="Id" placeholder="{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.search-placeholder' | translate}}">
+          <ng-select class="c-input" (change)="saveChange();" labelForId="DefaultInboundQCLocation" formControlName="DefaultInboundQCLocation" [items]="locationList" [virtualScroll]="true" bindLabel="Name" bindValue="Id" placeholder="{{'Search' | translate}}">
             <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
               <div *ngIf="i">
                 <div> <span *ngFor="let l of i.levels">&nbsp;&nbsp;&nbsp;</span> <span [ngOptionHighlight]="search">{{i.Name}}</span></div>
@@ -127,10 +127,10 @@
           </ng-select>
         </div>
         <div class="c-control">
-          <label class="c-label" for="DefaultOutboundQCLocation">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.default-outbound-qc-location' | translate}}
+          <label class="c-label" for="DefaultOutboundQCLocation">{{'Default outbound QC location' | translate}}
             <span *ngIf="!formGroup.controls.DefaultOutboundQCLocation.valid && !formGroup.controls.DefaultOutboundQCLocation.pending && (formGroup.controls.DefaultOutboundQCLocation.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
-          <ng-select class="c-input" (change)="saveChange();" labelForId="DefaultOutboundQCLocation" formControlName="DefaultOutboundQCLocation" [items]="locationList" [virtualScroll]="true" bindLabel="Name" bindValue="Id" placeholder="{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.search-placeholder' | translate}}">
+          <ng-select class="c-input" (change)="saveChange();" labelForId="DefaultOutboundQCLocation" formControlName="DefaultOutboundQCLocation" [items]="locationList" [virtualScroll]="true" bindLabel="Name" bindValue="Id" placeholder="{{'Search' | translate}}">
             <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
               <div *ngIf="i">
                 <div> <span *ngFor="let l of i.levels">&nbsp;&nbsp;&nbsp;</span> <span [ngOptionHighlight]="search">{{i.Name}}</span></div>
@@ -139,10 +139,10 @@
           </ng-select>
         </div>
         <div class="c-control">
-          <label class="c-label" for="DefaultReturnsReceiptLocation">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.default-returns-receipt-location' | translate}}
+          <label class="c-label" for="DefaultReturnsReceiptLocation">{{'Default returns receipt location' | translate}}
             <span *ngIf="!formGroup.controls.DefaultReturnsReceiptLocation.valid && !formGroup.controls.DefaultReturnsReceiptLocation.pending && (formGroup.controls.DefaultReturnsReceiptLocation.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
-          <ng-select class="c-input" (change)="saveChange();" labelForId="DefaultReturnsReceiptLocation" formControlName="DefaultReturnsReceiptLocation" [items]="locationList" [virtualScroll]="true" bindLabel="Name" bindValue="Id" placeholder="{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.search-placeholder' | translate}}">
+          <ng-select class="c-input" (change)="saveChange();" labelForId="DefaultReturnsReceiptLocation" formControlName="DefaultReturnsReceiptLocation" [items]="locationList" [virtualScroll]="true" bindLabel="Name" bindValue="Id" placeholder="{{'Search' | translate}}">
             <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
               <div *ngIf="i">
                 <div> <span *ngFor="let l of i.levels">&nbsp;&nbsp;&nbsp;</span> <span [ngOptionHighlight]="search">{{i.Name}}</span></div>
@@ -151,10 +151,10 @@
           </ng-select>
         </div>
         <div class="c-control">
-          <label class="c-label" for="DefaultPackingLocation">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.default-packing-location' | translate}}
+          <label class="c-label" for="DefaultPackingLocation">{{'Default packing location' | translate}}
             <span *ngIf="!formGroup.controls.DefaultPackingLocation.valid && !formGroup.controls.DefaultPackingLocation.pending && (formGroup.controls.DefaultPackingLocation.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
-          <ng-select class="c-input" (change)="saveChange();" labelForId="DefaultPackingLocation" formControlName="DefaultPackingLocation" [items]="locationList" [virtualScroll]="true" bindLabel="Name" bindValue="Id" placeholder="{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.search-placeholder' | translate}}">
+          <ng-select class="c-input" (change)="saveChange();" labelForId="DefaultPackingLocation" formControlName="DefaultPackingLocation" [items]="locationList" [virtualScroll]="true" bindLabel="Name" bindValue="Id" placeholder="{{'Search' | translate}}">
             <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
               <div *ngIf="i">
                 <div> <span *ngFor="let l of i.levels">&nbsp;&nbsp;&nbsp;</span> <span [ngOptionHighlight]="search">{{i.Name}}</span></div>
@@ -168,50 +168,50 @@
     <ion-row class="hr-group" style="border:none">
       <ion-col size="12" size-sm="12" size-md="12" size-xl="3">
         <ion-list-header class="ion-no-padding">
-          <ion-label color="primary">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.label' | translate}}</ion-label>
+          <ion-label color="primary">{{'Label' | translate}}</ion-label>
         </ion-list-header>
       </ion-col>
       <ion-col size="12" size-sm="6" size-xl="4">
         <div class="c-control">
-          <label class="c-label" for="LPNBarcodeSymbology">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.lpn-barcode-symbology' | translate}}
+          <label class="c-label" for="LPNBarcodeSymbology">{{'LPN barcode symbology' | translate}}
             <span *ngIf="!formGroup.controls.LPNBarcodeSymbology.valid && !formGroup.controls.LPNBarcodeSymbology.pending && (formGroup.controls.LPNBarcodeSymbology.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
           <select (change)="saveChange()" class="c-input c-dropdown" formControlName="LPNBarcodeSymbology">
-            <option value="Code39">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.code-39' | translate}}</option>
-            <option value="Code128">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.code-128' | translate}}</option>
-            <option value="DataMatrix">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.data-matrix' | translate}}</option>
-            <option value="QRCode">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.qr-code' | translate}}</option>
+            <option value="Code39">{{'Code 39' | translate}}</option>
+            <option value="Code128">{{'Code 128' | translate}}</option>
+            <option value="DataMatrix">{{'Data matrix' | translate}}</option>
+            <option value="QRCode">{{'QR code' | translate}}</option>
           </select>
         </div>
         <div class="c-control">
-          <label class="c-label" for="LPNBarcodeFormat">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.lpn-barcode-format' | translate}}
+          <label class="c-label" for="LPNBarcodeFormat">{{'LPN barcode format' | translate}}
             <span *ngIf="!formGroup.controls.LPNBarcodeFormat.valid && !formGroup.controls.LPNBarcodeFormat.pending && (formGroup.controls.LPNBarcodeFormat.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
           <select (change)="saveChange()" class="c-input c-dropdown" formControlName="LPNBarcodeFormat">
-            <option value="SSCC">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.sscc' | translate}}</option>
-            <option value="UserDefined">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.user-defined' | translate}}</option>
+            <option value="SSCC">{{'SSCC' | translate}}</option>
+            <option value="UserDefined">{{'User defined' | translate}}</option>
           </select>
         </div>
         <div class="c-control">
-          <label class="c-label" for="LPNLength">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.lpn-length' | translate}}
+          <label class="c-label" for="LPNLength">{{'LPN length' | translate}}
             <span *ngIf="!formGroup.controls.LPNLength.valid && !formGroup.controls.LPNLength.pending && (formGroup.controls.LPNLength.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
           <input (change)="saveChange()" class="c-input" id="LPNLength" formControlName="LPNLength" mask="separator.9" thousandSeparator="," [allowNegativeNumbers]="false" type="tel">
         </div>
         <div class="c-control">
-          <label class="c-label" for="LPNStartNumber">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.lpn-start-number' | translate}}
+          <label class="c-label" for="LPNStartNumber">{{'LPN start number' | translate}}
             <span *ngIf="!formGroup.controls.LPNStartNumber.valid && !formGroup.controls.LPNStartNumber.pending && (formGroup.controls.LPNStartNumber.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
           <input (change)="saveChange()" class="c-input" id="LPNStartNumber" formControlName="LPNStartNumber" mask="separator.9" thousandSeparator="," [allowNegativeNumbers]="false" type="tel">
         </div>
         <div class="c-control">
-          <label class="c-label" for="LPNNextNumber">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.lpn-next-number' | translate}}
+          <label class="c-label" for="LPNNextNumber">{{'LPN next number' | translate}}
             <span *ngIf="!formGroup.controls.LPNNextNumber.valid && !formGroup.controls.LPNNextNumber.pending && (formGroup.controls.LPNNextNumber.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
           <input (change)="saveChange()" class="c-input" id="LPNNextNumber" formControlName="LPNNextNumber" mask="separator.9" thousandSeparator="," [allowNegativeNumbers]="false" type="tel">
         </div>
         <div class="c-control">
-          <label class="c-label" for="LPNRollbackNumber">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.lpn-rollback-number' | translate}}
+          <label class="c-label" for="LPNRollbackNumber">{{'LPN rollback number' | translate}}
             <span *ngIf="!formGroup.controls.LPNRollbackNumber.valid && !formGroup.controls.LPNRollbackNumber.pending && (formGroup.controls.LPNRollbackNumber.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
           <input (change)="saveChange()" class="c-input" id="LPNRollbackNumber" formControlName="LPNRollbackNumber" mask="separator.9" thousandSeparator="," [allowNegativeNumbers]="false" type="tel">
@@ -221,29 +221,29 @@
       </ion-col>
       <ion-col size="12" size-sm="6" size-xl="4">
         <div class="c-control">
-          <label class="c-label" for="CaseLabelType">Ca{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.case-label-type' | translate}}
+          <label class="c-label" for="CaseLabelType">Ca{{'Case label type' | translate}}
             <span *ngIf="!formGroup.controls.CaseLabelType.valid && !formGroup.controls.CaseLabelType.pending && (formGroup.controls.CaseLabelType.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
           <select (change)="saveChange()" class="c-input c-dropdown" formControlName="CaseLabelType">
-            <option value="STD">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.std' | translate}}</option>
-            <option value="SGTIN">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.sgtin' | translate}}</option>
-            <option value="SSCC">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.sscc' | translate}}</option>
+            <option value="STD">{{'STD' | translate}}</option>
+            <option value="SGTIN">{{'SGTIN' | translate}}</option>
+            <option value="SSCC">{{'SSCC' | translate}}</option>
           </select>
         </div>
         <div class="c-control">
-          <label class="c-label" for="ApplicationID">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.application-id' | translate}}
+          <label class="c-label" for="ApplicationID">{{'Application ID' | translate}}
             <span *ngIf="!formGroup.controls.ApplicationID.valid && !formGroup.controls.ApplicationID.pending && (formGroup.controls.ApplicationID.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
           <input (change)="saveChange()" class="c-input" id="ApplicationID" formControlName="ApplicationID">
         </div>
         <div class="c-control">
-          <label class="c-label" for="SSCCFirstDigit">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.sscc-1st-digit' | translate}}
+          <label class="c-label" for="SSCCFirstDigit">{{'SSCC 1st digit' | translate}}
             <span *ngIf="!formGroup.controls.SSCCFirstDigit.valid && !formGroup.controls.SSCCFirstDigit.pending && (formGroup.controls.SSCCFirstDigit.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
           <input (change)="saveChange()" class="c-input" id="SSCCFirstDigit" formControlName="SSCCFirstDigit">
         </div>
         <div class="c-control">
-          <label class="c-label" for="UCCVendor">{{'erp.app.pages.crm.business-partner-detail.bp-storer-info.ucc-vendor' | translate}}
+          <label class="c-label" for="UCCVendor">{{'UCC vendor #' | translate}}
             <span *ngIf="!formGroup.controls.UCCVendor.valid && !formGroup.controls.UCCVendor.pending && (formGroup.controls.UCCVendor.dirty || submitAttempt)" ion-text color="danger">(*)</span>
           </label>
           <input (change)="saveChange()" class="c-input" id="UCCVendor" formControlName="UCCVendor">

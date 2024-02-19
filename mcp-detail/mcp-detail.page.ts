@@ -136,13 +136,13 @@ export class MCPDetailPage extends PageBase {
             if (i.Id == 0) {
                 i.Id = result['Id'];
             }
-            this.env.showTranslateMessage('erp.app.pages.crm.mcp.message.update-mcp-complete','success');
+            this.env.showTranslateMessage('MCP updated','success');
         })
     }
 
     deleteRouteDetail(i){
         this.routeDetailProvider.delete(i).then(result =>{
-            this.env.showTranslateMessage('erp.app.pages.crm.mcp.message.update-mcp-complete','success');
+            this.env.showTranslateMessage('MCP updated','success');
             const index = this.routeDetail.indexOf(i);
             if (index > -1) {
                 this.routeDetail.splice(index, 1);
@@ -302,7 +302,7 @@ export class MCPDetailPage extends PageBase {
                 };
 
                 this.partnerAddressProvider.save(submitItem).then(resp => {
-                    this.env.showTranslateMessage('erp.app.pages.crm.business-partner.message.update-coordination-complete','success');
+                    this.env.showTranslateMessage('Location updated','success');
                 });
             });
         }

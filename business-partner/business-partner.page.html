@@ -1,11 +1,11 @@
 <ion-header>
-	<app-list-toolbar pageTitle="{{'erp.app.pages.crm.business-partner.page-title' | translate}}" [ShowFeature]="true" [pageConfig]="pageConfig" [selectedItems]="selectedItems" [query]="query" (add)="add()" (refresh)="refresh()" (export)="export()" (import)="import($event)" (help)="help()" (unselect)="unselect()" (archiveItems)="archiveItems()" (deleteItems)="deleteItems()" (changeBranch)="changeBranch($event)" (submitBusinessPartner)="submitBusinessPartner()" (approveBusinessPartner)="approveBusinessPartner()" (disapproveBusinessPartner)="disapproveBusinessPartner()" (mergeOrders)="showMergePopup($event)"></app-list-toolbar>
+	<app-list-toolbar pageTitle="{{'List' | translate}}" [ShowFeature]="true" [pageConfig]="pageConfig" [selectedItems]="selectedItems" [query]="query" (add)="add()" (refresh)="refresh()" (export)="export()" (import)="import($event)" (help)="help()" (unselect)="unselect()" (archiveItems)="archiveItems()" (deleteItems)="deleteItems()" (changeBranch)="changeBranch($event)" (submitBusinessPartner)="submitBusinessPartner()" (approveBusinessPartner)="approveBusinessPartner()" (disapproveBusinessPartner)="disapproveBusinessPartner()" (mergeOrders)="showMergePopup($event)"></app-list-toolbar>
 
 	<section class="table">
 		<header class="bold ion-hide-sm-down">
 			<div class="col-checkbox cell"></div>
 			<div class="col-id cell ion-hide-sm-down" (click)="sortToggle('Id')">
-				{{'erp.app.pages.crm.business-partner.id' | translate}}
+				{{'Id' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.Id" [name]="sort.Id == 'Id'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Id" name="search" color="primary"></ion-icon>
 			</div>
@@ -16,49 +16,49 @@
 			</div>
 
 			<div class="col-status cell" (click)="sortToggle('IDStatus')">
-				{{'erp.app.pages.sale.sale-order.id-status' | translate}}
+				{{'Status' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.IDStatus" [name]="sort.IDStatus == 'IDStatus'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.IDStatus" name="search" color="primary"></ion-icon>
 			</div>
 
 			<div class="col-name cell" (click)="sortToggle('Name')">
-				{{'erp.app.pages.crm.business-partner.name' | translate}}
+				{{'Name' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.Name" [name]="sort.Name == 'Name'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.CustomerName" name="search" color="primary"></ion-icon>
 			</div>
 			<div class="col-code cell clickable ion-hide-sm-down" (click)="sortToggle('WorkPhone')">
-				{{'erp.app.pages.crm.business-partner.workphone' | translate}}
+				{{'Telephone' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.WorkPhone" [name]="sort.WorkPhone == 'WorkPhone'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.WorkPhone" name="search" color="primary"></ion-icon>
 			</div>
 
 			<div class="col-id cell ion-hide-sm-down" (click)="sortToggle('IsOutlets')">
-				{{'erp.app.pages.crm.business-partner.outlets' | translate}}
+				{{'Outlets' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.IsOutlets" [name]="sort.IsOutlets == 'IsOutlets'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.IsOutlets" name="search" color="primary"></ion-icon>
 			</div>
 			<div class="col-id cell ion-hide-sm-down" (click)="sortToggle('IsStorer')">
-				{{'erp.app.pages.crm.business-partner.storer' | translate}}
+				{{'Storer' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.IsStorer" [name]="sort.IsStorer == 'IsStorer'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.IsStorer" name="search" color="primary"></ion-icon>
 			</div>
 			<div class="col-id cell ion-hide-sm-down" (click)="sortToggle('IsVendor')">
-				{{'erp.app.pages.crm.business-partner.vendor' | translate}}
+				{{'Vendor' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.IsVendor" [name]="sort.IsVendor == 'IsVendor'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.IsVendor" name="search" color="primary"></ion-icon>
 			</div>
 			<div class="col-id cell ion-hide-sm-down" (click)="sortToggle('IsCarrier')">
-				{{'erp.app.pages.crm.business-partner.carrier' | translate}}
+				{{'Carrier' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.IsCarrier" [name]="sort.IsCarrier == 'IsCarrier'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.IsCarrier" name="search" color="primary"></ion-icon>
 			</div>
 			<div class="col-id cell ion-hide-sm-down" (click)="sortToggle('IsBranch')">
-				{{'erp.app.pages.crm.business-partner.branch' | translate}}
+				{{'Branch' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.IsBranch" [name]="sort.IsBranch == 'IsBranch'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.IsBranch" name="search" color="primary"></ion-icon>
 			</div>
 			<div class="col-id cell ion-hide-sm-down" (click)="sortToggle('IsStaff')">
-				{{'erp.app.pages.crm.business-partner.staff' | translate}}
+				{{'Staff' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.IsStaff" [name]="sort.IsStaff == 'IsStaff'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.IsStaff" name="search" color="primary"></ion-icon>
 			</div>
@@ -78,14 +78,14 @@
 				</div>
 				<div class="col-status cell">
 					<select (change)="refresh()" class="c-input c-dropdown" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Status" [ngClass]="{active: query.Status}">
-						<option value="">{{'erp.app.pages.purchase.purchase-order.all-option' | translate}}</option>
+						<option value="">{{'All' | translate}}</option>
 						<option disabled value="">----------</option>
 						<option *ngFor="let t of statusList" [value]="t.Code">{{t.Name}}</option>
 					</select>
 					<ion-icon class="min-btn" (click)="query.Status=''; refresh()" *ngIf="query.Status !=''" name="close-circle-outline"></ion-icon>
 				</div>
 				<div class="col-name cell">
-					<input (keydown)="onKeydown($event)" placeholder="{{'erp.app.pages.crm.business-partner.customer-name-placeholder' | translate}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.CustomerName" class="c-input" [ngClass]="{active: query.CustomerName}" type="text">
+					<input (keydown)="onKeydown($event)" placeholder="{{'Search by code, name, phone number' | translate}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.CustomerName" class="c-input" [ngClass]="{active: query.CustomerName}" type="text">
 					<ion-icon class="min-btn" (click)="query.CustomerName=''; refresh()" *ngIf="query.CustomerName" name="close-circle-outline"></ion-icon>
 				</div>
 				<div class="col-code cell ion-hide-sm-down">
@@ -220,7 +220,7 @@
 					</ion-buttons>
 
 					<ion-buttons slot="primary">
-						<ion-button title="{{'erp.app.pages.shipping.shipment-modal.close-modal' | translate}}" color="secondary" (click)="isShowMergePopup= false">
+						<ion-button title="{{'Close' | translate}}" color="secondary" (click)="isShowMergePopup= false">
 							<ion-icon slot="icon-only" name="close"></ion-icon>
 						</ion-button>
 					</ion-buttons>

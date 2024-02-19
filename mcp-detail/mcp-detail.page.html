@@ -12,12 +12,12 @@
                 <ion-row class="hr-group" style=" border: none">
                     <ion-col size="12" size-sm="12" size-md="12" size-xl="3">
                         <ion-list-header class="ion-no-padding">
-                            <ion-label color="primary">{{'erp.app.pages.crm.mcp.route-info' | translate}}</ion-label>
+                            <ion-label color="primary">{{'Route information' | translate}}</ion-label>
                         </ion-list-header>
                     </ion-col>
                     <ion-col size="12" size-sm size-xl="4">
                         <!-- <div class="c-control" *ngIf="item.Id">
-                            <label class="c-label" for="Id">{{'erp.app.pages.crm.mcp.id' | translate}}</label>
+                            <label class="c-label" for="Id">{{'Id' | translate}}</label>
                             <input class="c-input" id="Id" formControlName="Id" type="number">
                         </div> -->
 
@@ -39,7 +39,7 @@
 
                         <!-- <div class="c-control">
                             <label class="c-label" for="IDWarehouse">{{'Warehouse' | translate}}</label>
-                            <ng-select class="c-input" (change)="saveChange()" #IDWarehouse formControlName="IDWarehouse" labelForId="IDWarehouse" [items]="wareHouseList" bindLabel="Name" bindValue="Id" placeholder="{{'erp.app.pages.crm.mcp.id-warehouse-placeholder' | translate}}">
+                            <ng-select class="c-input" (change)="saveChange()" #IDWarehouse formControlName="IDWarehouse" labelForId="IDWarehouse" [items]="wareHouseList" bindLabel="Name" bindValue="Id" placeholder="{{'Select warehouse' | translate}}">
                                 <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
                                     <div *ngIf="i">
                                         <div><span [ngOptionHighlight]="search">{{i.Name}}</span></div>
@@ -55,19 +55,19 @@
                             <label class="c-label" for="IDSeller">{{'Salesman' | translate}}
                                 <span *ngIf="!formGroup.controls.IDSeller.valid && !formGroup.controls.IDSeller.pending && (formGroup.controls.IDSeller.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                             </label>
-                            <ng-select (change)="saveChange()" class="c-input" #IDSeller formControlName="IDSeller" labelForId="IDSeller" [items]="salesmanList$ | async" [typeahead]="salesmanListInput$" [loading]='salesmanListLoading' [virtualScroll]="true" bindLabel="FullName" bindValue="Id" placeholder="{{'erp.app.pages.crm.mcp.salesman-placeholder' | translate}}">
+                            <ng-select (change)="saveChange()" class="c-input" #IDSeller formControlName="IDSeller" labelForId="IDSeller" [items]="salesmanList$ | async" [typeahead]="salesmanListInput$" [loading]='salesmanListLoading' [virtualScroll]="true" bindLabel="FullName" bindValue="Id" placeholder="{{'Search for name, code or phone number' | translate}}">
                                 <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
                                     <div *ngIf="i">
                                         <div><span [ngOptionHighlight]="search">{{i.FullName}}</span></div>
-                                        <small>#<b><span class="important" [ngOptionHighlight]="search">{{i.Id}} - {{i.Code}}</span></b> <span *ngIf="i.Phone"> | {{'erp.app.pages.crm.mcp.phone' | translate}}: <b [ngOptionHighlight]="search">{{i.Phone}}</b></span></small>
+                                        <small>#<b><span class="important" [ngOptionHighlight]="search">{{i.Id}} - {{i.Code}}</span></b> <span *ngIf="i.Phone"> | {{'Telephone' | translate}}: <b [ngOptionHighlight]="search">{{i.Phone}}</b></span></small>
                                     </div>
                                 </ng-template>
                             </ng-select>
                         </div>
 
                         <!-- <div class="c-control">
-                            <label class="c-label" for="IDVehicleForUrgent">{{'erp.app.pages.crm.mcp.id-vehicle-for-urgent' | translate}}</label>
-                            <ng-select (change)="changedVehicle()" class="c-input" #IDVehicleForUrgent formControlName="IDVehicleForUrgent" labelForId="IDVehicleForUrgent" [items]="vehicleList" bindLabel="Name" bindValue="Id" placeholder="{{'erp.app.pages.crm.mcp.id-vehicle-placeholder' | translate}}">
+                            <label class="c-label" for="IDVehicleForUrgent">{{'Urgent delivery vehicle' | translate}}</label>
+                            <ng-select (change)="changedVehicle()" class="c-input" #IDVehicleForUrgent formControlName="IDVehicleForUrgent" labelForId="IDVehicleForUrgent" [items]="vehicleList" bindLabel="Name" bindValue="Id" placeholder="{{'Search for truck' | translate}}">
                                 <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
                                     <div *ngIf="i">
                                         <div><span [ngOptionHighlight]="search">{{i.Name}}</span></div>
@@ -77,8 +77,8 @@
                         </div>
 
                         <div class="c-control">
-                            <label class="c-label" for="IDVehicleForWholeSale">{{'erp.app.pages.crm.mcp.id-vehicle-for-wholesale' | translate}}</label>
-                            <ng-select (change)="changedVehicle()" class="c-input" #IDVehicleForWholeSale formControlName="IDVehicleForWholeSale" labelForId="IDVehicleForWholeSale" [items]="vehicleList" bindLabel="Name" bindValue="Id" placeholder="{{'erp.app.pages.crm.mcp.id-vehicle-placeholder' | translate}}">
+                            <label class="c-label" for="IDVehicleForWholeSale">{{'Wholesale delivery vehicle' | translate}}</label>
+                            <ng-select (change)="changedVehicle()" class="c-input" #IDVehicleForWholeSale formControlName="IDVehicleForWholeSale" labelForId="IDVehicleForWholeSale" [items]="vehicleList" bindLabel="Name" bindValue="Id" placeholder="{{'Search for truck' | translate}}">
                                 <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
                                     <div *ngIf="i">
                                         <div><span [ngOptionHighlight]="search">{{i.Name}}</span></div>
@@ -88,8 +88,8 @@
                         </div>
 
                         <div class="c-control">
-                            <label class="c-label" for="IDVehicleForSample">{{'erp.app.pages.crm.mcp.id-vehicle-for-sample' | translate}}</label>
-                            <ng-select (change)="changedVehicle()" class="c-input" #IDVehicleForSample formControlName="IDVehicleForSample" labelForId="IDVehicleForSample" [items]="vehicleList" bindLabel="Name" bindValue="Id" placeholder="{{'erp.app.pages.crm.mcp.id-vehicle-placeholder' | translate}}">
+                            <label class="c-label" for="IDVehicleForSample">{{'Samples delivery vehicle' | translate}}</label>
+                            <ng-select (change)="changedVehicle()" class="c-input" #IDVehicleForSample formControlName="IDVehicleForSample" labelForId="IDVehicleForSample" [items]="vehicleList" bindLabel="Name" bindValue="Id" placeholder="{{'Search for truck' | translate}}">
                                 <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
                                     <div *ngIf="i">
                                         <div><span [ngOptionHighlight]="search">{{i.Name}}</span></div>
@@ -99,8 +99,8 @@
                         </div>
 
                         <div class="c-control">
-                            <label class="c-label" for="IDVehicle">{{'erp.app.pages.crm.mcp.id-vehicle' | translate}}</label>
-                            <ng-select (change)="changedVehicle()" class="c-input" #IDVehicle formControlName="IDVehicle" labelForId="IDVehicle" [items]="vehicleList" bindLabel="Name" bindValue="Id" placeholder="{{'erp.app.pages.crm.mcp.id-vehicle-placeholder' | translate}}">
+                            <label class="c-label" for="IDVehicle">{{'Standard delivery vehicle' | translate}}</label>
+                            <ng-select (change)="changedVehicle()" class="c-input" #IDVehicle formControlName="IDVehicle" labelForId="IDVehicle" [items]="vehicleList" bindLabel="Name" bindValue="Id" placeholder="{{'Search for truck' | translate}}">
                                 <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
                                     <div *ngIf="i">
                                         <div><span [ngOptionHighlight]="search">{{i.Name}}</span></div>
@@ -111,7 +111,7 @@
 
                         <div class="c-control">
                             <label class="c-label" for=""></label>
-                            <ion-button *ngIf="!item.Id && pageConfig.canAdd" expand="block" (click)="saveChange()" [disabled]="!formGroup.dirty">{{'erp.app.pages.crm.mcp.add-route' | translate}}</ion-button>
+                            <ion-button *ngIf="!item.Id && pageConfig.canAdd" expand="block" (click)="saveChange()" [disabled]="!formGroup.dirty">{{'Add routes' | translate}}</ion-button>
                         </div> -->
 
                     </ion-col>
@@ -120,7 +120,7 @@
                 <!-- <ion-row class="hr-group">
                     <ion-col size="12" size-sm="12" size-md="12" size-xl="3">
                         <ion-list-header class="ion-no-padding">
-                            <ion-label color="primary">{{'erp.app.pages.crm.mcp.item-information-title' | translate}}</ion-label>
+                            <ion-label color="primary">{{'item-information-title' | translate}}</ion-label>
                         </ion-list-header>
                     </ion-col>
                     <ion-col size="12" size-sm size-xl="4">
@@ -141,14 +141,14 @@
 
                     <ion-button color="primary" *ngIf="pageConfig.canEdit">
                         <ion-icon slot="start" name="truck"></ion-icon>
-                        {{'erp.app.pages.crm.mcp.add-customer' | translate}}
+                        {{'Add customer' | translate}}
                     </ion-button>
 
-                    <ion-button color="primary" title="{{'erp.app.pages.crm.mcp.export' | translate}}">
+                    <ion-button color="primary" title="{{'Export' | translate}}">
                         <ion-icon slot="icon-only" name="cloud-download-outline"></ion-icon>
                     </ion-button>
 
-                    <ion-button color="primary" title="{{'erp.app.pages.crm.mcp.import' | translate}}" *ngIf="pageConfig.canEdit">
+                    <ion-button color="primary" title="{{'Import' | translate}}" *ngIf="pageConfig.canEdit">
                         <ion-icon slot="icon-only" name="cloud-upload-outline"></ion-icon>
                     </ion-button>
 
@@ -156,29 +156,29 @@
 
                 <ion-segment scrollable="false" (ionChange)="segmentChanged($event)" [value]="segmentView">
                     <ion-segment-button value="s1">
-                        <ion-label>{{'erp.app.pages.crm.mcp.customer' | translate}} <span *ngIf="routeDetail.length">({{routeDetail.length}})</span></ion-label>
+                        <ion-label>{{'Customer' | translate}} <span *ngIf="routeDetail.length">({{routeDetail.length}})</span></ion-label>
                     </ion-segment-button>
                     <ion-segment-button value="s2">
-                        <ion-label>{{'erp.app.pages.crm.mcp.route-map' | translate}}</ion-label>
+                        <ion-label>{{'Route map' | translate}}</ion-label>
                     </ion-segment-button>
                 </ion-segment>
 
                 <ion-buttons slot="end" *ngIf="segmentView == 's1'">
 
-                    <ion-button title="{{'erp.app.components.list-toolbar.search' | translate}}" (click)="pageConfig.isShowSearch =! pageConfig.isShowSearch">
+                    <ion-button title="{{'Search' | translate}}" (click)="pageConfig.isShowSearch =! pageConfig.isShowSearch">
                         <ion-icon slot="icon-only" name="search-outline"></ion-icon> 
                     </ion-button>
 
                     <ion-button (click)="showMCPCustomerPickerModal()" *ngIf="pageConfig.canEdit">
                         <ion-icon slot="start" name="truck"></ion-icon>
-                        {{'erp.app.pages.crm.mcp.add-customer' | translate}}
+                        {{'Add customer' | translate}}
                     </ion-button>
 
-                    <ion-button title="{{'erp.app.pages.crm.mcp.export' | translate}}" *ngIf="pageConfig.canEdit && pageConfig.canExport" (click)="export()">
+                    <ion-button title="{{'Export' | translate}}" *ngIf="pageConfig.canEdit && pageConfig.canExport" (click)="export()">
                         <ion-icon slot="icon-only" name="cloud-download-outline"></ion-icon>
                     </ion-button>
 
-                    <ion-button title="{{'erp.app.pages.crm.mcp.import' | translate}}" *ngIf="pageConfig.canEdit && pageConfig.canImport" (click)="onClickImport()">
+                    <ion-button title="{{'Import' | translate}}" *ngIf="pageConfig.canEdit && pageConfig.canImport" (click)="onClickImport()">
                         <ion-icon slot="icon-only" name="cloud-upload-outline"></ion-icon>
                     </ion-button>
                     <input class="hide-all" #importfile type="file" accept=".xlsx" (change)="importFileChange($event)" />
@@ -192,32 +192,32 @@
                 <div class="table-contain">
                     <section class="table" style="min-width: 1220px;">
                         <header class="bold">
-                            <div class="col-name cell">{{'erp.app.pages.crm.mcp.customer' | translate}}</div>
+                            <div class="col-name cell">{{'Customer' | translate}}</div>
 
 
-                            <div class="col-code cell">{{'erp.app.pages.crm.mcp.pickup-order' | translate}}</div>
+                            <div class="col-code cell">{{'Pick - up order' | translate}}</div>
 
-                            <div class="col-checkbox cell ">{{'erp.app.pages.crm.mcp.w1' | translate}}</div>
-                            <div class="col-checkbox cell ">{{'erp.app.pages.crm.mcp.w2' | translate}}</div>
-                            <div class="col-checkbox cell ">{{'erp.app.pages.crm.mcp.w3' | translate}}</div>
-                            <div class="col-checkbox cell ">{{'erp.app.pages.crm.mcp.w4' | translate}}</div>
+                            <div class="col-checkbox cell ">{{'W1' | translate}}</div>
+                            <div class="col-checkbox cell ">{{'W2' | translate}}</div>
+                            <div class="col-checkbox cell ">{{'W3' | translate}}</div>
+                            <div class="col-checkbox cell ">{{'W4' | translate}}</div>
 
-                            <div class="col-checkbox cell">{{'erp.app.pages.crm.mcp.date-mon' | translate}}</div>
-                            <div class="col-checkbox cell">{{'erp.app.pages.crm.mcp.date-tue' | translate}}</div>
-                            <div class="col-checkbox cell">{{'erp.app.pages.crm.mcp.date-wed' | translate}}</div>
-                            <div class="col-checkbox cell">{{'erp.app.pages.crm.mcp.date-thu' | translate}}</div>
-                            <div class="col-checkbox cell">{{'erp.app.pages.crm.mcp.date-fri' | translate}}</div>
-                            <div class="col-checkbox cell">{{'erp.app.pages.crm.mcp.date-sat' | translate}}</div>
-                            <div class="col-checkbox cell">{{'erp.app.pages.crm.mcp.date-sun' | translate}}</div>
+                            <div class="col-checkbox cell">{{'Mon' | translate}}</div>
+                            <div class="col-checkbox cell">{{'Tue' | translate}}</div>
+                            <div class="col-checkbox cell">{{'Wed' | translate}}</div>
+                            <div class="col-checkbox cell">{{'Collect' | translate}}</div>
+                            <div class="col-checkbox cell">{{'Fri' | translate}}</div>
+                            <div class="col-checkbox cell">{{'Sat' | translate}}</div>
+                            <div class="col-checkbox cell">{{'Sun' | translate}}</div>
 
-                            <div class="col-checkbox cell">{{'erp.app.pages.crm.mcp.f' | translate}}</div>
+                            <div class="col-checkbox cell">{{'F' | translate}}</div>
                             <div class="col-checkbox cell" *ngIf="pageConfig.canEdit"></div>
 
                         </header>
                         <form (submit)="filter(query)" action="#">
                             <header class="filter" *ngIf="pageConfig.isShowSearch">
                                 <div class="col-name cell">
-                                    <input placeholder="{{'erp.app.pages.crm.mcp.shipper-list-placeholder' | translate}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Name" class="c-input" [ngClass]="{active: query.Name}" type="text">
+                                    <input placeholder="{{'shipper-list-placeholder' | translate}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Name" class="c-input" [ngClass]="{active: query.Name}" type="text">
                                     <ion-icon class="min-btn" (click)="query.Name=''; filter('')" *ngIf="query.Name" name="close-circle-outline"></ion-icon>
                                 </div>
 

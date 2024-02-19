@@ -24,7 +24,7 @@
                                 <ion-row class="hr-group">
                                     <ion-col size="12" size-sm="12" size-md="12" size-xl="3">
                                         <ion-list-header class="ion-no-padding">
-                                            <ion-label color="primary">{{'erp.app.pages.crm.attendance-booking.page-title' | translate}} <span *ngIf="item.Id">{{item.Id}}</span> </ion-label>
+                                            <ion-label color="primary">{{'Booking' | translate}} <span *ngIf="item.Id">{{item.Id}}</span> </ion-label>
                                         </ion-list-header>
                                     </ion-col>
                                     <ion-col size="12" size-sm size-xl="4">
@@ -33,38 +33,38 @@
                                             <input class="c-input" id="Id" formControlName="Id" type="number">
                                         </div> -->
                                         <div class="c-control">
-                                            <label class="c-label" for="CustomerName">{{'erp.app.pages.crm.attendance-booking.customer-name' | translate}}
+                                            <label class="c-label" for="CustomerName">{{'Customer name' | translate}}
                                                 <span *ngIf="!formGroup.controls.CustomerName.valid && !formGroup.controls.CustomerName.pending && (formGroup.controls.CustomerName.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                                             </label>
                                             <input class="c-input" id="CustomerName" formControlName="CustomerName" type="text">
                                         </div>
                                         <div class="c-control">
-                                            <label class="c-label" for="PartyDate">{{'erp.app.pages.crm.attendance-booking.party-date' | translate}}
+                                            <label class="c-label" for="PartyDate">{{'banquet date' | translate}}
                                                 <span *ngIf="!formGroup.controls.PartyDate.valid && !formGroup.controls.PartyDate.pending && (formGroup.controls.PartyDate.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                                             </label>
                                             <input class="c-input" id="PartyDate" formControlName="PartyDate" type="datetime-local">
                                         </div>
                                         <div class="c-control">
-                                            <label class="c-label" for="Phone">{{'erp.app.pages.crm.attendance-booking.phone' | translate}}
+                                            <label class="c-label" for="Phone">{{'Telephone' | translate}}
                                                 <span *ngIf="!formGroup.controls.Phone.valid && !formGroup.controls.Phone.pending && (formGroup.controls.Phone.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                                             </label>
                                             <input class="c-input" id="Phone" formControlName="Phone" type="tel">
                                         </div>
                                         <div class="c-control">
-                                            <label class="c-label" for="Email">{{'erp.app.pages.crm.attendance-booking.email' | translate}}
+                                            <label class="c-label" for="Email">{{'Email' | translate}}
                                                 <span *ngIf="!formGroup.controls.Email.valid && !formGroup.controls.Email.pending && (formGroup.controls.Email.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                                             </label>
                                             <input class="c-input" id="Email" formControlName="Email" type="text">
                                         </div>
                                         <div class="c-control">
-                                            <label class="c-label" for="DinnerPax">{{'erp.app.pages.crm.attendance-booking.dinner-pax' | translate}}
+                                            <label class="c-label" for="DinnerPax">{{'Dinner/Pax' | translate}}
                                                 <span *ngIf="!formGroup.controls.DinnerPax.valid && !formGroup.controls.DinnerPax.pending && (formGroup.controls.DinnerPax.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                                             </label>
                                             <input class="c-input" id="DinnerPax" formControlName="DinnerPax" type="number">
                                         </div>
 
                                         <div class="c-control">
-                                            <label class="c-label" for="RegisteredTable">{{'erp.app.pages.crm.attendance-booking.registered-table' | translate}}
+                                            <label class="c-label" for="RegisteredTable">{{'Table' | translate}}
                                                 <span *ngIf="!formGroup.controls.RegisteredTable.valid && !formGroup.controls.RegisteredTable.pending && (formGroup.controls.RegisteredTable.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                                             </label>
                                             <input class="c-input" id="RegisteredTable" formControlName="RegisteredTable" type="text">
@@ -76,7 +76,7 @@
 
                                         
                                         <div class="c-control">
-                                            <label class="c-label" for="CustomerGroup">{{'erp.app.pages.crm.attendance-booking.customer-group' | translate}}
+                                            <label class="c-label" for="CustomerGroup">{{'Group' | translate}}
                                                 <span *ngIf="!formGroup.controls.CustomerGroup.valid && !formGroup.controls.CustomerGroup.pending && (formGroup.controls.CustomerGroup.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                                             </label>
 
@@ -85,7 +85,7 @@
                                             </select>
                                         </div>
                                         <div class="c-control">
-                                            <label class="c-label" for="TypeOfParty">{{'erp.app.pages.crm.attendance-booking.type-of-party' | translate}}
+                                            <label class="c-label" for="TypeOfParty">{{'Banquet type' | translate}}
                                                 <span *ngIf="!formGroup.controls.TypeOfParty.valid && !formGroup.controls.TypeOfParty.pending && (formGroup.controls.TypeOfParty.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                                             </label>
 
@@ -94,7 +94,7 @@
                                             </select>
                                         </div>
                                         <div class="c-control">
-                                            <label class="c-label" for="CustomerType">{{'erp.app.pages.crm.attendance-booking.customer-type' | translate}}
+                                            <label class="c-label" for="CustomerType">{{'Customer type' | translate}}
                                                 <span *ngIf="!formGroup.controls.CustomerType.valid && !formGroup.controls.CustomerType.pending && (formGroup.controls.CustomerType.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                                             </label>
 
@@ -103,7 +103,7 @@
                                             </select>
                                         </div>
                                         <div class="c-control">
-                                            <label class="c-label" for="Remark">{{'erp.app.pages.crm.attendance-booking.remark' | translate}}
+                                            <label class="c-label" for="Remark">{{'Remark' | translate}}
                                                 <span *ngIf="!formGroup.controls.Remark.valid && !formGroup.controls.Remark.pending && (formGroup.controls.Remark.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                                             </label>
                                             <textarea rows="3" class="c-input" id="Remark" formControlName="Remark" type="textarea" style="height: 19.8rem;"></textarea>
@@ -114,7 +114,7 @@
                                 <ion-row class="hr-group">
                                     <ion-col size="12" size-sm="12" size-md="12" size-xl="3">
                                         <ion-list-header class="ion-no-padding">
-                                            <ion-label color="primary">{{'erp.app.pages.crm.attendance-booking.other-information' | translate}}</ion-label>
+                                            <ion-label color="primary">{{'Other information' | translate}}</ion-label>
                                         </ion-list-header>
                                     </ion-col>
                                     <ion-col size="12" size-sm size-xl="4">
@@ -125,27 +125,27 @@
                                             <input  class="c-input" id="LunchPax" formControlName="LunchPax" type="number">
                                         </div> -->
                                         <div class="c-control">
-                                            <label class="c-label" for="RealField">{{'erp.app.pages.crm.attendance-booking.real-field' | translate}}
+                                            <label class="c-label" for="RealField">{{'bookings' | translate}}
                                                 <span *ngIf="!formGroup.controls.RealField.valid && !formGroup.controls.RealField.pending && (formGroup.controls.RealField.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                                             </label>
                                             <input class="c-input" id="RealField" formControlName="RealField" type="number">
                                         </div>
                                         <div class="c-control">
-                                            <label class="c-label" for="Kids">{{'erp.app.pages.crm.attendance-booking.kids' | translate}}
+                                            <label class="c-label" for="Kids">{{'Kids' | translate}}
                                                 <span *ngIf="!formGroup.controls.Kids.valid && !formGroup.controls.Kids.pending && (formGroup.controls.Kids.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                                             </label>
                                             <input class="c-input" id="Kids" formControlName="Kids" type="number">
                                         </div>
 
                                         <div class="c-control">
-                                            <label class="c-label" for="ForeignerNo">{{'erp.app.pages.crm.attendance-booking.foreigner-no' | translate}}
+                                            <label class="c-label" for="ForeignerNo">{{'Foreign' | translate}}
                                                 <span *ngIf="!formGroup.controls.ForeignerNo.valid && !formGroup.controls.ForeignerNo.pending && (formGroup.controls.ForeignerNo.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                                             </label>
                                             <input class="c-input" id="ForeignerNo" formControlName="ForeignerNo" type="number">
                                         </div>
 
                                         <div class="c-control">
-                                            <label class="c-label" for="DiningCard">{{'erp.app.pages.crm.attendance-booking.dining-card' | translate}}
+                                            <label class="c-label" for="DiningCard">{{'DiningCard' | translate}}
                                                 <span *ngIf="!formGroup.controls.DiningCard.valid && !formGroup.controls.DiningCard.pending && (formGroup.controls.DiningCard.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                                             </label>
                                             <input class="c-input" id="DiningCard" formControlName="DiningCard" type="text">
@@ -155,7 +155,7 @@
                                     <ion-col size="12" size-sm size-xl="4">
                                         <div class="c-control">
                                             
-                                            <label class="c-label" for="Status">{{'erp.app.pages.crm.attendance-booking.status' | translate}}
+                                            <label class="c-label" for="Status">{{'Status' | translate}}
                                                 <span *ngIf="!formGroup.controls.Status.valid && !formGroup.controls.Status.pending && (formGroup.controls.Status.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                                             </label>
 
@@ -164,7 +164,7 @@
                                             </select>
                                         </div>
                                         <div class="c-control">
-                                            <label class="c-label" for="NoRecords">{{'erp.app.pages.crm.attendance-booking.no-records-detail' | translate}}
+                                            <label class="c-label" for="NoRecords">{{'Number of bookings' | translate}}
                                                 <span *ngIf="!formGroup.controls.NoRecords.valid && !formGroup.controls.NoRecords.pending && (formGroup.controls.NoRecords.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                                             </label>
                                             <input class="c-input" id="NoRecords" formControlName="NoRecords" type="number">
@@ -173,7 +173,7 @@
 
 
                                         <div class="c-control">
-                                            <label class="c-label" for="BillingInformation">{{'erp.app.pages.crm.attendance-booking.billing-information' | translate}}
+                                            <label class="c-label" for="BillingInformation">{{'Invoice note' | translate}}
                                                 <span *ngIf="!formGroup.controls.BillingInformation.valid && !formGroup.controls.BillingInformation.pending && (formGroup.controls.BillingInformation.dirty || submitAttempt)" ion-text color="danger">(*)</span>
                                             </label>
                                             <textarea rows="3" class="c-input" id="BillingInformation" formControlName="BillingInformation" type="textarea"></textarea>
@@ -189,9 +189,9 @@
                                     <ion-col size="12" size-sm="12" size-md="12" size-xl="3"></ion-col>
                                     <ion-col size="12" size-sm size-xl="8">
                                         <div class="c-control ion-text-right" >
-                                            <ion-button *ngIf="pageConfig.canEdit" (click)="saveChange()" [disabled]="!formGroup.dirty">{{'erp.app.pages.crm.attendance-booking.save' | translate}}</ion-button>
-                                            <ion-button *ngIf="item.Id && formGroup.dirty" (click)="refresh()" color="warning">{{'erp.app.pages.crm.attendance-booking.refresh' | translate}}</ion-button>
-                                            <ion-button *ngIf="item.Id && pageConfig.canDelete" (click)="delete()" color="danger">{{'erp.app.pages.crm.attendance-booking.delete' | translate}}</ion-button>
+                                            <ion-button *ngIf="pageConfig.canEdit" (click)="saveChange()" [disabled]="!formGroup.dirty">{{'Booking saved' | translate}}</ion-button>
+                                            <ion-button *ngIf="item.Id && formGroup.dirty" (click)="refresh()" color="warning">{{'Change cancel' | translate}}</ion-button>
+                                            <ion-button *ngIf="item.Id && pageConfig.canDelete" (click)="delete()" color="danger">{{'Delete' | translate}}</ion-button>
                                         </div>
                                     </ion-col>
                                 </ion-row>

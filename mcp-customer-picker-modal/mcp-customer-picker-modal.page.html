@@ -21,18 +21,18 @@
             <span class="split ion-hide-sm-down">|</span>
             
             <ion-button [disabled]="selectedItems.length==0" fill="solid" size="small" color="primary" (click)="SaveSelectedOrders()">
-                &nbsp;{{'erp.app.pages.crm.mcp-customer-picker.add' | translate}} {{selectedItems.length}} {{'erp.app.pages.crm.mcp-customer-picker.selected-items' | translate}}&nbsp;
+                &nbsp;{{'Add' | translate}} {{selectedItems.length}} {{'khách vào tuyến' | translate}}&nbsp;
             </ion-button>
 
-            <ion-button (click)="refresh()" title="{{'erp.app.pages.crm.mcp-customer-picker.refresh' | translate}}">
+            <ion-button (click)="refresh()" title="{{'Refresh' | translate}}">
                 <ion-icon slot="icon-only" name="reload-outline"></ion-icon>
             </ion-button>
 
-            <ion-button title="{{'erp.app.pages.crm.mcp-customer-picker.help' | translate}}" (click)="help()">
+            <ion-button title="{{'Help' | translate}}" (click)="help()">
                 <ion-icon slot="icon-only" name="help-circle-outline"></ion-icon>
             </ion-button>
 
-            <ion-button title="{{'erp.app.pages.crm.mcp-customer-picker.close-modal' | translate}}" color="secondary" (click)="closeModal()">
+            <ion-button title="{{'Close' | translate}}" color="secondary" (click)="closeModal()">
                 <ion-icon slot="icon-only" name="close"></ion-icon>
             </ion-button>
         </ion-buttons>
@@ -43,7 +43,7 @@
                 <input (change)="toggleSelectAll()" [(ngModel)]="isAllChecked" class="c-checkbox" type="checkbox">
             </div>
             <div class="col-id cell" (click)="sortToggle('Id')">
-                #{{'erp.app.pages.crm.mcp-customer-picker.id-sort' | translate}}
+                #{{'Id' | translate}}
                 <ion-icon class="min-btn" *ngIf="sort.Id" [name]="sort.Id == 'Id'?'arrow-down': 'arrow-up'"></ion-icon>
                 <ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Id" name="search" color="primary"></ion-icon>
             </div>
@@ -51,17 +51,17 @@
            
 
             <div class="col-name cell" (click)="sortToggle('Name')">
-                {{'erp.app.pages.crm.mcp-customer-picker.name-sort' | translate}}
+                {{'Customer' | translate}}
                 <ion-icon class="min-btn" *ngIf="sort.Name" [name]="sort.Name == 'Name'?'arrow-down': 'arrow-up'"></ion-icon>
                 <ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Name" name="search" color="primary"></ion-icon>
 
                 <small class="right">
-                    <ion-text color="dark"> {{'erp.app.pages.crm.mcp-customer-picker.address' | translate}}</ion-text>
+                    <ion-text color="dark"> {{'Address' | translate}}</ion-text>
                 </small>
             </div>
            
             <div class="col-code cell" (click)="sortToggle('Code')">
-                {{'erp.app.pages.crm.mcp-customer-picker.vendor-code-sort' | translate}}
+                {{'Vendor code' | translate}}
                 <ion-icon class="min-btn" *ngIf="sort.Code" [name]="sort.Code == 'Code'?'arrow-down': 'arrow-up'"></ion-icon>
                 <ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Code" name="search" color="primary"></ion-icon>
             </div>
@@ -69,7 +69,7 @@
 
         <form  (submit)="refresh()" action="#">
             <header class="filter" >
-                <div class="col-checkbox cell clickable" title="{{'erp.app.pages.crm.mcp-customer-picker.unselect-all' | translate}}" (click)="isAllChecked = false; toggleSelectAll()">
+                <div class="col-checkbox cell clickable" title="{{'Unselect all' | translate}}" (click)="isAllChecked = false; toggleSelectAll()">
                     <ion-icon color="danger" class="min-btn" name="close-circle-outline"></ion-icon>
                 </div>
                 <div class="col-id cell">

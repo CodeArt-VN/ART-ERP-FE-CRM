@@ -1,5 +1,5 @@
 <ion-header>
-	<app-list-toolbar pageTitle="{{'erp.app.pages.crm.business-partner.page-title' | translate}}" [ShowFeature]="false" [pageConfig]="pageConfig" [selectedItems]="selectedItems" [query]="query" (add)="add()" (refresh)="refresh()" (export)="export()" (import)="import($event)" (help)="help()" (unselect)="unselect()" (archiveItems)="archiveItems()" (deleteItems)="deleteItems()" (changeBranch)="changeBranch($event)" (submitBusinessPartner)="submitBusinessPartner()" (approveBusinessPartner)="approveBusinessPartner()" (disapproveBusinessPartner)="disapproveBusinessPartner()"></app-list-toolbar>
+	<app-list-toolbar pageTitle="{{'List' | translate}}" [ShowFeature]="false" [pageConfig]="pageConfig" [selectedItems]="selectedItems" [query]="query" (add)="add()" (refresh)="refresh()" (export)="export()" (import)="import($event)" (help)="help()" (unselect)="unselect()" (archiveItems)="archiveItems()" (deleteItems)="deleteItems()" (changeBranch)="changeBranch($event)" (submitBusinessPartner)="submitBusinessPartner()" (approveBusinessPartner)="approveBusinessPartner()" (disapproveBusinessPartner)="disapproveBusinessPartner()"></app-list-toolbar>
 </ion-header>
 
 <ion-content appScrollbarTheme class="scrollx" scroll-x="true">
@@ -16,7 +16,7 @@
 		<header class="bold">
 			<div class="col-checkbox cell"></div>
 			<div class="col-id cell" (click)="sortToggle('Id')">
-				{{'erp.app.pages.crm.business-partner.id' | translate}}
+				{{'Id' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.Id" [name]="sort.Id == 'Id'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Id" name="search" color="primary"></ion-icon>
 			</div>
@@ -26,22 +26,22 @@
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.IsPersonal" name="search" color="primary"></ion-icon>
 			</div>
 			<div class="col-name cell" (click)="sortToggle('Name')">
-				{{'erp.app.pages.crm.business-partner.name' | translate}}
+				{{'Name' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.Name" [name]="sort.Name == 'Name'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.CustomerName" name="search" color="primary"></ion-icon>
 			</div>
 			<div class="col-saleMan cell" (click)="sortToggle('Owner')">
-				{{'erp.app.pages.sale.sale-order.saleman' | translate}}
+				{{'Sales staff' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.Owner" [name]="sort.Owner == 'Owner'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Owner" name="search" color="primary"></ion-icon>
 			</div>
 			<div class="col-code cell" (click)="sortToggle('Code')">
-				{{'erp.app.pages.sale.sale-order.vendor-code' | translate}}
+				{{'Vendor code' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.Code" [name]="sort.Code == 'Code'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Code" name="search" color="primary"></ion-icon>
 			</div>
 			<div class="col-status cell" (click)="sortToggle('IDStatus')">
-				{{'erp.app.pages.sale.sale-order.id-status' | translate}}
+				{{'Status' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.IDStatus" [name]="sort.IDStatus == 'IDStatus'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.IDStatus" name="search" color="primary"></ion-icon>
 			</div>
@@ -57,20 +57,20 @@
 					<ion-icon [name]="query.IsPersonal===true?'person-outline':(query.IsPersonal===false?'business-outline':'people-circle-outline')"></ion-icon>
 				</div>
 				<div class="col-name cell">
-					<input (keydown.enter)="refresh()" placeholder="{{'erp.app.pages.crm.business-partner.customer-name-placeholder' | translate}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.CustomerName" class="c-input" [ngClass]="{active: query.CustomerName}" type="search">
+					<input (keydown.enter)="refresh()" placeholder="{{'Search by code, name, phone number' | translate}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.CustomerName" class="c-input" [ngClass]="{active: query.CustomerName}" type="search">
 					<ion-icon class="min-btn" (click)="query.CustomerName=''; refresh()" *ngIf="query.CustomerName" name="close-circle-outline"></ion-icon>
 				</div>
 				<div class="col-saleMan cell col-hide-small">
-					<input (keydown.enter)="refresh()" placeholder="{{'erp.app.pages.sale.sale-order.saleman' | translate}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Owner" class="c-input" [ngClass]="{active: query.Owner}" type="search">
+					<input (keydown.enter)="refresh()" placeholder="{{'Sales staff' | translate}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Owner" class="c-input" [ngClass]="{active: query.Owner}" type="search">
 					<ion-icon class="min-btn" (click)="query.Owner=''; refresh()" *ngIf="query.Owner" name="close-circle-outline"></ion-icon>
 				</div>
 				<div class="col-code cell col-hide-small">
-					<input (keydown.enter)="refresh()" placeholder="{{'erp.app.pages.sale.sale-order.vendor-code' | translate}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Code" class="c-input" [ngClass]="{active: query.Code}" type="search">
+					<input (keydown.enter)="refresh()" placeholder="{{'Vendor code' | translate}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Code" class="c-input" [ngClass]="{active: query.Code}" type="search">
 					<ion-icon class="min-btn" (click)="query.Code=''; refresh()" *ngIf="query.Code" name="close-circle-outline"></ion-icon>
 				</div>
 				<div class="col-status cell">
 					<select (change)="refresh()" class="c-input c-dropdown" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Status" [ngClass]="{active: query.Status}">
-						<option value="">{{'erp.app.pages.purchase.purchase-order.all-option' | translate}}</option>
+						<option value="">{{'All' | translate}}</option>
 						<option disabled value="">----------</option>
 						<option *ngFor="let t of statusList" [value]="t.Code">{{t.Name}}</option>
 					</select>

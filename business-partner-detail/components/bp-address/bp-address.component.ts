@@ -160,7 +160,7 @@ export class BpAddressComponent extends PageBase {
 						this.pageProvider.delete(Ids).then(resp => {
 							this.items = this.items.filter(d => d.Id != Ids[0].Id);
 							groups.removeAt(index);
-							this.env.showTranslateMessage('erp.app.pages.crm.business-partner.message.remove-address-complete', 'success');
+							this.env.showTranslateMessage('Delete this address', 'success');
 						});
 					}
 				}

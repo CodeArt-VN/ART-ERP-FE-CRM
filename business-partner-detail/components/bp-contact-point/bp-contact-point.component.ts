@@ -106,7 +106,7 @@ export class BpContactPointComponent extends PageBase {
 			this.pageProvider.save(submitItem).then(resp => {
 				this.items = this.items.filter(d => d.Id != submitItem.Id);
 				groups.removeAt(index);
-				this.env.showTranslateMessage('erp.app.pages.crm.business-partner.message.remove-contact-complete','success');
+				this.env.showTranslateMessage('Contacts deleted','success');
 			});
 	}
 

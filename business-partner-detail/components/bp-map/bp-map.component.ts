@@ -160,7 +160,7 @@ export class BpMapComponent extends PageBase {
       Long: marker.getPosition().lng(),
     };
     this.pageProvider.save(submitItem).then(resp => {
-      this.env.showTranslateMessage('erp.app.pages.crm.business-partner.message.update-coordination-complete','success');
+      this.env.showTranslateMessage('Location updated','success');
     })
   }
 }

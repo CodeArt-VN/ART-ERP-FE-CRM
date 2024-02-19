@@ -6,16 +6,16 @@
 				<ng-container [formGroup]="add">
 					<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
 						<ion-list-header class="ion-no-padding">
-							<ion-label color="primary">{{'erp.app.pages.crm.business-partner-detail.bp-address.address' | translate}} <span *ngIf="i>0">{{i + 1}}</span> </ion-label>
+							<ion-label color="primary">{{'Address' | translate}} <span *ngIf="i>0">{{i + 1}}</span> </ion-label>
 						</ion-list-header>
 					</ion-col>
 					<ion-col size="12" size-sm size-xl="4">
 						<!-- <div class="c-control">
-              <label class="c-label" [for]="'Country'+i">{{'erp.app.pages.crm.business-partner-detail.bp-address.country' | translate}} <small>Country</small>
+              <label class="c-label" [for]="'Country'+i">{{'country' | translate}} <small>Country</small>
                 <span *ngIf="!add.controls.Country.valid && !add.controls.Country.pending && (add.controls.Country.dirty || submitAttempt)" ion-text color="danger">(*)</span>
               </label>
 
-              <ng-select class="c-input" [readonly]="!(pageConfig.canEdit || pageConfig.canAdd)" (change)="saveAddress(add);" #Country [labelForId]="'Country'+i" formControlName="Country" [items]="countryList$ | async" [typeahead]="countryListInput$" [loading]='countryListLoading' [virtualScroll]="true" bindLabel="Name" bindValue="Id" placeholder="{{'erp.app.pages.crm.business-partner-detail.bp-address.country-placeholder' | translate}}">
+              <ng-select class="c-input" [readonly]="!(pageConfig.canEdit || pageConfig.canAdd)" (change)="saveAddress(add);" #Country [labelForId]="'Country'+i" formControlName="Country" [items]="countryList$ | async" [typeahead]="countryListInput$" [loading]='countryListLoading' [virtualScroll]="true" bindLabel="Name" bindValue="Id" placeholder="{{'country-placeholder' | translate}}">
                 <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
                   <div *ngIf="i">
                     <div> <span *ngFor="let l of i.levels">&nbsp;&nbsp;&nbsp;</span> <span [ngOptionHighlight]="search">{{i.Name}}</span></div>
@@ -25,46 +25,46 @@
 
             </div> -->
 						<div class="c-control">
-							<label class="c-label" [for]="'Province'+i">{{'erp.app.pages.crm.business-partner-detail.bp-address.province' | translate}}
+							<label class="c-label" [for]="'Province'+i">{{'Provinces' | translate}}
 								<span *ngIf="!add.controls.Province.valid && !add.controls.Province.pending && (add.controls.Province.dirty || submitAttempt)" ion-text color="danger">(*)</span>
 							</label>
 							<input (change)="saveAddress(add)" class="c-input" [attr.id]="'Province'+i" formControlName="Province">
 						</div>
 						<div class="c-control">
-							<label class="c-label" [for]="'District'+i">{{'erp.app.pages.crm.business-partner-detail.bp-address.district' | translate}}
+							<label class="c-label" [for]="'District'+i">{{'District' | translate}}
 								<span *ngIf="!add.controls.District.valid && !add.controls.District.pending && (add.controls.District.dirty || submitAttempt)" ion-text color="danger">(*)</span>
 							</label>
 							<input (change)="saveAddress(add)" class="c-input" [attr.id]="'District'+i" formControlName="District">
 						</div>
 						<div class="c-control">
-							<label class="c-label" [for]="'Ward'+i">{{'erp.app.pages.crm.business-partner-detail.bp-address.ward' | translate}}
+							<label class="c-label" [for]="'Ward'+i">{{'Ward' | translate}}
 								<span *ngIf="!add.controls.Ward.valid && !add.controls.Ward.pending && (add.controls.Ward.dirty || submitAttempt)" ion-text color="danger">(*)</span>
 							</label>
 							<input (change)="saveAddress(add)" class="c-input" [attr.id]="'Ward'+i" formControlName="Ward">
 						</div>
 						<!-- <div class="c-control">
-							<label class="c-label" [for]="'ZipCode'+i">{{'erp.app.pages.crm.business-partner-detail.bp-address.zipcode' | translate}}
+							<label class="c-label" [for]="'ZipCode'+i">{{'Zip code' | translate}}
 								<span *ngIf="!add.controls.ZipCode.valid && !add.controls.ZipCode.pending && (add.controls.ZipCode.dirty || submitAttempt)" ion-text color="danger">(*)</span>
 							</label>
 							<input (change)="saveAddress(add)" class="c-input" [attr.id]="'ZipCode'+i" formControlName="ZipCode">
 						</div> -->
 
 						<div class="c-control">
-							<label class="c-label" [for]="'AddressLine1'+i">{{'erp.app.pages.crm.business-partner-detail.bp-address.addressline1' | translate}}
+							<label class="c-label" [for]="'AddressLine1'+i">{{'House number, street name, quarter' | translate}}
 								<span *ngIf="!add.controls.AddressLine1.valid && !add.controls.AddressLine1.pending && (add.controls.AddressLine1.dirty || submitAttempt)" ion-text color="danger">(*)</span>
 							</label>
 							<input (change)="saveAddress(add)" class="c-input" [attr.id]="'AddressLine1'+i" formControlName="AddressLine1">
 						</div>
 
 						<div class="c-control">
-							<label class="c-label" [for]="'AddressLine2'+i">{{'erp.app.pages.crm.business-partner-detail.bp-address.addressline2' | translate}}
+							<label class="c-label" [for]="'AddressLine2'+i">{{'Apartment, Building, Unit…' | translate}}
 								<span *ngIf="!add.controls.AddressLine2.valid && !add.controls.AddressLine2.pending && (add.controls.AddressLine2.dirty || submitAttempt)" ion-text color="danger">(*)</span>
 							</label>
 							<input (change)="saveAddress(add)" class="c-input" [attr.id]="'AddressLine2'+i" formControlName="AddressLine2">
 						</div>
 
 						<div class="c-control">
-							<label class="c-label" [for]="'Remark'+i">{{'erp.app.pages.crm.business-partner-detail.bp-address.remark' | translate}}
+							<label class="c-label" [for]="'Remark'+i">{{'remark' | translate}}
 								<span *ngIf="!add.controls.Remark.valid && !add.controls.Remark.pending && (add.controls.Remark.dirty || submitAttempt)" ion-text color="danger">(*)</span>
 							</label>
 							<textarea (change)="saveAddress(add)" rows="2" class="c-input" [attr.id]="'Remark'+i" formControlName="Remark" type="textarea"></textarea>
@@ -73,32 +73,32 @@
 					</ion-col>
 					<ion-col size="12" size-sm size-xl="4">
 						<div class="c-control">
-							<label class="c-label" [for]="'Contact'+i">{{'erp.app.pages.crm.business-partner-detail.bp-address.contact' | translate}}
+							<label class="c-label" [for]="'Contact'+i">{{'Contact' | translate}}
 								<span *ngIf="!add.controls.Contact.valid && !add.controls.Contact.pending && (add.controls.Contact.dirty || submitAttempt)" ion-text color="danger">(*)</span>
 							</label>
 							<input (change)="saveAddress(add)" class="c-input" [attr.id]="'Contact'+i" formControlName="Contact">
 						</div>
 
 						<div class="c-control">
-							<label class="c-label" [for]="'Phone1'+i">{{'erp.app.pages.crm.business-partner-detail.bp-address.phone1' | translate}}
+							<label class="c-label" [for]="'Phone1'+i">{{'Telephone' | translate}}
 								<span *ngIf="!add.controls.Phone1.valid && !add.controls.Phone1.pending && (add.controls.Phone1.dirty || submitAttempt)" ion-text color="danger">(*)</span>
 							</label>
 							<input (change)="saveAddress(add)" class="c-input" [attr.id]="'Phone1'+i" formControlName="Phone1">
 						</div>
 
 						<div class="c-control">
-							<label class="c-label" [for]="'Phone2'+i">{{'erp.app.pages.crm.business-partner-detail.bp-address.phone2' | translate}}
+							<label class="c-label" [for]="'Phone2'+i">{{'Telephone number (other)' | translate}}
 								<span *ngIf="!add.controls.Phone2.valid && !add.controls.Phone2.pending && (add.controls.Phone2.dirty || submitAttempt)" ion-text color="danger">(*)</span>
 							</label>
 							<input (change)="saveAddress(add)" class="c-input" [attr.id]="'Phone2'+i" formControlName="Phone2">
 						</div>
 
 						
-							<!-- <label class="c-label">{{'erp.app.pages.crm.business-partner-detail.bp-address.coordinates' | translate}}
+							<!-- <label class="c-label">{{'coordinates' | translate}}
 								<small>
-									{{add.controls.Lat.value || ('erp.app.pages.crm.business-partner-detail.bp-address.lat' | translate)}}
+									{{add.controls.Lat.value || ('lat' | translate)}}
 									-
-									{{add.controls.Long.value || ('erp.app.pages.crm.business-partner-detail.bp-address.long' | translate)}}</small>
+									{{add.controls.Long.value || ('long' | translate)}}</small>
 									
 							</label> -->
 
@@ -109,19 +109,19 @@
 						
 
 						<!-- <div class="c-control">
-              <label class="c-label" [for]="'Lat'+i">{{'erp.app.pages.crm.business-partner-detail.bp-address.latitude' | translate}}
+              <label class="c-label" [for]="'Lat'+i">{{'latitude' | translate}}
                 <span *ngIf="!add.controls.Lat.valid && !add.controls.Lat.pending && (add.controls.Lat.dirty || submitAttempt)" ion-text color="danger">(*)</span>
               </label>
               <input (change)="saveAddress(add)" class="c-input" [attr.id]="'Lat'+i" formControlName="Lat">
             </div>
             <div class="c-control">
-              <label class="c-label" [for]="'Long'+i">{{'erp.app.pages.crm.business-partner-detail.bp-address.longtitude' | translate}}
+              <label class="c-label" [for]="'Long'+i">{{'longtitude' | translate}}
                 <span *ngIf="!add.controls.Long.valid && !add.controls.Long.pending && (add.controls.Long.dirty || submitAttempt)" ion-text color="danger">(*)</span>
               </label>
               <input (change)="saveAddress(add)" class="c-input" [attr.id]="'Long'+i" formControlName="Long">
             </div>
             <div class="c-control">
-              <label class="c-label" [for]="'Remark'+i">{{'erp.app.pages.crm.business-partner-detail.bp-address.remark' | translate}}
+              <label class="c-label" [for]="'Remark'+i">{{'remark' | translate}}
                 <span *ngIf="!add.controls.Remark.valid && !add.controls.Remark.pending && (add.controls.Remark.dirty || submitAttempt)" ion-text color="danger">(*)</span>
               </label>
               <textarea (change)="saveAddress(add)" rows="3" class="c-input" [attr.id]="'Remark'+i" formControlName="Remark" type="textarea"></textarea>
@@ -129,20 +129,20 @@
 					</ion-col>
 					<ion-col size="12" size-sm="12" size-xl="8" offset-xl="3">
 						<div class="c-control">
-							<b>{{add.controls.Contact.value||('erp.app.pages.crm.business-partner-detail.bp-address.contact-person' | translate)}}</b>
-							({{add.controls.Phone1.value||('erp.app.pages.crm.business-partner-detail.bp-address.phone1'|translate)}} <span>
-								/ {{add.controls.Phone2.value||('erp.app.pages.crm.business-partner-detail.bp-address.phone2'|translate)}}</span>) <br>
-							{{add.controls.AddressLine1.value||('erp.app.pages.crm.business-partner-detail.bp-address.addressline1'|translate)}},
-							{{add.controls.Ward.value||('erp.app.pages.crm.business-partner-detail.bp-address.ward'|translate)}},
-							{{add.controls.District.value||('erp.app.pages.crm.business-partner-detail.bp-address.district'|translate)}},
-							{{add.controls.Province.value||('erp.app.pages.crm.business-partner-detail.bp-address.province'|translate)}},
-							{{add.controls.Country.value||('erp.app.pages.crm.business-partner-detail.bp-address.country'|translate)}}<br>
-							{{add.controls.AddressLine2.value||('erp.app.pages.crm.business-partner-detail.bp-address.addressline2'|translate)}} <br>
+							<b>{{add.controls.Contact.value||('contact-person' | translate)}}</b>
+							({{add.controls.Phone1.value||('Telephone'|translate)}} <span>
+								/ {{add.controls.Phone2.value||('Telephone number (other)'|translate)}}</span>) <br>
+							{{add.controls.AddressLine1.value||('House number, street name, quarter'|translate)}},
+							{{add.controls.Ward.value||('Ward'|translate)}},
+							{{add.controls.District.value||('District'|translate)}},
+							{{add.controls.Province.value||('Provinces'|translate)}},
+							{{add.controls.Country.value||('country'|translate)}}<br>
+							{{add.controls.AddressLine2.value||('Apartment, Building, Unit…'|translate)}} <br>
 						</div>
 						<div class="c-control" *ngIf="pageConfig.canEdit">
 							<ion-button (click)="removeAddress(i)" size="small" fill="outline">
 								<ion-icon slot="start" name="trash"></ion-icon>
-								{{'erp.app.pages.crm.business-partner-detail.bp-address.remove-address' | translate}}
+								{{'Delete this address' | translate}}
 							</ion-button>
 						</div>
 					</ion-col>
@@ -153,7 +153,7 @@
 	<ion-row class="hr-group border" *ngIf="pageConfig.canEdit">
 		<ion-col size="12" size-sm size-xl="4" offset-xl="3">
 			<ion-button (click)="addAddress({Id:0})">
-				{{'erp.app.pages.crm.business-partner-detail.bp-address.add-address' | translate}}
+				{{'Add address' | translate}}
 			</ion-button>
 		</ion-col>
 	</ion-row>

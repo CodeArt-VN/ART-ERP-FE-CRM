@@ -3,12 +3,12 @@
 		<ion-row class="hr-group">
 			<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
 				<ion-list-header class="ion-no-padding">
-					<ion-label color="primary">{{'erp.app.pages.crm.business-partner-detail.bp-items.items-list' | translate}}</ion-label>
+					<ion-label color="primary">{{'Product list' | translate}}</ion-label>
 				</ion-list-header>
 				<div>
 					<ion-button fill="clear" size="small">
 						<ion-icon slot="start" name="cloud-upload"></ion-icon>
-						{{'erp.app.pages.crm.business-partner-detail.bp-items.item-import' | translate}}
+						{{'Import product/price list' | translate}}
 					</ion-button>
 				</div>
 			</ion-col>
@@ -16,10 +16,10 @@
 				<div class="table-contain">
 					<section class="table">
 						<header class="bold" style="padding-right: 0;">
-							<div class="col-id cell">{{'erp.app.pages.crm.business-partner-detail.bp-items.id' | translate}}</div>
-							<div class="col-code cell">{{'erp.app.pages.crm.business-partner-detail.bp-items.code' | translate}}</div>
-							<div class="col-name cell">{{'erp.app.pages.crm.business-partner-detail.bp-items.name' | translate}}</div>
-							<div class="col-money cell">{{'erp.app.pages.crm.business-partner-detail.bp-items.price' | translate}}</div>
+							<div class="col-id cell">{{'Id' | translate}}</div>
+							<div class="col-code cell">{{'Product code' | translate}}</div>
+							<div class="col-name cell">{{'Product name' | translate}}</div>
+							<div class="col-money cell">{{'Price' | translate}}</div>
 
 							<div class="col-checkbox cell" *ngIf="pageConfig.canEdit"></div>
 						</header>
@@ -49,11 +49,11 @@
 						</ng-container>
 						<!-- <div *ngIf="pageConfig.canEdit" class="row footer">
 							<div class="cell">
-								<ng-select class="c-input" [readonly]="submitAttempt" (change)="selectContact($event)" [addTag]="addContactLine.bind(this)" appendTo="#selectholder" [items]="contactList$ | async" [typeahead]="contactListInput$" [loading]='contactListLoading' [virtualScroll]="true" placeholder="{{'erp.app.pages.crm.business-partner-detail.bp-items.contact-placeholder' | translate}}">
+								<ng-select class="c-input" [readonly]="submitAttempt" (change)="selectContact($event)" [addTag]="addContactLine.bind(this)" appendTo="#selectholder" [items]="contactList$ | async" [typeahead]="contactListInput$" [loading]='contactListLoading' [virtualScroll]="true" placeholder="{{'contact-placeholder' | translate}}">
 									<ng-template ng-option-tmp let-i="item" let-search="searchTerm">
 										<div *ngIf="i">
 											<div><span [ngOptionHighlight]="search">{{i.Name}}</span></div>
-											<small>#<b><span class="important" [ngOptionHighlight]="search">{{i.Id}}</span></b> <span *ngIf="i.Title"> - {{i.Title}}</span> <span *ngIf="i.WorkPhone"> | {{'erp.app.pages.crm.business-partner-detail.bp-items.phone' | translate}}: <b [ngOptionHighlight]="search">{{i.WorkPhone}}</b></span></small>
+											<small>#<b><span class="important" [ngOptionHighlight]="search">{{i.Id}}</span></b> <span *ngIf="i.Title"> - {{i.Title}}</span> <span *ngIf="i.WorkPhone"> | {{'phone' | translate}}: <b [ngOptionHighlight]="search">{{i.WorkPhone}}</b></span></small>
 										</div>
 									</ng-template>
 									<ng-template ng-tag-tmp let-search="searchTerm">

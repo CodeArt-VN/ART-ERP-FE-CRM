@@ -1,25 +1,25 @@
 <ion-header>
-	<app-list-toolbar pageTitle="{{'erp.app.pages.crm.mcp.page-title' | translate}}" [ShowFeature]="false" [pageConfig]="pageConfig" [selectedItems]="selectedItems" [query]="query" (add)="add()" (refresh)="refresh()" (export)="export()" (import)="import($event)" (help)="help()" (unselect)="unselect()" (archiveItems)="archiveItems()" (deleteItems)="deleteItems()" (changeBranch)="changeBranch($event)"></app-list-toolbar>
+	<app-list-toolbar pageTitle="{{'Selling route' | translate}}" [ShowFeature]="false" [pageConfig]="pageConfig" [selectedItems]="selectedItems" [query]="query" (add)="add()" (refresh)="refresh()" (export)="export()" (import)="import($event)" (help)="help()" (unselect)="unselect()" (archiveItems)="archiveItems()" (deleteItems)="deleteItems()" (changeBranch)="changeBranch($event)"></app-list-toolbar>
 
 	<section class="table">
 		<header class="bold ion-hide-sm-down">
 			<div class="col-checkbox cell"></div>
 			<div class="col-id cell ion-hide-sm-down" (click)="sortToggle('Sort')">
-				{{'erp.app.pages.crm.mcp.id' | translate}}
+				{{'Id' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.Sort" [name]="sort.Sort == 'Sort'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Id" name="search" color="primary"></ion-icon>
 			</div>
 			
 			<div class="col-name cell" (click)="sortToggle('Name')">
-				{{'erp.app.pages.crm.mcp.name' | translate}}
+				{{'Route name' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.Name" [name]="sort.Name == 'Name'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Name" name="search" color="primary"></ion-icon>
 			</div>
 			<div class="col-id cell ion-hide-sm-down">
-				{{'erp.app.pages.crm.mcp.number-of-customer' | translate}}
+				{{'Number of customers' | translate}}
 			</div>
 			<div class="col-code cell ion-hide-sm-down" (click)="sortToggle('SellerName')">
-				{{'erp.app.pages.crm.mcp.seller-name' | translate}}
+				{{'Sales staff' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.SellerName" [name]="sort.SellerName == 'SellerName'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.SellerName" name="search" color="primary"></ion-icon>
 			</div>

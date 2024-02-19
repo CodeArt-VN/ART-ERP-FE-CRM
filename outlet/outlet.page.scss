@@ -27,6 +27,14 @@
     .row{
         .col-icon{
             order: 0;
+            max-width: 50px;
+            top: auto;
+            bottom: 16px;
+            opacity: 0.35;
+            .min-btn{
+                width: 3rem !important;
+                height: 3rem !important;
+            }
         }
         .col-saleMan {
             display: none;
