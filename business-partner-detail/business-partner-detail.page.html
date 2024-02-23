@@ -78,13 +78,16 @@
                     <ion-segment-button value="s4" *ngIf="item.Id && formGroup.controls.IsStorer.value">
                         <ion-label>{{'warehousing' | translate}}</ion-label>
                     </ion-segment-button>
-                    <ion-segment-button value="s5">
+                    <ion-segment-button value="invoiceInfor">
+                        <ion-label>{{'Invoice information' | translate}}</ion-label>
+                    </ion-segment-button>
+                    <ion-segment-button value="addresses">
                         <ion-label>{{'Address' | translate}}</ion-label>
                     </ion-segment-button>
-                    <ion-segment-button value="s6">
+                    <ion-segment-button value="map">
                         <ion-label>{{'Map' | translate}}</ion-label>
                     </ion-segment-button>
-                    <ion-segment-button value="s7" *ngIf="item.Id && formGroup.controls.IsVendor.value">
+                    <ion-segment-button value="products" *ngIf="item.Id && formGroup.controls.IsVendor.value">
                         <ion-label>{{'Provided product' | translate}}</ion-label>
                     </ion-segment-button>
                 </ion-segment>
@@ -315,7 +318,7 @@
                                 </ion-row>
 
                                 <!-- Thông tin hóa đơn -->
-                                <ion-row class="hr-group">
+                                <!-- <ion-row class="hr-group">
                                     <ion-col size="12" size-sm="12" size-md="12" size-xl="3">
                                         <ion-list-header class="ion-no-padding">
                                             <ion-label color="primary">{{'Invoice information' | translate}}</ion-label>
@@ -349,7 +352,7 @@
                                             <textarea (change)="saveChange()" rows="3" class="c-input" id="BillingAddress" formControlName="BillingAddress" type="textarea"></textarea>
                                         </div>
                                     </ion-col>
-                                </ion-row>
+                                </ion-row> -->
 
                                 
                                 <!-- Thông tin cá nhân -->
@@ -485,18 +488,24 @@
                         <app-bp-storer-info [canEdit]="pageConfig.canEdit" [bpId]="item.Id" *ngIf="item.Id"></app-bp-storer-info>
                     </div>
                 </div>
+                <!-- Hóa đơn -->
+                <div *ngIf="segmentView == 'invoiceInfor'">
+                    <div class="ion-padding">
+                        <app-bp-tax-address [bpId]="item.Id" [canEdit]="pageConfig.canEdit" [canEdit]="pageConfig.canEdit" *ngIf="item.Id"></app-bp-tax-address>
+                    </div>
+                </div>
                 <!-- Địa chỉ -->
-                <div *ngIf="segmentView == 's5'">
+                <div *ngIf="segmentView == 'addresses'">
                     <div class="ion-padding">
                         <app-bp-address [bpId]="item.Id" [canEdit]="pageConfig.canEdit" [canEdit]="pageConfig.canEdit" *ngIf="item.Id"></app-bp-address>
                     </div>
                 </div>
                 <!-- map -->
-                <div *ngIf="segmentView == 's6'" style="height: calc(100vh - 140px)">
+                <div *ngIf="segmentView == 'map'" style="height: calc(100vh - 140px)">
                     <app-bp-map [bpId]="item.Id" [canEdit]="pageConfig.canEdit" *ngIf="item.Id"></app-bp-map>
                 </div>
                 <!-- Sản phẩm -->
-                <div *ngIf="segmentView == 's7'">
+                <div *ngIf="segmentView == 'products'">
                     <div class="ion-padding">
                         <ion-grid fixed>
                             <app-bp-items [bpId]="item.Id" [canEdit]="pageConfig.canEdit" *ngIf="item.Id && !formGroup.controls.IsPersonal.value"></app-bp-items>
