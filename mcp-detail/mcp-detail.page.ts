@@ -109,6 +109,12 @@ export class MCPDetailPage extends PageBase {
         }
 
         super.loadedData(event);
+        
+        if (!this.formGroup.get('Type').value || this.item.Id == 0) {
+            this.formGroup.get('Type').setValue('MCP');
+            this.formGroup.get('Type').markAsDirty();
+        }
+        
         this.item.StartDate = this.item.StartDate ? lib.dateFormat(this.item.StartDate, 'yyyy-mm-dd') : lib.dateFormat(new Date(), 'yyyy-mm-dd')
 
         if (this.item.IDSeller) {
@@ -311,5 +317,7 @@ export class MCPDetailPage extends PageBase {
             return;
         }
     }
+
+    async saveChange() { super.saveChange2(); }
 
 }
