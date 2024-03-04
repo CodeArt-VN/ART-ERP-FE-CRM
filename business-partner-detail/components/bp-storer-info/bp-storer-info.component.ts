@@ -34,7 +34,7 @@ export class BpStorerInfoComponent extends PageBase {
     this.pageConfig.isForceCreate = true; //Id===IDContact
 
     this.formGroup = formBuilder.group({
-      IDBranch: [''],
+      IDBranch: [this.env.selectedBranch],
       Id: new FormControl(),
       
       isActivated: [''],
