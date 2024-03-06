@@ -14,8 +14,8 @@ import { WMS_LocationProvider, WMS_StorerProvider, WMS_ZoneProvider } from 'src/
 export class BpStorerInfoComponent extends PageBase {
   @Input() canEdit;
   @Input() set bpId(value) {
-		this.id = value;
-	};
+    this.id = value;
+  }
 
   constructor(
     public pageProvider: WMS_StorerProvider,
@@ -36,12 +36,12 @@ export class BpStorerInfoComponent extends PageBase {
     this.formGroup = formBuilder.group({
       IDBranch: [this.env.selectedBranch],
       Id: new FormControl(),
-      
+
       isActivated: [''],
       StandardCarrierAlphaCode: [''],
       CreditLimit: [''],
       IDCartonGroup: [''],
-      
+
       Remark: [''],
 
       //Crossdock
@@ -83,29 +83,26 @@ export class BpStorerInfoComponent extends PageBase {
       ApplicationID: [''],
       SSCCFirstDigit: [''],
       UCCVendor: [''],
-      
+
       //Processing
       AllowCommingledLPN: [''],
       LabelTemplate: [''],
     });
-
   }
 
-  
-
-  loadedData(){
+  loadedData() {
     if (!this.item || !this.item.Id) {
       this.item = {};
       this.item.Id = this.id;
     }
     super.loadedData();
     this.pageConfig.canEdit = this.canEdit;
-		if (!this.canEdit) this.formGroup?.disable();
+    if (!this.canEdit) this.formGroup?.disable();
   }
 
   async saveChange() {
     super.saveChange2(this.formGroup, null);
   }
 
-  locationList=[]; //TODO: load locations
+  locationList = []; //TODO: load locations
 }

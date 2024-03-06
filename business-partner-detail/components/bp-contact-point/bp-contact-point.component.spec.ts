@@ -9,8 +9,8 @@ describe('BpContactPointComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ BpContactPointComponent ],
-      imports: [IonicModule.forRoot()]
+      declarations: [BpContactPointComponent],
+      imports: [IonicModule.forRoot()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(BpContactPointComponent);

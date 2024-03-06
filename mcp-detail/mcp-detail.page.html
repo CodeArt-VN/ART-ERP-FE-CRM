@@ -1,43 +1,53 @@
 <ion-header>
-    <app-detail-toolbar [page]="this"></app-detail-toolbar>
+  <app-detail-toolbar [page]="this"></app-detail-toolbar>
 </ion-header>
 
-
 <ion-content appScrollbarTheme class="ion-padding">
-    <app-page-message [itemsLength]="item? 1: 0" [showSpinner]="pageConfig.showSpinner"></app-page-message>
+  <app-page-message [itemsLength]="item? 1: 0" [showSpinner]="pageConfig.showSpinner"></app-page-message>
 
-    <div class="main-view" *ngIf="item && pageConfig.showSpinner==false">
-        <ion-grid fixed>
-            <form [formGroup]="formGroup">
-                <ion-row class="hr-group" style=" border: none">
-                    <ion-col size="12" size-sm="12" size-md="12" size-xl="3">
-                        <ion-list-header class="ion-no-padding">
-                            <ion-label color="primary">{{'Route information' | translate}}</ion-label>
-                        </ion-list-header>
-                    </ion-col>
-                    <ion-col size="12" size-sm size-xl="4">
-                        <!-- <div class="c-control" *ngIf="item.Id">
+  <div class="main-view" *ngIf="item && pageConfig.showSpinner==false">
+    <ion-grid fixed>
+      <form [formGroup]="formGroup">
+        <ion-row class="hr-group" style="border: none">
+          <ion-col size="12" size-sm="12" size-md="12" size-xl="3">
+            <ion-list-header class="ion-no-padding">
+              <ion-label color="primary">{{'Route information' | translate}}</ion-label>
+            </ion-list-header>
+          </ion-col>
+          <ion-col size="12" size-sm size-xl="4">
+            <!-- <div class="c-control" *ngIf="item.Id">
                             <label class="c-label" for="Id">{{'Id' | translate}}</label>
                             <input class="c-input" id="Id" formControlName="Id" type="number">
                         </div> -->
 
-                        <div class="c-control">
-                            <label class="c-label" for="Code">{{'Code' | translate}} <small *ngIf="item.Id">Id: {{item.Id}}</small>
-                                <span *ngIf="!formGroup.controls.Code.valid && !formGroup.controls.Code.pending && (formGroup.controls.Code.dirty || submitAttempt)" ion-text color="danger">(*)</span>
-                            </label>
-                            <input (change)="saveChange()" class="c-input" id="Code" formControlName="Code" type="text">
-                        </div>
+            <div class="c-control">
+              <label class="c-label" for="Code"
+                >{{'Code' | translate}}
+                <small *ngIf="item.Id">Id: {{item.Id}}</small>
+                <span
+                  *ngIf="!formGroup.controls.Code.valid && !formGroup.controls.Code.pending && (formGroup.controls.Code.dirty || submitAttempt)"
+                  ion-text
+                  color="danger"
+                  >(*)</span
+                >
+              </label>
+              <input (change)="saveChange()" class="c-input" id="Code" formControlName="Code" type="text" />
+            </div>
 
-                        <div class="c-control">
-                            <label class="c-label" for="Name">{{'Name' | translate}}
-                                <span *ngIf="!formGroup.controls.Name.valid && !formGroup.controls.Name.pending && (formGroup.controls.Name.dirty || submitAttempt)" ion-text color="danger">(*)</span>
-                            </label>
-                            <input (change)="saveChange()" class="c-input" id="Name" formControlName="Name" type="text">
-                        </div>
+            <div class="c-control">
+              <label class="c-label" for="Name"
+                >{{'Name' | translate}}
+                <span
+                  *ngIf="!formGroup.controls.Name.valid && !formGroup.controls.Name.pending && (formGroup.controls.Name.dirty || submitAttempt)"
+                  ion-text
+                  color="danger"
+                  >(*)</span
+                >
+              </label>
+              <input (change)="saveChange()" class="c-input" id="Name" formControlName="Name" type="text" />
+            </div>
 
-                        
-
-                        <!-- <div class="c-control">
+            <!-- <div class="c-control">
                             <label class="c-label" for="IDWarehouse">{{'Warehouse' | translate}}</label>
                             <ng-select class="c-input" (change)="saveChange()" #IDWarehouse formControlName="IDWarehouse" labelForId="IDWarehouse" [items]="wareHouseList" bindLabel="Name" bindValue="Id" placeholder="{{'Select warehouse' | translate}}">
                                 <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
@@ -47,25 +57,50 @@
                                 </ng-template>
                             </ng-select>
                         </div> -->
+          </ion-col>
+          <ion-col size="12" size-sm size-xl="4">
+            <div class="c-control">
+              <label class="c-label" for="IDSeller"
+                >{{'Salesman' | translate}}
+                <span
+                  *ngIf="!formGroup.controls.IDSeller.valid && !formGroup.controls.IDSeller.pending && (formGroup.controls.IDSeller.dirty || submitAttempt)"
+                  ion-text
+                  color="danger"
+                  >(*)</span
+                >
+              </label>
+              <ng-select
+                (change)="saveChange()"
+                class="c-input"
+                #IDSeller
+                formControlName="IDSeller"
+                labelForId="IDSeller"
+                [items]="salesmanList$ | async"
+                [typeahead]="salesmanListInput$"
+                [loading]="salesmanListLoading"
+                [virtualScroll]="true"
+                bindLabel="FullName"
+                bindValue="Id"
+                placeholder="{{'Search for name, code or phone number' | translate}}"
+              >
+                <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
+                  <div *ngIf="i">
+                    <div>
+                      <span [ngOptionHighlight]="search">{{i.FullName}}</span>
+                    </div>
+                    <small
+                      >#<b><span class="important" [ngOptionHighlight]="search">{{i.Id}} - {{i.Code}}</span></b>
+                      <span *ngIf="i.Phone">
+                        | {{'Telephone' | translate}}:
+                        <b [ngOptionHighlight]="search">{{i.Phone}}</b></span
+                      ></small
+                    >
+                  </div>
+                </ng-template>
+              </ng-select>
+            </div>
 
-                    </ion-col>
-                    <ion-col size="12" size-sm size-xl="4">
-
-                        <div class="c-control">
-                            <label class="c-label" for="IDSeller">{{'Salesman' | translate}}
-                                <span *ngIf="!formGroup.controls.IDSeller.valid && !formGroup.controls.IDSeller.pending && (formGroup.controls.IDSeller.dirty || submitAttempt)" ion-text color="danger">(*)</span>
-                            </label>
-                            <ng-select (change)="saveChange()" class="c-input" #IDSeller formControlName="IDSeller" labelForId="IDSeller" [items]="salesmanList$ | async" [typeahead]="salesmanListInput$" [loading]='salesmanListLoading' [virtualScroll]="true" bindLabel="FullName" bindValue="Id" placeholder="{{'Search for name, code or phone number' | translate}}">
-                                <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
-                                    <div *ngIf="i">
-                                        <div><span [ngOptionHighlight]="search">{{i.FullName}}</span></div>
-                                        <small>#<b><span class="important" [ngOptionHighlight]="search">{{i.Id}} - {{i.Code}}</span></b> <span *ngIf="i.Phone"> | {{'Telephone' | translate}}: <b [ngOptionHighlight]="search">{{i.Phone}}</b></span></small>
-                                    </div>
-                                </ng-template>
-                            </ng-select>
-                        </div>
-
-                        <!-- <div class="c-control">
+            <!-- <div class="c-control">
                             <label class="c-label" for="IDVehicleForUrgent">{{'Urgent delivery vehicle' | translate}}</label>
                             <ng-select (change)="changedVehicle()" class="c-input" #IDVehicleForUrgent formControlName="IDVehicleForUrgent" labelForId="IDVehicleForUrgent" [items]="vehicleList" bindLabel="Name" bindValue="Id" placeholder="{{'Search for truck' | translate}}">
                                 <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
@@ -113,11 +148,10 @@
                             <label class="c-label" for=""></label>
                             <ion-button *ngIf="!item.Id && pageConfig.canAdd" expand="block" (click)="saveChange()" [disabled]="!formGroup.dirty">{{'Add routes' | translate}}</ion-button>
                         </div> -->
+          </ion-col>
+        </ion-row>
 
-                    </ion-col>
-                </ion-row>
-
-                <!-- <ion-row class="hr-group">
+        <!-- <ion-row class="hr-group">
                     <ion-col size="12" size-sm="12" size-md="12" size-xl="3">
                         <ion-list-header class="ion-no-padding">
                             <ion-label color="primary">{{'item-information-title' | translate}}</ion-label>
@@ -130,123 +164,235 @@
                         
                     </ion-col>
                 </ion-row> -->
+      </form>
+    </ion-grid>
+
+    <div class="row-full shadow full-screen">
+      <ion-toolbar color="primary">
+        <ion-buttons class="ion-hide-md-down" slot="start" *ngIf="segmentView == 's1'">
+          <ion-button color="primary" *ngIf="pageConfig.canEdit">
+            <ion-icon slot="start" name="truck"></ion-icon>
+            {{'Add customer' | translate}}
+          </ion-button>
+
+          <ion-button color="primary" title="{{'Export' | translate}}">
+            <ion-icon slot="icon-only" name="cloud-download-outline"></ion-icon>
+          </ion-button>
+
+          <ion-button color="primary" title="{{'Import' | translate}}" *ngIf="pageConfig.canEdit">
+            <ion-icon slot="icon-only" name="cloud-upload-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+
+        <ion-segment scrollable="false" (ionChange)="segmentChanged($event)" [value]="segmentView">
+          <ion-segment-button value="s1">
+            <ion-label
+              >{{'Customer' | translate}} <span *ngIf="routeDetail.length">({{routeDetail.length}})</span></ion-label
+            >
+          </ion-segment-button>
+          <ion-segment-button value="s2">
+            <ion-label>{{'Route map' | translate}}</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+
+        <ion-buttons slot="end" *ngIf="segmentView == 's1'">
+          <ion-button title="{{'Search' | translate}}" (click)="pageConfig.isShowSearch =! pageConfig.isShowSearch">
+            <ion-icon slot="icon-only" name="search-outline"></ion-icon>
+          </ion-button>
+
+          <ion-button (click)="showMCPCustomerPickerModal()" *ngIf="pageConfig.canEdit">
+            <ion-icon slot="start" name="truck"></ion-icon>
+            {{'Add customer' | translate}}
+          </ion-button>
+
+          <ion-button
+            title="{{'Export' | translate}}"
+            *ngIf="pageConfig.canEdit && pageConfig.canExport"
+            (click)="export()"
+          >
+            <ion-icon slot="icon-only" name="cloud-download-outline"></ion-icon>
+          </ion-button>
+
+          <ion-button
+            title="{{'Import' | translate}}"
+            *ngIf="pageConfig.canEdit && pageConfig.canImport"
+            (click)="onClickImport()"
+          >
+            <ion-icon slot="icon-only" name="cloud-upload-outline"></ion-icon>
+          </ion-button>
+          <input class="hide-all" #importfile type="file" accept=".xlsx" (change)="importFileChange($event)" />
+        </ion-buttons>
+      </ion-toolbar>
+
+      <div *ngIf="segmentView == 's1'">
+        <div class="table-contain">
+          <section class="table" style="min-width: 1220px">
+            <header class="bold">
+              <div class="col-name cell">{{'Customer' | translate}}</div>
+
+              <div class="col-code cell">{{'Pick - up order' | translate}}</div>
+
+              <div class="col-checkbox cell">{{'W1' | translate}}</div>
+              <div class="col-checkbox cell">{{'W2' | translate}}</div>
+              <div class="col-checkbox cell">{{'W3' | translate}}</div>
+              <div class="col-checkbox cell">{{'W4' | translate}}</div>
+
+              <div class="col-checkbox cell">{{'Mon' | translate}}</div>
+              <div class="col-checkbox cell">{{'Tue' | translate}}</div>
+              <div class="col-checkbox cell">{{'Wed' | translate}}</div>
+              <div class="col-checkbox cell">{{'Collect' | translate}}</div>
+              <div class="col-checkbox cell">{{'Fri' | translate}}</div>
+              <div class="col-checkbox cell">{{'Sat' | translate}}</div>
+              <div class="col-checkbox cell">{{'Sun' | translate}}</div>
+
+              <div class="col-checkbox cell">{{'F' | translate}}</div>
+              <div class="col-checkbox cell" *ngIf="pageConfig.canEdit"></div>
+            </header>
+            <form (submit)="filter(query)" action="#">
+              <header class="filter" *ngIf="pageConfig.isShowSearch">
+                <div class="col-name cell">
+                  <input
+                    placeholder="{{'shipper-list-placeholder' | translate}}"
+                    [ngModelOptions]="{standalone: true}"
+                    [(ngModel)]="query.Name"
+                    class="c-input"
+                    [ngClass]="{active: query.Name}"
+                    type="text"
+                  />
+                  <ion-icon
+                    class="min-btn"
+                    (click)="query.Name=''; filter('')"
+                    *ngIf="query.Name"
+                    name="close-circle-outline"
+                  ></ion-icon>
+                </div>
+
+                <button mat-raised-button type="submit" style="display: none">Search</button>
+              </header>
             </form>
+          </section>
+          <section class="table table-scroll">
+            <div class="row" [ngClass]="{odd: j % 2 != 0 }" *ngFor="let i of routeDetail; let j = index;">
+              <div class="col-name cell">
+                {{i._Contact?.Name}}
+                <small> {{i.IDContact}}</small>
+                <span *ngFor="let a of i._Contact?._Addresses"
+                  ><small><span *ngIf="a.AddressLine2">{{a.AddressLine2}}, </span>{{a.AddressLine1}} </small>
+                </span>
+              </div>
 
+              <div class="col-code cell">
+                <input
+                  [disabled]="!pageConfig.canEdit"
+                  (change)="saveRouteDetail(i)"
+                  class="c-input"
+                  [(ngModel)]="i.Sort"
+                  type="number"
+                />
+              </div>
 
-        </ion-grid>
+              <div class="col-checkbox cell week">
+                <input
+                  [disabled]="!pageConfig.canEdit"
+                  (change)="saveRouteDetail(i)"
+                  class="c-checkbox"
+                  [(ngModel)]="i.Week1"
+                  type="checkbox"
+                />
+              </div>
+              <div class="col-checkbox cell week">
+                <input
+                  [disabled]="!pageConfig.canEdit"
+                  (change)="saveRouteDetail(i)"
+                  class="c-checkbox"
+                  [(ngModel)]="i.Week2"
+                  type="checkbox"
+                />
+              </div>
+              <div class="col-checkbox cell week">
+                <input
+                  [disabled]="!pageConfig.canEdit"
+                  (change)="saveRouteDetail(i)"
+                  class="c-checkbox"
+                  [(ngModel)]="i.Week3"
+                  type="checkbox"
+                />
+              </div>
+              <div class="col-checkbox cell week">
+                <input
+                  [disabled]="!pageConfig.canEdit"
+                  (change)="saveRouteDetail(i)"
+                  class="c-checkbox"
+                  [(ngModel)]="i.Week4"
+                  type="checkbox"
+                />
+              </div>
 
-        <div class="row-full shadow full-screen">
-            <ion-toolbar color="primary">
-                <ion-buttons class="ion-hide-md-down" slot="start" *ngIf="segmentView == 's1'">
+              <div class="col-checkbox cell">
+                <input
+                  [disabled]="!pageConfig.canEdit"
+                  (change)="saveRouteDetail(i)"
+                  class="c-checkbox"
+                  [(ngModel)]="i.Monday"
+                  type="checkbox"
+                />
+              </div>
+              <div class="col-checkbox cell">
+                <input
+                  [disabled]="!pageConfig.canEdit"
+                  (change)="saveRouteDetail(i)"
+                  class="c-checkbox"
+                  [(ngModel)]="i.Tuesday"
+                  type="checkbox"
+                />
+              </div>
+              <div class="col-checkbox cell">
+                <input
+                  [disabled]="!pageConfig.canEdit"
+                  (change)="saveRouteDetail(i)"
+                  class="c-checkbox"
+                  [(ngModel)]="i.Wednesday"
+                  type="checkbox"
+                />
+              </div>
+              <div class="col-checkbox cell">
+                <input
+                  [disabled]="!pageConfig.canEdit"
+                  (change)="saveRouteDetail(i)"
+                  class="c-checkbox"
+                  [(ngModel)]="i.Thursday"
+                  type="checkbox"
+                />
+              </div>
+              <div class="col-checkbox cell">
+                <input
+                  [disabled]="!pageConfig.canEdit"
+                  (change)="saveRouteDetail(i)"
+                  class="c-checkbox"
+                  [(ngModel)]="i.Friday"
+                  type="checkbox"
+                />
+              </div>
+              <div class="col-checkbox cell">
+                <input
+                  [disabled]="!pageConfig.canEdit"
+                  (change)="saveRouteDetail(i)"
+                  class="c-checkbox"
+                  [(ngModel)]="i.Saturday"
+                  type="checkbox"
+                />
+              </div>
+              <div class="col-checkbox cell">
+                <input
+                  [disabled]="!pageConfig.canEdit"
+                  (change)="saveRouteDetail(i)"
+                  class="c-checkbox"
+                  [(ngModel)]="i.Sunday"
+                  type="checkbox"
+                />
+              </div>
 
-                    <ion-button color="primary" *ngIf="pageConfig.canEdit">
-                        <ion-icon slot="start" name="truck"></ion-icon>
-                        {{'Add customer' | translate}}
-                    </ion-button>
-
-                    <ion-button color="primary" title="{{'Export' | translate}}">
-                        <ion-icon slot="icon-only" name="cloud-download-outline"></ion-icon>
-                    </ion-button>
-
-                    <ion-button color="primary" title="{{'Import' | translate}}" *ngIf="pageConfig.canEdit">
-                        <ion-icon slot="icon-only" name="cloud-upload-outline"></ion-icon>
-                    </ion-button>
-
-                </ion-buttons>
-
-                <ion-segment scrollable="false" (ionChange)="segmentChanged($event)" [value]="segmentView">
-                    <ion-segment-button value="s1">
-                        <ion-label>{{'Customer' | translate}} <span *ngIf="routeDetail.length">({{routeDetail.length}})</span></ion-label>
-                    </ion-segment-button>
-                    <ion-segment-button value="s2">
-                        <ion-label>{{'Route map' | translate}}</ion-label>
-                    </ion-segment-button>
-                </ion-segment>
-
-                <ion-buttons slot="end" *ngIf="segmentView == 's1'">
-
-                    <ion-button title="{{'Search' | translate}}" (click)="pageConfig.isShowSearch =! pageConfig.isShowSearch">
-                        <ion-icon slot="icon-only" name="search-outline"></ion-icon> 
-                    </ion-button>
-
-                    <ion-button (click)="showMCPCustomerPickerModal()" *ngIf="pageConfig.canEdit">
-                        <ion-icon slot="start" name="truck"></ion-icon>
-                        {{'Add customer' | translate}}
-                    </ion-button>
-
-                    <ion-button title="{{'Export' | translate}}" *ngIf="pageConfig.canEdit && pageConfig.canExport" (click)="export()">
-                        <ion-icon slot="icon-only" name="cloud-download-outline"></ion-icon>
-                    </ion-button>
-
-                    <ion-button title="{{'Import' | translate}}" *ngIf="pageConfig.canEdit && pageConfig.canImport" (click)="onClickImport()">
-                        <ion-icon slot="icon-only" name="cloud-upload-outline"></ion-icon>
-                    </ion-button>
-                    <input class="hide-all" #importfile type="file" accept=".xlsx" (change)="importFileChange($event)" />
-
-                </ion-buttons>
-
-            </ion-toolbar>
-
-            <div *ngIf="segmentView == 's1'">
-
-                <div class="table-contain">
-                    <section class="table" style="min-width: 1220px;">
-                        <header class="bold">
-                            <div class="col-name cell">{{'Customer' | translate}}</div>
-
-
-                            <div class="col-code cell">{{'Pick - up order' | translate}}</div>
-
-                            <div class="col-checkbox cell ">{{'W1' | translate}}</div>
-                            <div class="col-checkbox cell ">{{'W2' | translate}}</div>
-                            <div class="col-checkbox cell ">{{'W3' | translate}}</div>
-                            <div class="col-checkbox cell ">{{'W4' | translate}}</div>
-
-                            <div class="col-checkbox cell">{{'Mon' | translate}}</div>
-                            <div class="col-checkbox cell">{{'Tue' | translate}}</div>
-                            <div class="col-checkbox cell">{{'Wed' | translate}}</div>
-                            <div class="col-checkbox cell">{{'Collect' | translate}}</div>
-                            <div class="col-checkbox cell">{{'Fri' | translate}}</div>
-                            <div class="col-checkbox cell">{{'Sat' | translate}}</div>
-                            <div class="col-checkbox cell">{{'Sun' | translate}}</div>
-
-                            <div class="col-checkbox cell">{{'F' | translate}}</div>
-                            <div class="col-checkbox cell" *ngIf="pageConfig.canEdit"></div>
-
-                        </header>
-                        <form (submit)="filter(query)" action="#">
-                            <header class="filter" *ngIf="pageConfig.isShowSearch">
-                                <div class="col-name cell">
-                                    <input placeholder="{{'shipper-list-placeholder' | translate}}" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Name" class="c-input" [ngClass]="{active: query.Name}" type="text">
-                                    <ion-icon class="min-btn" (click)="query.Name=''; filter('')" *ngIf="query.Name" name="close-circle-outline"></ion-icon>
-                                </div>
-
-                                <button mat-raised-button type="submit" style="display:none">Search</button>
-                            </header>
-                        </form>
-                    </section>
-                    <section class="table table-scroll">
-                        <div class="row" [ngClass]="{odd: j % 2 != 0 }" *ngFor="let i of routeDetail; let j = index;">
-                            <div class="col-name cell">{{i._Contact?.Name}} <small> {{i.IDContact}}</small> <span *ngFor="let a of i._Contact?._Addresses"><small><span *ngIf="a.AddressLine2">{{a.AddressLine2}}, </span>{{a.AddressLine1}} </small> </span></div>
-
-                            <div class="col-code cell"><input [disabled]="!pageConfig.canEdit" (change)="saveRouteDetail(i)" class="c-input" [(ngModel)]="i.Sort" type="number"></div>
-
-                            <div class="col-checkbox cell week"><input [disabled]="!pageConfig.canEdit" (change)="saveRouteDetail(i)" class="c-checkbox" [(ngModel)]="i.Week1" type="checkbox"></div>
-                            <div class="col-checkbox cell week"><input [disabled]="!pageConfig.canEdit" (change)="saveRouteDetail(i)" class="c-checkbox" [(ngModel)]="i.Week2" type="checkbox"></div>
-                            <div class="col-checkbox cell week"><input [disabled]="!pageConfig.canEdit" (change)="saveRouteDetail(i)" class="c-checkbox" [(ngModel)]="i.Week3" type="checkbox"></div>
-                            <div class="col-checkbox cell week"><input [disabled]="!pageConfig.canEdit" (change)="saveRouteDetail(i)" class="c-checkbox" [(ngModel)]="i.Week4" type="checkbox"></div>
-
-                            <div class="col-checkbox cell"><input [disabled]="!pageConfig.canEdit" (change)="saveRouteDetail(i)" class="c-checkbox" [(ngModel)]="i.Monday" type="checkbox"></div>
-                            <div class="col-checkbox cell"><input [disabled]="!pageConfig.canEdit" (change)="saveRouteDetail(i)" class="c-checkbox" [(ngModel)]="i.Tuesday" type="checkbox"></div>
-                            <div class="col-checkbox cell"><input [disabled]="!pageConfig.canEdit" (change)="saveRouteDetail(i)" class="c-checkbox" [(ngModel)]="i.Wednesday" type="checkbox"></div>
-                            <div class="col-checkbox cell"><input [disabled]="!pageConfig.canEdit" (change)="saveRouteDetail(i)" class="c-checkbox" [(ngModel)]="i.Thursday" type="checkbox"></div>
-                            <div class="col-checkbox cell"><input [disabled]="!pageConfig.canEdit" (change)="saveRouteDetail(i)" class="c-checkbox" [(ngModel)]="i.Friday" type="checkbox"></div>
-                            <div class="col-checkbox cell"><input [disabled]="!pageConfig.canEdit" (change)="saveRouteDetail(i)" class="c-checkbox" [(ngModel)]="i.Saturday" type="checkbox"></div>
-                            <div class="col-checkbox cell"><input [disabled]="!pageConfig.canEdit" (change)="saveRouteDetail(i)" class="c-checkbox" [(ngModel)]="i.Sunday" type="checkbox"></div>
-
-
-
-                            <!-- <div class="col-checkbox cell" (click)="i.Monday = !i.Monday; saveRouteDetail(i)">
+              <!-- <div class="col-checkbox cell" (click)="i.Monday = !i.Monday; saveRouteDetail(i)">
                                 <ion-checkbox [disabled]="!pageConfig.canEdit" [checked]="i.Monday"></ion-checkbox>
                             </div>
                             <div class="col-checkbox cell" (click)="i.Tuesday = !i.Tuesday; saveRouteDetail(i)">
@@ -268,23 +414,22 @@
                                 <ion-checkbox [disabled]="!pageConfig.canEdit" [checked]="i.Sunday"></ion-checkbox>
                             </div> -->
 
-                            <div class="col-checkbox cell">{{i.Frequency}}</div>
-                            <div class="col-checkbox cell" *ngIf="pageConfig.canEdit" (click)="deleteRouteDetail(i)">
-                                <ion-icon color="danger" class="min-btn" name="trash-outline"></ion-icon>
-                            </div>
-
-                        </div>
-
-                    </section>
-                </div>
-                
+              <div class="col-checkbox cell">{{i.Frequency}}</div>
+              <div class="col-checkbox cell" *ngIf="pageConfig.canEdit" (click)="deleteRouteDetail(i)">
+                <ion-icon color="danger" class="min-btn" name="trash-outline"></ion-icon>
+              </div>
             </div>
-
-            <div *ngIf="segmentView == 's2'" style="height: calc(100vh - 140px)">
-                <app-map-view *ngIf="item.CoordinateList" [CoordinateList]="item.CoordinateList" (savePosition)="savePosition($event)"></app-map-view>
-            </div>
-
+          </section>
         </div>
-    </div>
+      </div>
 
+      <div *ngIf="segmentView == 's2'" style="height: calc(100vh - 140px)">
+        <app-map-view
+          *ngIf="item.CoordinateList"
+          [CoordinateList]="item.CoordinateList"
+          (savePosition)="savePosition($event)"
+        ></app-map-view>
+      </div>
+    </div>
+  </div>
 </ion-content>

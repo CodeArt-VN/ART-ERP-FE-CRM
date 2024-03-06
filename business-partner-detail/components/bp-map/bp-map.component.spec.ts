@@ -9,8 +9,8 @@ describe('BpMapComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ BpMapComponent ],
-      imports: [IonicModule.forRoot()]
+      declarations: [BpMapComponent],
+      imports: [IonicModule.forRoot()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(BpMapComponent);

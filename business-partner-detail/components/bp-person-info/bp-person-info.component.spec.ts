@@ -9,8 +9,8 @@ describe('BpPersonInfoComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ BpPersonInfoComponent ],
-      imports: [IonicModule.forRoot()]
+      declarations: [BpPersonInfoComponent],
+      imports: [IonicModule.forRoot()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(BpPersonInfoComponent);

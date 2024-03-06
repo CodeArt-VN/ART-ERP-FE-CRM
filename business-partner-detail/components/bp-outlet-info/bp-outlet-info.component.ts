@@ -17,7 +17,7 @@ export class BpOutletInfoComponent extends PageBase {
   @Input() canEdit;
   @Input() set bpId(value) {
     this.id = value;
-  };
+  }
 
   constructor(
     public pageProvider: CRM_OutletsProvider,
@@ -45,9 +45,8 @@ export class BpOutletInfoComponent extends PageBase {
       Remark: [''],
 
       MainRouteId: [''],
-      IsDisabled: ['']
+      IsDisabled: [''],
     });
-
   }
 
   typeList = [];
@@ -58,28 +57,35 @@ export class BpOutletInfoComponent extends PageBase {
   CustomersAccessSource = [];
   DisplaySource = [];
   preLoadData() {
-    this.typeProvider.read({ IgnoredBranch: true, AllChildren: true, Code: 'OutletsType', Take: 5000 }).then(resp => {
-      this.typeList = resp['data'];
-      super.preLoadData();
-      this.getDataSource('fmcg-distribution-channels').then((tree: any) => {
-        this.TypeSource = tree;
+    this.typeProvider
+      .read({
+        IgnoredBranch: true,
+        AllChildren: true,
+        Code: 'OutletsType',
+        Take: 5000,
+      })
+      .then((resp) => {
+        this.typeList = resp['data'];
+        super.preLoadData();
+        this.getDataSource('fmcg-distribution-channels').then((tree: any) => {
+          this.TypeSource = tree;
+        });
+        this.getDataSource('shop-location').then((tree: any) => {
+          this.LocationSource = tree;
+        });
+        this.getDataSource('business-type').then((tree: any) => {
+          this.BusinessTypeSource = tree;
+        });
+        this.getDataSource('population-distribution').then((tree: any) => {
+          this.PopulationDistributionSource = tree;
+        });
+        this.getDataSource('customers-access').then((tree: any) => {
+          this.CustomersAccessSource = tree;
+        });
+        this.getDataSource('outlets-display').then((tree: any) => {
+          this.DisplaySource = tree;
+        });
       });
-      this.getDataSource('shop-location').then((tree: any) => {
-        this.LocationSource = tree;
-      });
-      this.getDataSource('business-type').then((tree: any) => {
-        this.BusinessTypeSource = tree;
-      });
-      this.getDataSource('population-distribution').then((tree: any) => {
-        this.PopulationDistributionSource = tree;
-      });
-      this.getDataSource('customers-access').then((tree: any) => {
-        this.CustomersAccessSource = tree;
-      });
-      this.getDataSource('outlets-display').then((tree: any) => {
-        this.DisplaySource = tree;
-      });
-    });
   }
 
   loadedData() {
@@ -96,13 +102,12 @@ export class BpOutletInfoComponent extends PageBase {
   }
 
   getDataSource(code) {
-    let root = this.typeList.find(d => d.Code == code);
+    let root = this.typeList.find((d) => d.Code == code);
     return lib.buildFlatTree(this.typeList, [], true, root);
   }
 
   searchShowAllChildren = (term: string, item: any) => {
     let ids = lib.searchTreeReturnId(this.typeList, term);
     return ids.indexOf(item.Id) > -1;
-  }
-
+  };
 }

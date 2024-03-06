@@ -9,8 +9,8 @@ describe('BpOutletInfoComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ BpOutletInfoComponent ],
-      imports: [IonicModule.forRoot()]
+      declarations: [BpOutletInfoComponent],
+      imports: [IonicModule.forRoot()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(BpOutletInfoComponent);

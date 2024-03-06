@@ -5,15 +5,14 @@ import { Routes, RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { ShareModule } from 'src/app/share.module';
 import { BusinessPartnerDetailPage } from './business-partner-detail.page';
-import { FileUploadModule } from 'ng2-file-upload';
 import { BusinessPartnerComponentsModule } from './components/business-partner-components.module';
 import { MapCompsModule } from 'src/app/components/map-comps/map-comps.module';
 
 const routes: Routes = [
   {
     path: '',
-    component: BusinessPartnerDetailPage
-  }
+    component: BusinessPartnerDetailPage,
+  },
 ];
 
 @NgModule({
@@ -24,10 +23,9 @@ const routes: Routes = [
     ReactiveFormsModule,
     BusinessPartnerComponentsModule,
     MapCompsModule,
-    FileUploadModule,
     ShareModule,
-    RouterModule.forChild(routes)
+    RouterModule.forChild(routes),
   ],
-  declarations: [BusinessPartnerDetailPage]
+  declarations: [BusinessPartnerDetailPage],
 })
-export class ContactDetailPageModule { }
+export class ContactDetailPageModule {}

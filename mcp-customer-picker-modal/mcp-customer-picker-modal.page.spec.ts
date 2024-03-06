@@ -9,10 +9,9 @@ describe('MCPCustomerPickerModalPage', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ MCPCustomerPickerModalPage ],
+      declarations: [MCPCustomerPickerModalPage],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
-    })
-    .compileComponents();
+    }).compileComponents();
   }));
 
   beforeEach(() => {

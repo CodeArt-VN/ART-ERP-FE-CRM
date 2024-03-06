@@ -10,7 +10,7 @@ describe('MCPPage', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [MCPPage],
-      imports: [IonicModule.forRoot()]
+      imports: [IonicModule.forRoot()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MCPPage);

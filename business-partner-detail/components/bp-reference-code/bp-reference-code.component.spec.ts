@@ -9,8 +9,8 @@ describe('BpReferenceCodeComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ BpReferenceCodeComponent ],
-      imports: [IonicModule.forRoot()]
+      declarations: [BpReferenceCodeComponent],
+      imports: [IonicModule.forRoot()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(BpReferenceCodeComponent);

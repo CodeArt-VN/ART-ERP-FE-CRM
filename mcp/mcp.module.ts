@@ -12,8 +12,8 @@ import { ShareModule } from 'src/app/share.module';
     CommonModule,
     FormsModule,
     ShareModule,
-    RouterModule.forChild([{ path: '', component: MCPPage }])
+    RouterModule.forChild([{ path: '', component: MCPPage }]),
   ],
-  declarations: [MCPPage]
+  declarations: [MCPPage],
 })
 export class MCPPageModule {}

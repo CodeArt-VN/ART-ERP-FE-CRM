@@ -5,7 +5,6 @@ import { Routes, RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { ShareModule } from 'src/app/share.module';
 import { OutletDetailPage } from './outlet-detail.page';
-import { FileUploadModule } from 'ng2-file-upload';
 import { BpPersonInfoComponent } from '../business-partner-detail/components/bp-person-info/bp-person-info.component';
 import { BpOutletInfoComponent } from '../business-partner-detail/components/bp-outlet-info/bp-outlet-info.component';
 import { BpAddressComponent } from '../business-partner-detail/components/bp-address/bp-address.component';
@@ -15,8 +14,8 @@ import { BusinessPartnerComponentsModule } from '../business-partner-detail/comp
 const routes: Routes = [
   {
     path: '',
-    component: OutletDetailPage
-  }
+    component: OutletDetailPage,
+  },
 ];
 
 @NgModule({
@@ -25,12 +24,11 @@ const routes: Routes = [
     FormsModule,
     IonicModule,
     ReactiveFormsModule,
-    FileUploadModule,
     ShareModule,
     MapCompsModule,
     BusinessPartnerComponentsModule,
-    RouterModule.forChild(routes)
+    RouterModule.forChild(routes),
   ],
-  declarations: [OutletDetailPage]
+  declarations: [OutletDetailPage],
 })
-export class OutletDetailPageModule { }
+export class OutletDetailPageModule {}
