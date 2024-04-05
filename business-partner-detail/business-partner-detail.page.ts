@@ -130,36 +130,38 @@ export class BusinessPartnerDetailPage extends PageBase {
         this.pageConfig.canDelete = false;
         //this.formGroup.get('IDAddress').disable();
       }
-    } else {
+    } 
+    if(this.pageConfig.pageName != 'business-partner'){
+      this.formGroup.controls['IsVendor'].disable();
+      this.formGroup.controls['IsCarrier'].disable();
+      this.formGroup.controls['IsDistributor'].disable();
+      this.formGroup.controls['IsStorer'].disable();
+      this.formGroup.controls['IsOutlets'].disable();
+      this.formGroup.controls['IsCustomer'].disable();
+      // this.formGroup.controls['IsProvideReferenceCode'].disable();
+    }
       if (this.pageConfig.pageName == 'vendor') {
         this.formGroup.controls['IsVendor'].setValue(true);
         this.formGroup.controls['IsVendor'].markAsDirty();
-        this.formGroup.controls['IsVendor'].disable();
       } else if (this.pageConfig.pageName == 'carrier') {
         this.formGroup.controls['IsCarrier'].setValue(true);
         this.formGroup.controls['IsCarrier'].markAsDirty();
-        this.formGroup.controls['IsCarrier'].disable();
       } else if (this.pageConfig.pageName == 'distributor') {
         this.formGroup.controls['IsDistributor'].setValue(true);
         this.formGroup.controls['IsDistributor'].markAsDirty();
-        this.formGroup.controls['IsDistributor'].disable();
       } else if (this.pageConfig.pageName == 'storer') {
         this.formGroup.controls['IsStorer'].setValue(true);
         this.formGroup.controls['IsStorer'].markAsDirty();
-        this.formGroup.controls['IsStorer'].disable();
       } else if (this.pageConfig.pageName == 'outlet') {
         this.formGroup.controls['IsOutlets'].setValue(true);
         this.formGroup.controls['IsOutlets'].markAsDirty();
-        this.formGroup.controls['IsOutlets'].disable();
       } else if (this.pageConfig.pageName == 'customer') {
         this.formGroup.controls['IsCustomer'].setValue(true);
         this.formGroup.controls['IsCustomer'].markAsDirty();
-        this.formGroup.controls['IsCustomer'].disable();
       }
 
       this.formGroup.controls['IsPersonal'].setValue(true);
       this.formGroup.controls['IsPersonal'].markAsDirty();
-    }
 
     if (this.item._Owner) {
       this.salesmanListSelected.push(this.item._Owner);
@@ -207,6 +209,14 @@ export class BusinessPartnerDetailPage extends PageBase {
     super.saveChange2();
   }
 
+  changeType(control){
+    if(this.submitAttempt) {
+      this.formGroup.get(control).setValue(!this.formGroup.get(control).value)
+      return;
+    }
+    this.submitAttempt = false;
+    this.saveChange(); 
+  }
   segmentView = 's1';
   segmentChanged(ev: any) {
     this.segmentView = ev.detail.value;
