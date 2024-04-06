@@ -34,7 +34,7 @@ export class OutletDetailPage extends PageBase {
     this.pageConfig.isDetailPage = true;
 
     this.formGroup = formBuilder.group({
-      IDBranch: [this.env.selectedBranch],
+      IDBranch: new FormControl({ value: null, disabled: false }),
       Id: new FormControl({ value: '', disabled: true }),
       Code: [''],
       Name: ['', Validators.required],
