@@ -2,7 +2,7 @@ import { Component, Renderer2 } from '@angular/core';
 import { NavController, ModalController, AlertController, LoadingController, PopoverController } from '@ionic/angular';
 import { EnvService } from 'src/app/services/core/env.service';
 import { PageBase } from 'src/app/page-base';
-import { BRA_BranchProvider, CRM_ContactProvider } from 'src/app/services/static/services.service';
+import { BRA_BranchProvider, CRM_ContactProvider, SYS_ConfigProvider } from 'src/app/services/static/services.service';
 import { Location } from '@angular/common';
 import { lib } from 'src/app/services/static/global-functions';
 import { ApiSetting } from 'src/app/services/static/api-setting';
@@ -54,6 +54,7 @@ export class BusinessPartnerPage extends PageBase {
     public pageProvider: CRM_ContactProvider,
     public branchProvider: BRA_BranchProvider,
     public modalController: ModalController,
+    public sysConfigProvider: SYS_ConfigProvider,
     public popoverCtrl: PopoverController,
     public alertCtrl: AlertController,
     public loadingController: LoadingController,
@@ -71,7 +72,7 @@ export class BusinessPartnerPage extends PageBase {
       this.sort.Id = 'Id';
       this.sortToggle('Id', true);
     }
-
+  
     if (this.pageConfig.pageName == 'vendor') {
       this.query.IgnoredBranch = true;
       this.query.IsVendor = true;
@@ -95,7 +96,11 @@ export class BusinessPartnerPage extends PageBase {
       this.query.IDOwner = this.pageConfig.canViewAllData ? 'all' : this.env.user.StaffID;
     }
 
-    Promise.all([this.branchProvider.read(), this.env.getStatus('BusinessPartner')]).then((values: any) => {
+    let sysConfigQuery = ['ContactUsedApprovalModule'];
+   
+    Promise.all([this.branchProvider.read(), this.env.getStatus('BusinessPartner'),
+     this.sysConfigProvider.read({ Code_in: sysConfigQuery, IDBranch: this.env.selectedBranch })
+   ]).then((values: any) => {
       this.branchList = values[0]['data'];
       this.statusList = values[1];
 
@@ -123,7 +128,18 @@ export class BusinessPartnerPage extends PageBase {
         this.departmentList.forEach((i) => {
           i.Query = JSON.stringify(i.IDs);
         });
-
+        if (values[2]['data']) {
+          values[2]['data'].forEach((e) => {
+            if ((e.Value == null || e.Value == 'null') && e._InheritedConfig) {
+              e.Value = e._InheritedConfig.Value;
+            }
+            this.pageConfig[e.Code] = JSON.parse(e.Value);
+            if (this.pageConfig.ContactUsedApprovalModule) {
+              this.pageConfig.canApprove = false;
+              this.pageConfig.canDisapprove = false;
+            }
+          });
+        }
         //console.log(this.departmentList)
       });
       super.preLoadData(null);
