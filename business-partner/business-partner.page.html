@@ -318,7 +318,7 @@
           ></ion-icon>
         </div>
 
-        <button mat-raised-button type="submit" style="display: none">Search</button>
+        <button mat-raised-button type="submit" style="display: none">{{'Search' | translate}}</button>
       </header>
     </form>
   </section>
@@ -335,7 +335,7 @@
   >
     <div>
       <ion-list-header lines="full">
-        <ion-label>Find duplicates</ion-label>
+        <ion-label>{{'Find duplicates' | translate}}</ion-label>
       </ion-list-header>
 
       <ion-radio-group (ionChange)="changeDuplicateKeywork($event)" [value]="'WorkPhone'">
@@ -348,7 +348,7 @@
             class="radio-icon"
             mode="md"
           ></ion-radio>
-          <ion-label style="white-space: normal">WorkPhone</ion-label>
+          <ion-label style="white-space: normal">{{'WorkPhone' | translate}}</ion-label>
         </ion-item>
         <ion-item>
           <ion-radio
@@ -359,7 +359,7 @@
             class="radio-icon"
             mode="md"
           ></ion-radio>
-          <ion-label style="white-space: normal">TaxCode</ion-label>
+          <ion-label style="white-space: normal">{{'TaxCode' | translate}}</ion-label>
         </ion-item>
       </ion-radio-group>
       <div class="ion-padding">
@@ -367,7 +367,7 @@
       </div>
 
       <ion-list-header lines="full" *ngIf="mergeFunction.items.length">
-        <ion-label>Duplicate contacts</ion-label>
+        <ion-label>{{'Duplicate contacts' | translate}}</ion-label>
       </ion-list-header>
 
       <app-page-message
@@ -471,22 +471,22 @@
           <ion-row>
             <ion-col size="2">
               <ion-row class="merge-row avatar"> </ion-row>
-              <ion-row class="merge-row"> Code </ion-row>
-              <ion-row class="merge-row"> Name </ion-row>
-              <ion-row class="merge-row name"> WorkPhone </ion-row>
-              <ion-row class="merge-row"> TaxCode </ion-row>
-              <ion-row class="merge-row"> BillingAddress </ion-row>
-              <ion-row class="merge-row"> CompanyName </ion-row>
-              <ion-row class="merge-row"> Email </ion-row>
-              <ion-row class="merge-row"> IsPersonal </ion-row>
-              <ion-row class="merge-row"> AddressLine 1 </ion-row>
-              <ion-row class="merge-row"> AddressLine 2 </ion-row>
-              <ion-row class="merge-row"> Contact </ion-row>
-              <ion-row class="merge-row"> Country </ion-row>
-              <ion-row class="merge-row"> Phone 1 </ion-row>
-              <ion-row class="merge-row"> Phone 2 </ion-row>
-              <ion-row class="merge-row"> Ward </ion-row>
-              <ion-row class="merge-row"> Province </ion-row>
+              <ion-row class="merge-row"> {{'Code' | translate}} </ion-row>
+              <ion-row class="merge-row"> {{'Name' | translate}} </ion-row>
+              <ion-row class="merge-row name"> {{'WorkPhone' | translate}} </ion-row>
+              <ion-row class="merge-row"> {{'TaxCode' | translate}} </ion-row>
+              <ion-row class="merge-row"> {{'BillingAddress' | translate}}</ion-row>
+              <ion-row class="merge-row"> {{'CompanyName' | translate}}</ion-row>
+              <ion-row class="merge-row"> {{'Email' | translate}}</ion-row>
+              <ion-row class="merge-row"> {{'IsPersonal' | translate}}</ion-row>
+              <ion-row class="merge-row"> {{'AddressLine 1' | translate}}</ion-row>
+              <ion-row class="merge-row"> {{'AddressLine 2' | translate}} </ion-row>
+              <ion-row class="merge-row"> {{'Contact' | translate}}</ion-row>
+              <ion-row class="merge-row"> {{'Country' | translate}}</ion-row>
+              <ion-row class="merge-row"> {{'Phone 1' | translate}}</ion-row>
+              <ion-row class="merge-row"> {{'Phone 2' | translate}}</ion-row>
+              <ion-row class="merge-row"> {{'Ward' | translate}}</ion-row>
+              <ion-row class="merge-row"> {{'Province' | translate}}</ion-row>
             </ion-col>
             <ion-col
               size="10"

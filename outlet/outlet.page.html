@@ -122,7 +122,7 @@
             class="c-input"
             [ngClass]="{active: query.Id}"
             type="search"
-            placeholder="Id"
+            placeholder="{{'Id' | translate}}"
           />
           <ion-icon
             class="min-btn"
@@ -209,7 +209,7 @@
             name="close-circle-outline"
           ></ion-icon>
         </div>
-        <button mat-raised-button type="submit" style="display: none">Search</button>
+        <button mat-raised-button type="submit" style="display: none">{{'Search' | translate}}</button>
       </header>
     </form>
 
