@@ -111,6 +111,8 @@ export class BusinessPartnerDetailPage extends PageBase {
   }
 
   loadedData(event?: any, ignoredFromGroup?: boolean): void {
+    
+    super.loadedData(event, ignoredFromGroup);           
     if (this.item && (this.item.IsBranch || this.item.IsStaff)) {
       this.formGroup.controls.Code.disable();
       this.formGroup.controls.Name.disable();
@@ -143,15 +145,19 @@ export class BusinessPartnerDetailPage extends PageBase {
       } else if (this.pageConfig.pageName == 'carrier') {
         this.formGroup.controls['IsCarrier'].setValue(true);
         this.formGroup.controls['IsCarrier'].markAsDirty();
+
       } else if (this.pageConfig.pageName == 'distributor') {
         this.formGroup.controls['IsDistributor'].setValue(true);
         this.formGroup.controls['IsDistributor'].markAsDirty();
+
       } else if (this.pageConfig.pageName == 'storer') {
         this.formGroup.controls['IsStorer'].setValue(true);
         this.formGroup.controls['IsStorer'].markAsDirty();
+
       } else if (this.pageConfig.pageName == 'outlet') {
         this.formGroup.controls['IsOutlets'].setValue(true);
         this.formGroup.controls['IsOutlets'].markAsDirty();
+
       } else if (this.pageConfig.pageName == 'customer') {
         this.formGroup.controls['IsCustomer'].setValue(true);
         this.formGroup.controls['IsCustomer'].markAsDirty();
@@ -167,7 +173,6 @@ export class BusinessPartnerDetailPage extends PageBase {
 
     this.salesmanSearch();
 
-    super.loadedData(event, ignoredFromGroup);
   }
 
   salesmanList$;
