@@ -85,7 +85,7 @@ export class BpTaxAddressComponent extends PageBase {
       .create({
         header: 'Xóa thông tin xuất hóa đơn',
         //subHeader: '---',
-        message: 'Bạn chắc muốn xóa thông tin xuất hóa đơn này?',
+        message: 'Bạn có chắc muốn xóa thông tin xuất hóa đơn này?',
         buttons: [
           {
             text: 'Không',

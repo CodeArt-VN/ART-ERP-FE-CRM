@@ -119,7 +119,7 @@ export class OutletPage extends PageBase {
         header: 'Gửi duyệt',
         //subHeader: '---',
         message:
-          'Sau khi gửi duyệt, bạn không thể chỉnh sửa đối tượng được nữa. Bạn chắc muốn gửi duyệt tất cả đối tượng chưa duyệt?',
+          'Sau khi gửi duyệt, bạn không thể chỉnh sửa đối tượng được nữa. Bạn có chắc muốn gửi duyệt tất cả đối tượng chưa duyệt?',
         buttons: [
           {
             text: 'Không',
@@ -188,7 +188,7 @@ export class OutletPage extends PageBase {
         .create({
           header: 'Duyệt ' + this.selectedItems.length + ' đối tượng',
           //subHeader: '---',
-          message: 'Bạn chắc muốn duyệt ' + this.selectedItems.length + ' đối tượng đang chọn?',
+          message: 'Bạn có chắc muốn duyệt ' + this.selectedItems.length + ' đối tượng đang chọn?',
           buttons: [
             {
               text: 'Không',
@@ -259,7 +259,7 @@ export class OutletPage extends PageBase {
         .create({
           header: 'Từ chối ' + this.selectedItems.length + ' đối tượng',
           //subHeader: '---',
-          message: 'Bạn chắc muốn từ chối ' + this.selectedItems.length + ' đối tượng đang chọn?',
+          message: 'Bạn có chắc muốn từ chối ' + this.selectedItems.length + ' đối tượng đang chọn?',
           buttons: [
             {
               text: 'Không',
