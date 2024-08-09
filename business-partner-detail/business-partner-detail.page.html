@@ -317,7 +317,7 @@
                           type="checkbox"
                         />
                         <label class="c-label checkbox" for="IsProvideReferenceCode"
-                          >Có khách hàng riêng
+                          >{{'Có khách hàng riêng' | translate}}
                           <span
                             *ngIf="!formGroup.controls.IsProvideReferenceCode.valid && !formGroup.controls.IsProvideReferenceCode.pending && (formGroup.controls.IsProvideReferenceCode.dirty || submitAttempt)"
                             ion-text
@@ -435,7 +435,7 @@
                 <ion-row class="hr-group" *ngIf="item?._Routes">
                   <ion-col size="12" size-sm="12" size-md="12" size-xl="3">
                     <ion-list-header class="ion-no-padding">
-                      <ion-label color="primary">Tuyến bán hàng</ion-label>
+                      <ion-label color="primary">{{'Tuyến bán hàng' | translate}}</ion-label>
                     </ion-list-header>
                   </ion-col>
                   <ion-col size="12" size-sm size-xl="8">
@@ -596,7 +596,7 @@
                 <ion-row class="hr-group" *ngIf="item?._LastSOs?.length">
                   <ion-col size="12" size-sm="12" size-md="12" size-xl="3">
                     <ion-list-header class="ion-no-padding">
-                      <ion-label color="primary">Đơn hàng gần đây</ion-label>
+                      <ion-label color="primary">{{'Đơn hàng gần đây' | translate}}</ion-label>
                     </ion-list-header>
                   </ion-col>
                   <ion-col size="12" size-sm size-xl="8">
