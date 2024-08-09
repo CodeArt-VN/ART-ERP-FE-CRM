@@ -148,7 +148,7 @@ export class BpAddressComponent extends PageBase {
       .create({
         header: 'Xóa địa chỉ',
         //subHeader: '---',
-        message: 'Bạn chắc muốn xóa địa chỉ này?',
+        message: 'Bạn có chắc muốn xóa địa chỉ này?',
         buttons: [
           {
             text: 'Không',
