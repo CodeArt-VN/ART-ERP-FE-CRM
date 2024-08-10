@@ -111,6 +111,8 @@ export class BusinessPartnerDetailPage extends PageBase {
   }
 
   loadedData(event?: any, ignoredFromGroup?: boolean): void {
+    
+    super.loadedData(event, ignoredFromGroup);           
     if (this.item && (this.item.IsBranch || this.item.IsStaff)) {
       this.formGroup.controls.Code.disable();
       this.formGroup.controls.Name.disable();
@@ -167,7 +169,6 @@ export class BusinessPartnerDetailPage extends PageBase {
 
     this.salesmanSearch();
 
-    super.loadedData(event, ignoredFromGroup);
   }
 
   salesmanList$;
