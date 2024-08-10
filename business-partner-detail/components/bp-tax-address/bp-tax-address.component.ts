@@ -103,7 +103,7 @@ export class BpTaxAddressComponent extends PageBase {
               this.pageProvider.delete(Ids).then((resp) => {
                 this.items = this.items.filter((d) => d.Id != Ids[0].Id);
                 groups.removeAt(index);
-                this.env.showTranslateMessage('Deleted! ', 'success');
+                this.env.showMessage('Deleted! ', 'success');
               });
             },
           },
@@ -140,7 +140,7 @@ export class BpTaxAddressComponent extends PageBase {
           }
         })
         .catch((err) => {
-          this.env.showTranslateMessage('Mã số thuế không hợp lệ!', 'danger');
+          this.env.showMessage('Mã số thuế không hợp lệ!', 'danger');
         });
     }
   }

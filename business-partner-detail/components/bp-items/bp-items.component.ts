@@ -94,7 +94,7 @@ export class BPItemsComponent extends PageBase {
       this.pageProvider.save(submitItem).then((resp) => {
         this.items = this.items.filter((d) => d.Id != submitItem.Id);
         groups.removeAt(index);
-        this.env.showTranslateMessage('Contacts deleted', 'success');
+        this.env.showMessage('Contacts deleted', 'success');
       });
   }
 

@@ -206,7 +206,7 @@ export class BusinessPartnerPage extends PageBase {
                         Code: publishEventCode,
                       });
                     }
-                    this.env.showTranslateMessage('Saving completed!', 'success');
+                    this.env.showMessage('Saving completed!', 'success');
                     this.submitAttempt = false;
                   })
                   .catch((err) => {
@@ -226,7 +226,7 @@ export class BusinessPartnerPage extends PageBase {
   approveBusinessPartner() {
     let itemsCanNotProcess = this.selectedItems.filter((i) => !(i.Status == 'Submitted'));
     if (itemsCanNotProcess.length == this.selectedItems.length) {
-      this.env.showTranslateMessage(
+      this.env.showMessage(
         'Selected Business Partners Cannot Be Approved. Submitted Business Partners Only!',
         'warning',
       );
@@ -276,7 +276,7 @@ export class BusinessPartnerPage extends PageBase {
                           Code: publishEventCode,
                         });
                       }
-                      this.env.showTranslateMessage('Saving completed!', 'success');
+                      this.env.showMessage('Saving completed!', 'success');
                       this.submitAttempt = false;
                     })
                     .catch((err) => {
@@ -297,7 +297,7 @@ export class BusinessPartnerPage extends PageBase {
   disapproveBusinessPartner() {
     let itemsCanNotProcess = this.selectedItems.filter((i) => !(i.Status == 'Submitted' || i.Status == 'Approved'));
     if (itemsCanNotProcess.length == this.selectedItems.length) {
-      this.env.showTranslateMessage(
+      this.env.showMessage(
         'Selected Business Partners Cannot Be Disapproved. Submitted Business Partners Only!',
         'warning',
       );
@@ -347,7 +347,7 @@ export class BusinessPartnerPage extends PageBase {
                           Code: publishEventCode,
                         });
                       }
-                      this.env.showTranslateMessage('Saving completed!', 'success');
+                      this.env.showMessage('Saving completed!', 'success');
                       this.submitAttempt = false;
                     })
                     .catch((err) => {

@@ -165,7 +165,7 @@ export class BpMapComponent extends PageBase {
       Long: marker.getPosition().lng(),
     };
     this.pageProvider.save(submitItem).then((resp) => {
-      this.env.showTranslateMessage('Location updated', 'success');
+      this.env.showMessage('Location updated', 'success');
     });
   }
 }
