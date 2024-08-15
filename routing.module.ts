@@ -15,8 +15,8 @@ export const CRMRoutes: Routes = [
     { path: 'business-partner/:id', loadChildren: () => import('./business-partner-detail/business-partner-detail.module').then(m => m.ContactDetailPageModule), canActivate: [AuthGuard] },
     { path: 'distributor', loadChildren: () => import('./business-partner/business-partner.module').then(m => m.BusinessPartnerPageModule), canActivate: [AuthGuard] },
     { path: 'distributor/:id', loadChildren: () => import('./business-partner-detail/business-partner-detail.module').then(m => m.ContactDetailPageModule), canActivate: [AuthGuard] },
-    { path: 'storer', loadChildren: () => import('./business-partner/business-partner.module').then(m => m.BusinessPartnerPageModule), canActivate: [AuthGuard] },
-    { path: 'storer/:id', loadChildren: () => import('./business-partner-detail/business-partner-detail.module').then(m => m.ContactDetailPageModule), canActivate: [AuthGuard] },
+    // { path: 'storer', loadChildren: () => import('./business-partner/business-partner.module').then(m => m.BusinessPartnerPageModule), canActivate: [AuthGuard] },
+    // { path: 'storer/:id', loadChildren: () => import('./business-partner-detail/business-partner-detail.module').then(m => m.ContactDetailPageModule), canActivate: [AuthGuard] },
     { path: 'carrier', loadChildren: () => import('./business-partner/business-partner.module').then(m => m.BusinessPartnerPageModule), canActivate: [AuthGuard] },
     { path: 'carrier/:id', loadChildren: () => import('./business-partner-detail/business-partner-detail.module').then(m => m.ContactDetailPageModule), canActivate: [AuthGuard] },
   
