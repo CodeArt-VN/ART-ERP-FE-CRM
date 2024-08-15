@@ -9,6 +9,42 @@
       </ion-col>
       <ion-col size="12" size-sm="6" size-xl="4">
         <div class="c-control">
+          <label class="c-label" for="IDWarehouse"
+            >{{ 'Warehouse' | translate }}
+            <span
+              *ngIf="
+                !formGroup.controls.IDWarehouse.valid &&
+                !formGroup.controls.IDWarehouse.pending &&
+                (formGroup.controls.IDWarehouse.dirty || submitAttempt)
+              "
+              ion-text
+              color="danger"
+              >(*)</span
+            >
+          </label>
+          <ng-select
+            class="c-input"
+            (change)="saveChange()"
+            labelForId="IDWarehouse"
+            formControlName="IDWarehouse"
+            [items]="branchList"
+            [virtualScroll]="true"
+            bindLabel="Name"
+            bindValue="Id"
+            placeholder="{{ 'Search...' | translate }}"
+          >
+            <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
+              <div *ngIf="i">
+                <div>
+                  <span *ngFor="let l of i.levels">&nbsp;&nbsp;&nbsp;</span>
+                  <span [ngOptionHighlight]="search">{{ i.Name }}</span>
+                </div>
+              </div>
+            </ng-template>
+          </ng-select>
+        </div>
+
+        <div class="c-control">
           <label class="c-label" for="StandardCarrierAlphaCode"
             >{{ 'StandardCarrierAlphaCode' | translate }}
             <span
@@ -218,9 +254,11 @@
               >(*)</span
             >
           </label>
-          <select (change)="saveChange()" class="c-input c-dropdown" formControlName="DefaultItemRotation">
-            <option value="Lot">Lot</option>
-          </select>
+          <ng-select (change)="saveChange()" class="c-input" formControlName="DefaultItemRotation">
+            <ng-option value="Lot">
+              <span>Lot</span>
+            </ng-option>
+          </ng-select>
         </div>
         <div class="c-control">
           <label class="c-label" for="DefaultRotation"
@@ -236,10 +274,11 @@
               >(*)</span
             >
           </label>
-          <select (change)="saveChange()" class="c-input c-dropdown" formControlName="DefaultRotation">
-            <option value="FIFO">{{ 'FIFO' | translate }}</option>
-            <option value="LIFO">{{ 'LIFO' | translate }}</option>
-          </select>
+
+          <ng-select (change)="saveChange()" class="c-input" formControlName="DefaultRotation">
+            <ng-option value="FIFO">{{ 'FIFO' | translate }}</ng-option>
+            <ng-option value="LIFO">{{ 'LIFO' | translate }}</ng-option>
+          </ng-select>
         </div>
         <div class="c-control">
           <label class="c-label" for="DefaultStrategy"
@@ -255,9 +294,9 @@
               >(*)</span
             >
           </label>
-          <select (change)="saveChange()" class="c-input c-dropdown" formControlName="DefaultStrategy">
-            <option [value]="1">{{ 'Std' | translate }}</option>
-          </select>
+          <ng-select (change)="saveChange()" class="c-input" formControlName="DefaultStrategy">
+            <ng-option [value]="1">{{ 'Std' | translate }}</ng-option>
+          </ng-select>
         </div>
         <div class="c-control">
           <label class="c-label" for="DefaultPutawayStrategy"
@@ -273,9 +312,9 @@
               >(*)</span
             >
           </label>
-          <select (change)="saveChange()" class="c-input c-dropdown" formControlName="DefaultPutawayStrategy">
-            <option [value]="1">{{ 'Std' | translate }}</option>
-          </select>
+          <ng-select (change)="saveChange()" class="c-input" formControlName="DefaultPutawayStrategy">
+            <ng-option [value]="1">{{ 'Std' | translate }}</ng-option>
+          </ng-select>
         </div>
       </ion-col>
       <ion-col size="12" size-sm="6" size-xl="4">
@@ -443,20 +482,21 @@
               >(*)</span
             >
           </label>
-          <select (change)="saveChange()" class="c-input c-dropdown" formControlName="LPNBarcodeSymbology">
-            <option value="Code39">
+
+          <ng-select (change)="saveChange()" class="c-input" formControlName="LPNBarcodeSymbology">
+            <ng-option value="Code39">
               {{ 'Code 39' | translate }}
-            </option>
-            <option value="Code128">
+            </ng-option>
+            <ng-option value="Code128">
               {{ 'Code 128' | translate }}
-            </option>
-            <option value="DataMatrix">
+            </ng-option>
+            <ng-option value="DataMatrix">
               {{ 'Data matrix' | translate }}
-            </option>
-            <option value="QRCode">
+            </ng-option>
+            <ng-option value="QRCode">
               {{ 'QR code' | translate }}
-            </option>
-          </select>
+            </ng-option>
+          </ng-select>
         </div>
         <div class="c-control">
           <label class="c-label" for="LPNBarcodeFormat"
@@ -472,12 +512,12 @@
               >(*)</span
             >
           </label>
-          <select (change)="saveChange()" class="c-input c-dropdown" formControlName="LPNBarcodeFormat">
-            <option value="SSCC">{{ 'SSCC' | translate }}</option>
-            <option value="UserDefined">
+          <ng-select (change)="saveChange()" class="c-input" formControlName="LPNBarcodeFormat">
+            <ng-option value="SSCC">{{ 'SSCC' | translate }}</ng-option>
+            <ng-option value="UserDefined">
               {{ 'User defined' | translate }}
-            </option>
-          </select>
+            </ng-option>
+          </ng-select>
         </div>
         <div class="c-control">
           <label class="c-label" for="LPNLength"
@@ -595,11 +635,11 @@
               >(*)</span
             >
           </label>
-          <select (change)="saveChange()" class="c-input c-dropdown" formControlName="CaseLabelType">
-            <option value="STD">{{ 'STD' | translate }}</option>
-            <option value="SGTIN">{{ 'SGTIN' | translate }}</option>
-            <option value="SSCC">{{ 'SSCC' | translate }}</option>
-          </select>
+          <ng-select (change)="saveChange()" class="c-input" formControlName="CaseLabelType">
+            <ng-option value="STD">{{ 'STD' | translate }}</ng-option>
+            <ng-option value="SGTIN">{{ 'SGTIN' | translate }}</ng-option>
+            <ng-option value="SSCC">{{ 'SSCC' | translate }}</ng-option>
+          </ng-select>
         </div>
         <div class="c-control">
           <label class="c-label" for="ApplicationID"

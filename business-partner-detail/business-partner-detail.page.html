@@ -84,9 +84,16 @@
           <ion-segment-button value="s3">
             <ion-label>{{'Classification' | translate}}</ion-label>
           </ion-segment-button>
-          <ion-segment-button value="s4" *ngIf="item.Id && formGroup.controls.IsStorer.value">
+
+          <ng-container *ngFor="let c of storerList;let j=index">
+            <ion-segment-button [value]="j" *ngIf="item.Id && formGroup.controls.IsStorer.value">
+              <ion-label *ngIf="c.Name">{{c.Name}}</ion-label>
+            </ion-segment-button>
+          </ng-container>
+
+          <!-- <ion-segment-button value="s4" *ngIf="item.Id && formGroup.controls.IsStorer.value">
             <ion-label>{{'warehousing' | translate}}</ion-label>
-          </ion-segment-button>
+          </ion-segment-button> -->
           <ion-segment-button value="invoiceInfor">
             <ion-label>{{'Invoice information' | translate}}</ion-label>
           </ion-segment-button>
@@ -100,6 +107,12 @@
             <ion-label>{{'Provided product' | translate}}</ion-label>
           </ion-segment-button>
         </ion-segment>
+        <ion-buttons slot="end" *ngIf="item.Id && formGroup.controls.IsStorer.value">
+          <ion-button (click)="addWarehouse()">
+            <ion-icon slot="start" name="add"></ion-icon>
+            {{'Add' | translate}}
+          </ion-button>
+        </ion-buttons>
       </ion-toolbar>
       <div>
         <div *ngIf="segmentView == 's1'">
@@ -212,11 +225,23 @@
                   <ion-col size="12" size-sm="6" size-xl="4" offset-xl="3">
                     <div class="c-control">
                       <span class="no-warp">
-                        <input (change)="changeType('IsVendor')" class="c-checkbox" id="IsVendor" formControlName="IsVendor" type="checkbox" />
+                        <input
+                          (change)="changeType('IsVendor')"
+                          class="c-checkbox"
+                          id="IsVendor"
+                          formControlName="IsVendor"
+                          type="checkbox"
+                        />
                         <label class="c-label checkbox" for="IsVendor"
                           >{{'Vendor' | translate}}
-                          <span *ngIf="!formGroup.controls.IsVendor.valid && !formGroup.controls.IsVendor.pending && (formGroup.controls.IsVendor.dirty || submitAttempt)" ion-text color="danger" >(*)</span >
-                        </label> </span ><br/>
+                          <span
+                            *ngIf="!formGroup.controls.IsVendor.valid && !formGroup.controls.IsVendor.pending && (formGroup.controls.IsVendor.dirty || submitAttempt)"
+                            ion-text
+                            color="danger"
+                            >(*)</span
+                          >
+                        </label> </span
+                      ><br />
 
                       <span class="no-warp">
                         <input
@@ -798,11 +823,21 @@
           </div>
         </div>
         <!-- storer-info -->
-        <div *ngIf="segmentView == 's4'">
-          <div class="ion-padding">
-            <app-bp-storer-info [canEdit]="pageConfig.canEdit" [bpId]="item.Id" *ngIf="item.Id"></app-bp-storer-info>
+
+        <ng-container *ngFor="let c of storerList; let j=index">
+          <div *ngIf="segmentView == j">
+            <div class="ion-padding">
+              <app-bp-storer-info [canEdit]="pageConfig.canEdit" [bpId]="c.Id" [bpIdStorer]="item.Id" [segmentIndex]="j" *ngIf="item.Id" (changeSegmentName)="changeSegmentName($event)"></app-bp-storer-info>
+            </div>
           </div>
-        </div>
+        </ng-container>
+
+        <!-- 
+          <ion-segment-button [value]="'warehouse'+j+1" *ngIf="item.Id && formGroup.controls.IsStorer.value" >
+            <ion-label *ngIf="c.name">{{c.name}}</ion-label>
+          </ion-segment-button>
+        </ng-container> -->
+
         <!-- Hóa đơn -->
         <div *ngIf="segmentView == 'invoiceInfor'">
           <div class="ion-padding">

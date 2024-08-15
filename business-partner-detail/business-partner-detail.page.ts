@@ -22,6 +22,7 @@ export class BusinessPartnerDetailPage extends PageBase {
   avatarURL = 'assets/imgs/avartar-empty.jpg';
   priceList = [];
   statusList = [];
+  storerList = [];
 
   constructor(
     public pageProvider: CRM_ContactProvider,
@@ -53,7 +54,6 @@ export class BusinessPartnerDetailPage extends PageBase {
       CreatedDate: new FormControl({ value: '', disabled: true }),
       ModifiedBy: new FormControl({ value: '', disabled: true }),
       ModifiedDate: new FormControl({ value: '', disabled: true }),
-
       IDParent: [''],
       Title: [''],
       IDOwner: [''],
@@ -77,10 +77,8 @@ export class BusinessPartnerDetailPage extends PageBase {
       DoNotCall: [''],
       Email: [''],
       HasOptedOutOfEmail: [''],
-
       IsBranch: new FormControl({ value: '', disabled: true }),
       IsStaff: new FormControl({ value: '', disabled: true }),
-
       IsDistributor: [''],
       IsStorer: [''],
       IsVendor: [''],
@@ -88,16 +86,15 @@ export class BusinessPartnerDetailPage extends PageBase {
       IsOutlets: [''],
       IsCustomer: [''],
       IsWholeSale: [''],
-
       IDPriceListForVendor: [''],
       IDPaymentTermForVendor: [''],
       IDBusinessPartnerGroup: [''],
       IDPriceList: [''],
       IDPaymentTerm: [''],
-
       Status: new FormControl({ value: '', disabled: true }),
       IsProvideReferenceCode: [''],
     });
+    console.log(this.formGroup.controls);
   }
 
   preLoadData(event) {
@@ -111,8 +108,10 @@ export class BusinessPartnerDetailPage extends PageBase {
   }
 
   loadedData(event?: any, ignoredFromGroup?: boolean): void {
-    
-    super.loadedData(event, ignoredFromGroup);           
+    this.formGroup.controls['IsPersonal'].setValue(true);
+    this.formGroup.controls['IsPersonal'].markAsDirty();
+
+    super.loadedData(event, ignoredFromGroup);
     if (this.item && (this.item.IsBranch || this.item.IsStaff)) {
       this.formGroup.controls.Code.disable();
       this.formGroup.controls.Name.disable();
@@ -129,8 +128,8 @@ export class BusinessPartnerDetailPage extends PageBase {
         this.pageConfig.canDelete = false;
         //this.formGroup.get('IDAddress').disable();
       }
-    } 
-    if(this.pageConfig.pageName != 'business-partner'){
+    }
+    if (this.pageConfig.pageName != 'business-partner') {
       this.formGroup.controls['IsVendor'].disable();
       this.formGroup.controls['IsCarrier'].disable();
       this.formGroup.controls['IsDistributor'].disable();
@@ -139,36 +138,35 @@ export class BusinessPartnerDetailPage extends PageBase {
       this.formGroup.controls['IsCustomer'].disable();
       // this.formGroup.controls['IsProvideReferenceCode'].disable();
     }
-      if (this.pageConfig.pageName == 'vendor') {
-        this.formGroup.controls['IsVendor'].setValue(true);
-        this.formGroup.controls['IsVendor'].markAsDirty();
-      } else if (this.pageConfig.pageName == 'carrier') {
-        this.formGroup.controls['IsCarrier'].setValue(true);
-        this.formGroup.controls['IsCarrier'].markAsDirty();
-      } else if (this.pageConfig.pageName == 'distributor') {
-        this.formGroup.controls['IsDistributor'].setValue(true);
-        this.formGroup.controls['IsDistributor'].markAsDirty();
-      } else if (this.pageConfig.pageName == 'storer') {
-        this.formGroup.controls['IsStorer'].setValue(true);
-        this.formGroup.controls['IsStorer'].markAsDirty();
-      } else if (this.pageConfig.pageName == 'outlet') {
-        this.formGroup.controls['IsOutlets'].setValue(true);
-        this.formGroup.controls['IsOutlets'].markAsDirty();
-      } else if (this.pageConfig.pageName == 'customer') {
-        this.formGroup.controls['IsCustomer'].setValue(true);
-        this.formGroup.controls['IsCustomer'].markAsDirty();
-      }
-
-      this.formGroup.controls['IsPersonal'].setValue(true);
-      this.formGroup.controls['IsPersonal'].markAsDirty();
+    if (this.pageConfig.pageName == 'vendor') {
+      this.formGroup.controls['IsVendor'].setValue(true);
+      this.formGroup.controls['IsVendor'].markAsDirty();
+    } else if (this.pageConfig.pageName == 'carrier') {
+      this.formGroup.controls['IsCarrier'].setValue(true);
+      this.formGroup.controls['IsCarrier'].markAsDirty();
+    } else if (this.pageConfig.pageName == 'distributor') {
+      this.formGroup.controls['IsDistributor'].setValue(true);
+      this.formGroup.controls['IsDistributor'].markAsDirty();
+    } else if (this.pageConfig.pageName == 'storer') {
+      this.formGroup.controls['IsStorer'].setValue(true);
+      this.formGroup.controls['IsStorer'].markAsDirty();
+    } else if (this.pageConfig.pageName == 'outlet') {
+      this.formGroup.controls['IsOutlets'].setValue(true);
+      this.formGroup.controls['IsOutlets'].markAsDirty();
+    } else if (this.pageConfig.pageName == 'customer') {
+      this.formGroup.controls['IsCustomer'].setValue(true);
+      this.formGroup.controls['IsCustomer'].markAsDirty();
+    }
 
     if (this.item._Owner) {
       this.salesmanListSelected.push(this.item._Owner);
       this.salesmanListSelected = [...this.salesmanListSelected];
     }
+    if (this.item._StorerConfig) {
+      this.storerList = [...this.item._StorerConfig];
+    }
 
     this.salesmanSearch();
-
   }
 
   salesmanList$;
@@ -207,18 +205,29 @@ export class BusinessPartnerDetailPage extends PageBase {
     super.saveChange2();
   }
 
-  changeType(control){
-    if(this.submitAttempt) {
-      this.formGroup.get(control).setValue(!this.formGroup.get(control).value)
+  changeType(control) {
+    if (this.submitAttempt) {
+      this.formGroup.get(control).setValue(!this.formGroup.get(control).value);
       return;
     }
     this.submitAttempt = false;
-    this.saveChange(); 
+    this.saveChange();
   }
   segmentView = 's1';
   segmentChanged(ev: any) {
     this.segmentView = ev.detail.value;
   }
+
+  warehouseList = [];
+
+  addWarehouse() {
+    this.storerList.push({ Name: 'Kho mới'});
+  }
+
+  changeSegmentName(data: any) {
+    this.storerList[data.index].Name = data.name;
+  }
+
 
   //https://www.google.com/maps/dir/?api=1&origin=10.764310,106.764643&destination=10.764310,106.764643&waypoints=10.7830526,106.94224159999999|10.791549,107.07479179999996|10.7915375,107.0749568|10.7922551,107.0781187|10.725809,107.05181330000005|10.7897802,107.10178040000005
   //https://www.google.com/maps/dir/10.7830526,106.94224159999999/10.791549,107.07479179999996/10.7915375,107.0749568/10.7922551,107.0781187/10.725809,107.05181330000005/10.7897802,107.10178040000005
