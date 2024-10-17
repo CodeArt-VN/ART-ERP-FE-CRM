@@ -87,12 +87,12 @@ export class OutletDetailPage extends PageBase {
   }
 
   preLoadData(event) {
+    this.loadGGMap();
     Promise.all([
       this.env.getStatus('BusinessPartner'),
       this.addressService.getAddressSubdivision()
     ]).then((values:any)=>{
       this.statusList = values[0];
-      this.loadGGMap();
       super.preLoadData(event);
     });
   }

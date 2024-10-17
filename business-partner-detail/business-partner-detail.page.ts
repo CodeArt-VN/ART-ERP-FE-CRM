@@ -104,13 +104,13 @@ export class BusinessPartnerDetailPage extends PageBase {
   }
 
   preLoadData(event) {
+    this.loadGGMap();
     Promise.all([this.priceListProvider.read(),
       this.env.getStatus('BusinessPartner'),
       this.addressService.getAddressSubdivision()
     ]).then((values:any)=>{
       this.priceList = values[0]['data'];
       this.statusList = values[1];
-      this.loadGGMap();
       super.preLoadData(event);
     });
   }
