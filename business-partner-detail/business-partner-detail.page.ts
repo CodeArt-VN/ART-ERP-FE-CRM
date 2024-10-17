@@ -12,7 +12,9 @@ import { FormBuilder, FormGroup, Validators, FormControl, FormArray } from '@ang
 import { concat, of, Subject } from 'rxjs';
 import { catchError, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
 import { CommonService } from 'src/app/services/core/common.service';
-
+import { thirdPartyLibs } from 'src/app/services/static/thirdPartyLibs';
+import { AddressService, DynamicScriptLoaderService } from 'src/app/services/custom.service';
+ declare var ggMap;
 @Component({
   selector: 'app-business-partner-detail',
   templateUrl: './business-partner-detail.page.html',
@@ -37,6 +39,8 @@ export class BusinessPartnerDetailPage extends PageBase {
     public formBuilder: FormBuilder,
     public cdr: ChangeDetectorRef,
     public loadingController: LoadingController,
+    public dynamicScriptLoaderService: DynamicScriptLoaderService,
+    public addressService : AddressService,
     public commonService: CommonService,
   ) {
     super();
@@ -93,16 +97,20 @@ export class BusinessPartnerDetailPage extends PageBase {
       IDPaymentTerm: [''],
       Status: new FormControl({ value: '', disabled: true }),
       IsProvideReferenceCode: [''],
+      Addresses: new FormArray([]),
+      DeletedAddressFields:[],
     });
     console.log(this.formGroup.controls);
   }
 
   preLoadData(event) {
-    this.priceListProvider.read().then((resp) => {
-      this.priceList = resp['data'];
-    });
-    this.env.getStatus('BusinessPartner').then((data: any) => {
-      this.statusList = data;
+    Promise.all([this.priceListProvider.read(),
+      this.env.getStatus('BusinessPartner'),
+      this.addressService.getAddressSubdivision()
+    ]).then((values:any)=>{
+      this.priceList = values[0]['data'];
+      this.statusList = values[1];
+      this.loadGGMap();
       super.preLoadData(event);
     });
   }
@@ -165,7 +173,11 @@ export class BusinessPartnerDetailPage extends PageBase {
     if (this.item._StorerConfig) {
       this.storerList = [...this.item._StorerConfig];
     }
-
+    if (this.item.Addresses?.length > 0) {
+      let groups = this.formGroup.get('Addresses') as FormArray;
+      groups.clear();
+      this.patchAddressesValue();
+    }
     this.salesmanSearch();
   }
 
@@ -197,12 +209,78 @@ export class BusinessPartnerDetailPage extends PageBase {
     );
   }
 
+  patchAddressesValue(){
+    if (this.item.Addresses) {
+      if (this.item.Addresses?.length) {
+        for (let i of this.item.Addresses) {
+          this.addAddress(i);
+        }
+      }
+  
+      if (!this.pageConfig.canEdit ) {
+        this.formGroup.controls.Addresses.disable();
+      }
+      }
+  }
+  
+  addAddress(address, markAsDirty = false){ // todo
+    let groups = <FormArray>this.formGroup.controls.Addresses;
+    let group = this.formBuilder.group({
+      IDPartner: [this.formGroup.get('Id').value],
+      Id: new FormControl(address?.Id),
+      AddressLine1: [address?.AddressLine1,Validators.required],
+      AddressLine2: [address?.AddressLine2],
+      Country: [address?.Country],
+      Province: [address?.Province],
+      District: [address?.District],
+      Ward: [address?.Ward],        
+      ZipCode: [address?.ZipCode],
+      Lat: [address?.Lat],
+      Long: [address?.Long],
+      Contact: [address?.Contact],
+      Phone1: [address?.Phone1],
+      Phone2: [address?.Phone2],
+      Remark: [address?.Remark],
+      Sort: [address?.Sort],
+    });
+    groups.push(group);
+    group.get('IDPartner').markAsDirty();
+    group.get('Id').markAsDirty();
+  }
+
   async saveChange() {
     if (this.id == '0') {
       this.formGroup.controls.Status.setValue('New');
       this.formGroup.controls.Status.markAsDirty();
     }
     super.saveChange2();
+  }
+
+  changeAddress(e){
+    let groups = <FormArray>this.formGroup.controls.Addresses;
+    let fg = groups.controls.find(d=> d.get('Id').value == e.Id) as FormGroup;
+    if(fg){
+        Object.keys(fg.controls).forEach(key => {
+          if (fg.get(key) && fg.get(key).value !== e[key]) {
+            fg.get(key).setValue(e[key]); // Update the value
+            fg.get(key).markAsDirty();    // Mark the control as dirty if the value changed
+          }
+        });
+        fg.get('Id').markAsDirty();
+        this.saveChange(); 
+    }
+  }
+
+  removeAddress(e) {
+    let groups = <FormArray>this.formGroup.controls.Addresses;
+    let fg = groups.controls.find(d=> d.get('Id').value == e.Id) as FormGroup;
+    let index = groups.controls.indexOf(fg);
+    if(e.Id >0){
+        this.formGroup.get('DeletedAddressFields').setValue([e.Id]);
+        this.formGroup.get('DeletedAddressFields').markAsDirty();
+        this.saveChange();
+    }
+    groups.removeAt(index);
   }
 
   changeType(control) {
@@ -226,6 +304,15 @@ export class BusinessPartnerDetailPage extends PageBase {
 
   changeSegmentName(data: any) {
     this.storerList[data.index].Name = data.name;
+  }
+  
+  loadGGMap() {
+    if (typeof ggMap !== 'undefined')  this.env.isMapLoaded = true;
+    else
+      this.dynamicScriptLoaderService
+        .loadResources(thirdPartyLibs.ggMap.source)
+        .then(() =>  this.env.isMapLoaded = true)
+        .catch((error) => console.error('Error loading script', error));
   }
 
 

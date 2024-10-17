@@ -4,10 +4,13 @@ import { PageBase } from 'src/app/page-base';
 import { ActivatedRoute } from '@angular/router';
 import { EnvService } from 'src/app/services/core/env.service';
 import { CRM_ContactProvider, HRM_StaffProvider } from 'src/app/services/static/services.service';
-import { FormBuilder, Validators, FormControl } from '@angular/forms';
+import { FormBuilder, Validators, FormControl, FormArray, FormGroup } from '@angular/forms';
 import { CommonService } from 'src/app/services/core/common.service';
 import { concat, of, Subject } from 'rxjs';
 import { catchError, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
+import { thirdPartyLibs } from 'src/app/services/static/thirdPartyLibs';
+import { AddressService, DynamicScriptLoaderService } from 'src/app/services/custom.service';
+declare var ggMap;
 
 @Component({
   selector: 'app-outlet-detail',
@@ -28,7 +31,9 @@ export class OutletDetailPage extends PageBase {
     public formBuilder: FormBuilder,
     public cdr: ChangeDetectorRef,
     public loadingController: LoadingController,
-    public commonService: CommonService,
+    public dynamicScriptLoaderService: DynamicScriptLoaderService,
+    public addressService : AddressService,
+      public commonService: CommonService,
   ) {
     super();
     this.pageConfig.isDetailPage = true;
@@ -61,17 +66,18 @@ export class OutletDetailPage extends PageBase {
       BillingAddress: [''],
 
       Status: new FormControl({ value: '', disabled: true }),
-      Address: this.formBuilder.group({
-        Id: [''],
-        Phone1: ['', Validators.required],
-        Contact: ['', Validators.required],
-        Province: ['', Validators.required],
-        District: ['', Validators.required],
-        Ward: ['', Validators.required],
-        AddressLine1: ['', Validators.required],
-        AddressLine2: [''],
-      }),
+      // Address: this.formBuilder.group({
+      //   Id: [''],
+      //   Phone1: ['', Validators.required],
+      //   Contact: ['', Validators.required],
+      //   Province: ['', Validators.required],
+      //   District: ['', Validators.required],
+      //   Ward: ['', Validators.required],
+      //   AddressLine1: ['', Validators.required],
+      //   AddressLine2: [''],
+      // }),
       Addresses: this.formBuilder.array([]),
+      DeletedAddressFields:[],
 
       NumberOfEmployees: [''],
       AnnualRevenue: [''],
@@ -81,8 +87,12 @@ export class OutletDetailPage extends PageBase {
   }
 
   preLoadData(event) {
-    this.env.getStatus('BusinessPartner').then((data: any) => {
-      this.statusList = data;
+    Promise.all([
+      this.env.getStatus('BusinessPartner'),
+      this.addressService.getAddressSubdivision()
+    ]).then((values:any)=>{
+      this.statusList = values[0];
+      this.loadGGMap();
       super.preLoadData(event);
     });
   }
@@ -110,9 +120,80 @@ export class OutletDetailPage extends PageBase {
       this.salesmanListSelected = [...this.salesmanListSelected];
     }
 
+    if (this.item.Addresses?.length > 0) {
+      let groups = this.formGroup.get('Addresses') as FormArray;
+      groups.clear();
+      this.patchAddressesValue();
+    }
     this.salesmanSearch();
 
     super.loadedData(event, ignoredFromGroup);
+  }
+
+  patchAddressesValue(){
+    if (this.item.Addresses) {
+      if (this.item.Addresses?.length) {
+        for (let i of this.item.Addresses) {
+          this.addAddress(i);
+        }
+      }
+  
+      if (!this.pageConfig.canEdit ) {
+        this.formGroup.controls.Addresses.disable();
+      }
+      }
+  }
+  
+  addAddress(address, markAsDirty = false){ // todo
+    let groups = <FormArray>this.formGroup.controls.Addresses;
+    let group = this.formBuilder.group({
+      IDPartner: [this.formGroup.get('Id').value],
+      Id: new FormControl(address?.Id),
+      AddressLine1: [address?.AddressLine1,Validators.required],
+      AddressLine2: [address?.AddressLine2],
+      Country: [address?.Country],
+      Province: [address?.Province],
+      District: [address?.District],
+      Ward: [address?.Ward],        
+      ZipCode: [address?.ZipCode],
+      Lat: [address?.Lat],
+      Long: [address?.Long],
+      Contact: [address?.Contact],
+      Phone1: [address?.Phone1],
+      Phone2: [address?.Phone2],
+      Remark: [address?.Remark],
+      Sort: [address?.Sort],
+    });
+    groups.push(group);
+    group.get('IDPartner').markAsDirty();
+    group.get('Id').markAsDirty();
+  }
+
+  changeAddress(e){
+    let groups = <FormArray>this.formGroup.controls.Addresses;
+    let fg = groups.controls.find(d=> d.get('Id').value == e.Id) as FormGroup;
+    if(fg){
+        Object.keys(fg.controls).forEach(key => {
+          if (fg.get(key) && fg.get(key).value !== e[key]) {
+            fg.get(key).setValue(e[key]); // Update the value
+            fg.get(key).markAsDirty();    // Mark the control as dirty if the value changed
+          }
+        });
+        fg.get('Id').markAsDirty();
+        this.saveChange(); 
+    }
+  }
+
+  removeAddress(e) {
+    let groups = <FormArray>this.formGroup.controls.Addresses;
+    let fg = groups.controls.find(d=> d.get('Id').value == e.Id) as FormGroup;
+    let index = groups.controls.indexOf(fg);
+    if(e.Id >0){
+        this.formGroup.get('DeletedAddressFields').setValue([e.Id]);
+        this.formGroup.get('DeletedAddressFields').markAsDirty();
+        this.saveChange();
+    }
+    groups.removeAt(index);
   }
 
   checkPhoneNumber() {
@@ -165,6 +246,14 @@ export class OutletDetailPage extends PageBase {
     );
   }
 
+  loadGGMap() {
+    if (typeof ggMap !== 'undefined')  this.env.isMapLoaded = true;
+    else
+      this.dynamicScriptLoaderService
+        .loadResources(thirdPartyLibs.ggMap.source)
+        .then(() =>  this.env.isMapLoaded = true)
+        .catch((error) => console.error('Error loading script', error));
+  }
   segmentView = 's1';
   segmentChanged(ev: any) {
     this.segmentView = ev.detail.value;

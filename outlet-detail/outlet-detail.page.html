@@ -234,116 +234,45 @@
             </ion-row>
 
             <!-- Địa chỉ -->
-            <app-bp-address [bpId]="item.Id" [canEdit]="pageConfig.canEdit" *ngIf="item.Id"></app-bp-address>
-
-            <ion-row class="hr-group" *ngIf="item.Id==0">
-              <ion-col size="12" size-sm="12" size-md="12" size-xl="3">
-                <ion-list-header class="ion-no-padding">
-                  <ion-label color="primary">{{'Address' | translate}}</ion-label>
-                </ion-list-header>
-              </ion-col>
-
-              <ng-container *ngFor="let add of [$any(formGroup['controls'].Address)]">
-                <ng-container [formGroup]="add">
-                  <ion-col size="12" size-sm="6" size-xl="4">
-                    <div class="c-control">
-                      <label class="c-label" [for]="'Province'"
-                        >{{'Provinces' | translate}}
-                        <span
-                          *ngIf="!add.controls.Province.valid && !add.controls.Province.pending && (add.controls.Province.dirty || submitAttempt)"
-                          ion-text
-                          color="danger"
-                          >(*)</span
-                        >
-                      </label>
-                      <input (change)="saveChange()" class="c-input" id="Province" formControlName="Province" />
-                    </div>
-                    <div class="c-control">
-                      <label class="c-label" [for]="'District'"
-                        >{{'District' | translate}}
-                        <span
-                          *ngIf="!add.controls.District.valid && !add.controls.District.pending && (add.controls.District.dirty || submitAttempt)"
-                          ion-text
-                          color="danger"
-                          >(*)</span
-                        >
-                      </label>
-                      <input (change)="saveChange()" class="c-input" id="District" formControlName="District" />
-                    </div>
-                    <div class="c-control">
-                      <label class="c-label" [for]="'Ward'"
-                        >{{'Ward' | translate}}
-                        <span
-                          *ngIf="!add.controls.Ward.valid && !add.controls.Ward.pending && (add.controls.Ward.dirty || submitAttempt)"
-                          ion-text
-                          color="danger"
-                          >(*)</span
-                        >
-                      </label>
-                      <input (change)="saveChange()" class="c-input" id="Ward" formControlName="Ward" />
-                    </div>
-                    <div class="c-control">
-                      <label class="c-label" [for]="'AddressLine1'"
-                        >{{'House number, street name, quarter' | translate}}
-                        <span
-                          *ngIf="!add.controls.AddressLine1.valid && !add.controls.AddressLine1.pending && (add.controls.AddressLine1.dirty || submitAttempt)"
-                          ion-text
-                          color="danger"
-                          >(*)</span
-                        >
-                      </label>
-                      <input (change)="saveChange()" class="c-input" id="AddressLine1" formControlName="AddressLine1" />
-                    </div>
-
-                    <div class="c-control">
-                      <label class="c-label" [for]="'AddressLine2'"
-                        >{{'Apartment, Building, Utility poles…' | translate}}
-                        <span
-                          *ngIf="!add.controls.AddressLine2.valid && !add.controls.AddressLine2.pending && (add.controls.AddressLine2.dirty || submitAttempt)"
-                          ion-text
-                          color="danger"
-                          >(*)</span
-                        >
-                      </label>
-                      <input (change)="saveChange()" class="c-input" id="AddressLine2" formControlName="AddressLine2" />
-                    </div>
-                  </ion-col>
-                  <ion-col size="12" size-sm="6" size-xl="4">
-                    <div class="c-control">
-                      <label class="c-label" for="Contact"
-                        >{{'Contact point' | translate}}
-                        <span
-                          *ngIf="!add.controls.Contact.valid && !add.controls.Contact.pending && (add.controls.Contact.dirty || submitAttempt)"
-                          ion-text
-                          color="danger"
-                          >(*)</span
-                        >
-                      </label>
-                      <input
-                        (change)="saveChange()"
-                        class="c-input"
-                        id="Contact"
-                        formControlName="Contact"
-                        type="text"
-                      />
-                    </div>
-
-                    <div class="c-control">
-                      <label class="c-label" for="Phone1"
-                        >{{'Phone number' | translate}}
-                        <span
-                          *ngIf="!add.controls.Phone1.valid && !add.controls.Phone1.pending && (add.controls.Phone1.dirty || submitAttempt)"
-                          ion-text
-                          color="danger"
-                          >(*)</span
-                        >
-                      </label>
-                      <input (change)="saveChange()" class="c-input" formControlName="Phone1" type="tel" />
-                    </div>
-                  </ion-col>
-                </ng-container>
-              </ng-container>
-            </ion-row>
+              <ion-row class="hr-group" >
+                <ion-col size="12" size-md="12" size-lg="12" size-xl="3">
+                  <ion-list lines="none">
+                    <ion-list-header class="ion-no-padding">
+                      <ion-label color="primary"> {{ 'Address' | translate }} </ion-label>
+                    </ion-list-header>
+                  </ion-list>
+                </ion-col>
+                <ion-col size="12" size-sm size-xl="8" class="ion-no-padding"  *ngIf="formGroup.get('Addresses').value.length > 0">
+                  <app-address *ngFor="let address of formGroup.get('Addresses')['controls']"
+                  [address]="address.value"
+                  [canEdit]="pageConfig.canEdit"
+                  [mapLoading]="env.isMapLoaded"
+                  (onChange)="changeAddress($event)"
+                  (onDelete)="removeAddress($event)"
+                ></app-address>
+                </ion-col>
+                <ion-col size="12" size-xl="4" *ngIf="formGroup.get('Addresses').value.length == 0 && pageConfig.canEdit">
+                  <ion-button (click)="addAddress({})">
+                    {{ 'Add address' | translate }}
+                  </ion-button>
+                </ion-col>
+              </ion-row>
+              <ion-row class="hr-group border" *ngIf="formGroup.get('Addresses').value.length > 0 && pageConfig.canEdit">
+                <ion-col size="0" size-md="0" size-lg="0" size-xl="3"></ion-col>
+                <ion-col size="12" size-xl="4">
+                  <ion-button (click)="addAddress({})">
+                    {{ 'Add address' | translate }}
+                  </ion-button>
+                </ion-col>
+              </ion-row>
+    
+                <!-- <app-bp-address
+                  [bpId]="item.Id"
+                  [canEdit]="pageConfig.canEdit"
+                  [canEdit]="pageConfig.canEdit"
+                  *ngIf="item.Id"
+                ></app-bp-address> -->
+            <!-- <app-bp-address [bpId]="item.Id" [canEdit]="pageConfig.canEdit" *ngIf="item.Id"></app-bp-address> -->
 
             <!-- Thông tin hóa đơn -->
             <app-bp-tax-address [bpId]="item.Id" [canEdit]="pageConfig.canEdit" *ngIf="item.Id"></app-bp-tax-address>
