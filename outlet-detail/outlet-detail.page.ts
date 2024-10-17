@@ -247,13 +247,15 @@ export class OutletDetailPage extends PageBase {
   }
 
   loadGGMap() {
-    if (typeof ggMap !== 'undefined')  this.env.isMapLoaded = true;
-    else
+    if (!this.env.isMapLoaded)  {
       this.dynamicScriptLoaderService
         .loadResources(thirdPartyLibs.ggMap.source)
-        .then(() =>  this.env.isMapLoaded = true)
+        .then(() =>  {
+          this.env.isMapLoaded = true
+        })
         .catch((error) => console.error('Error loading script', error));
   }
+}
   segmentView = 's1';
   segmentChanged(ev: any) {
     this.segmentView = ev.detail.value;

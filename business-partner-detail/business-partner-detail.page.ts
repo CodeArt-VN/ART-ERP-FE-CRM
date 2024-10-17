@@ -307,14 +307,15 @@ export class BusinessPartnerDetailPage extends PageBase {
   }
   
   loadGGMap() {
-    if (typeof ggMap !== 'undefined')  this.env.isMapLoaded = true;
-    else
+    if (!this.env.isMapLoaded)  {
       this.dynamicScriptLoaderService
         .loadResources(thirdPartyLibs.ggMap.source)
-        .then(() =>  this.env.isMapLoaded = true)
+        .then(() =>  {
+          this.env.isMapLoaded = true
+        })
         .catch((error) => console.error('Error loading script', error));
   }
-
+}
 
   //https://www.google.com/maps/dir/?api=1&origin=10.764310,106.764643&destination=10.764310,106.764643&waypoints=10.7830526,106.94224159999999|10.791549,107.07479179999996|10.7915375,107.0749568|10.7922551,107.0781187|10.725809,107.05181330000005|10.7897802,107.10178040000005
   //https://www.google.com/maps/dir/10.7830526,106.94224159999999/10.791549,107.07479179999996/10.7915375,107.0749568/10.7922551,107.0781187/10.725809,107.05181330000005/10.7897802,107.10178040000005
