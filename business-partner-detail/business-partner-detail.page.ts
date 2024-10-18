@@ -25,7 +25,7 @@ export class BusinessPartnerDetailPage extends PageBase {
   priceList = [];
   statusList = [];
   storerList = [];
-
+  isShowAddAddress = true;
   constructor(
     public pageProvider: CRM_ContactProvider,
     public priceListProvider: WMS_PriceListProvider,
@@ -173,11 +173,8 @@ export class BusinessPartnerDetailPage extends PageBase {
     if (this.item._StorerConfig) {
       this.storerList = [...this.item._StorerConfig];
     }
-    if (this.item.Addresses?.length > 0) {
-      let groups = this.formGroup.get('Addresses') as FormArray;
-      groups.clear();
-      this.patchAddressesValue();
-    }
+    this.patchAddressesValue();
+
     this.salesmanSearch();
   }
 
@@ -210,17 +207,18 @@ export class BusinessPartnerDetailPage extends PageBase {
   }
 
   patchAddressesValue(){
-    if (this.item.Addresses) {
+    if (this.item.Addresses?.length > 0) {
+      let groups = this.formGroup.get('Addresses') as FormArray;
+      groups.clear();
       if (this.item.Addresses?.length) {
         for (let i of this.item.Addresses) {
           this.addAddress(i);
         }
       }
-  
-      if (!this.pageConfig.canEdit ) {
-        this.formGroup.controls.Addresses.disable();
-      }
-      }
+    }
+    if (!this.pageConfig.canEdit ) {
+      this.formGroup.controls.Addresses.disable();
+    }
   }
   
   addAddress(address, markAsDirty = false){ // todo
@@ -246,6 +244,11 @@ export class BusinessPartnerDetailPage extends PageBase {
     groups.push(group);
     group.get('IDPartner').markAsDirty();
     group.get('Id').markAsDirty();
+    if(groups.controls.find(d=> !d.get('Id').value)){
+      this.isShowAddAddress = false;
+    }
+    else this.isShowAddAddress = true;
+     
   }
 
   async saveChange() {
@@ -256,7 +259,7 @@ export class BusinessPartnerDetailPage extends PageBase {
     super.saveChange2();
   }
 
-  changeAddress(e){
+  async changeAddress(e){
     let groups = <FormArray>this.formGroup.controls.Addresses;
     let fg = groups.controls.find(d=> d.get('Id').value == e.Id) as FormGroup;
     if(fg){
@@ -267,7 +270,7 @@ export class BusinessPartnerDetailPage extends PageBase {
           }
         });
         fg.get('Id').markAsDirty();
-        this.saveChange(); 
+        await this.saveChange(); 
     }
   }
 
@@ -317,6 +320,24 @@ export class BusinessPartnerDetailPage extends PageBase {
   }
 }
 
+savedChange(savedItem = null, form = this.formGroup) {
+  super.savedChange(savedItem,form);
+  let groups = <FormArray>this.formGroup.controls.Addresses;
+  let idsBeforeSaving = new Set(groups.controls.map((g) => g.get('Id').value));
+  this.item = savedItem;
+  if (this.item.Addresses?.length > 0) {
+    let newIds = new Set(this.item.Addresses.map((i) => i.Id));
+    const diff = [...newIds].filter((item) => !idsBeforeSaving.has(item));
+    if (diff?.length > 0) {
+      groups.controls .find((d) => d.get('Id').value == null) ?.get('Id') .setValue(diff[0]);
+    }
+  }
+  if(groups.controls.find(d=> !d.get('Id').value)){
+    this.isShowAddAddress = false;
+  }
+  else this.isShowAddAddress = true;
+   
+}
   //https://www.google.com/maps/dir/?api=1&origin=10.764310,106.764643&destination=10.764310,106.764643&waypoints=10.7830526,106.94224159999999|10.791549,107.07479179999996|10.7915375,107.0749568|10.7922551,107.0781187|10.725809,107.05181330000005|10.7897802,107.10178040000005
   //https://www.google.com/maps/dir/10.7830526,106.94224159999999/10.791549,107.07479179999996/10.7915375,107.0749568/10.7922551,107.0781187/10.725809,107.05181330000005/10.7897802,107.10178040000005
 }

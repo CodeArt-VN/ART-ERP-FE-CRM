@@ -19,6 +19,7 @@ declare var ggMap;
 })
 export class OutletDetailPage extends PageBase {
   statusList = [];
+  isShowAddAddress = true;
 
   constructor(
     public pageProvider: CRM_ContactProvider,
@@ -167,6 +168,11 @@ export class OutletDetailPage extends PageBase {
     groups.push(group);
     group.get('IDPartner').markAsDirty();
     group.get('Id').markAsDirty();
+    if(groups.controls.find(d=> !d.get('Id').value)){
+      this.isShowAddAddress = false;
+    }
+    else this.isShowAddAddress = true;
+     
   }
 
   changeAddress(e){
@@ -263,5 +269,24 @@ export class OutletDetailPage extends PageBase {
 
   async saveChange() {
     super.saveChange2();
+  }
+  
+  savedChange(savedItem = null, form = this.formGroup) {
+    super.savedChange(savedItem,form);
+    let groups = <FormArray>this.formGroup.controls.Addresses;
+    let idsBeforeSaving = new Set(groups.controls.map((g) => g.get('Id').value));
+    this.item = savedItem;
+    if (this.item.Addresses?.length > 0) {
+      let newIds = new Set(this.item.Addresses.map((i) => i.Id));
+      const diff = [...newIds].filter((item) => !idsBeforeSaving.has(item));
+      if (diff?.length > 0) {
+        groups.controls .find((d) => d.get('Id').value == null) ?.get('Id') .setValue(diff[0]);
+      }
+    }
+    if(groups.controls.find(d=> !d.get('Id').value)){
+      this.isShowAddAddress = false;
+    }
+    else this.isShowAddAddress = true;
+     
   }
 }
