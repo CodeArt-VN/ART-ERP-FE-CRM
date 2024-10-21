@@ -844,7 +844,6 @@
             <app-bp-tax-address
               [bpId]="item.Id"
               [canEdit]="pageConfig.canEdit"
-              [canEdit]="pageConfig.canEdit"
               *ngIf="item.Id"
             ></app-bp-tax-address>
           </div>
@@ -852,13 +851,47 @@
         <!-- Địa chỉ -->
         <div *ngIf="segmentView == 'addresses'">
           <div class="ion-padding">
-            <app-bp-address
+            <ion-grid fixed>
+          <ion-row class="hr-group border" >
+            <ion-col size="12" size-md="12" size-lg="12" size-xl="3">
+              <ion-list lines="none">
+                <ion-list-header class="ion-no-padding">
+                  <ion-label color="primary"> {{ 'Address' | translate }} </ion-label>
+                </ion-list-header>
+              </ion-list>
+            </ion-col>
+            <ion-col size="12" size-sm size-xl="8"  class="ion-no-padding" *ngIf="formGroup.get('Addresses').value.length > 0">
+              <app-address *ngFor="let address of formGroup.get('Addresses')['controls']"
+              [address]="address.value"
+              [canEdit]="pageConfig.canEdit"
+              [mapLoading]="env.isMapLoaded"
+              (onChange)="changeAddress($event)"
+              (onDelete)="removeAddress($event)"
+            ></app-address>
+            </ion-col>
+            <ion-col size="12" size-xl="4" *ngIf="formGroup.get('Addresses').value.length == 0 && pageConfig.canEdit && isShowAddAddress">
+              <ion-button (click)="addAddress({})">
+                {{ 'Add address' | translate }}
+              </ion-button>
+            </ion-col>
+          </ion-row>
+          <ion-row class="hr-group border" *ngIf="formGroup.get('Addresses').value.length > 0 && pageConfig.canEdit && isShowAddAddress">
+            <ion-col size="0" size-md="0" size-lg="0" size-xl="3"></ion-col>
+            <ion-col size="12" size-xl="4">
+              <ion-button (click)="addAddress({})">
+                {{ 'Add address' | translate }}
+              </ion-button>
+            </ion-col>
+          </ion-row>
+          </ion-grid>
+        </div>
+
+            <!-- <app-bp-address
               [bpId]="item.Id"
               [canEdit]="pageConfig.canEdit"
               [canEdit]="pageConfig.canEdit"
               *ngIf="item.Id"
-            ></app-bp-address>
-          </div>
+            ></app-bp-address> -->
         </div>
         <!-- map -->
         <div *ngIf="segmentView == 'map'" style="height: calc(100vh - 140px)">

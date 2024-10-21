@@ -7,6 +7,7 @@ import { Location } from '@angular/common';
 import { lib } from 'src/app/services/static/global-functions';
 import { ApiSetting } from 'src/app/services/static/api-setting';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
+import { AddressService } from 'src/app/services/custom.service';
 
 @Component({
   selector: 'app-business-partner',
@@ -62,6 +63,7 @@ export class BusinessPartnerPage extends PageBase {
     public formBuilder: FormBuilder,
     public navCtrl: NavController,
     public location: Location,
+    public addressService: AddressService,
   ) {
     super();
   }
@@ -99,7 +101,8 @@ export class BusinessPartnerPage extends PageBase {
     let sysConfigQuery = ['ContactUsedApprovalModule'];
    
     Promise.all([this.branchProvider.read(), this.env.getStatus('BusinessPartner'),
-     this.sysConfigProvider.read({ Code_in: sysConfigQuery, IDBranch: this.env.selectedBranch })
+     this.sysConfigProvider.read({ Code_in: sysConfigQuery, IDBranch: this.env.selectedBranch }),
+     this.addressService.getAddressSubdivision()
    ]).then((values: any) => {
       this.branchList = values[0]['data'];
       this.statusList = values[1];
