@@ -14,6 +14,7 @@ import { catchError, distinctUntilChanged, switchMap, tap } from 'rxjs/operators
 import { CommonService } from 'src/app/services/core/common.service';
 import { thirdPartyLibs } from 'src/app/services/static/thirdPartyLibs';
 import { AddressService, DynamicScriptLoaderService } from 'src/app/services/custom.service';
+import { DataCorrectionRequestModalPage } from 'src/app/modals/data-correction-request-modal/data-correction-request-modal.page';
  declare var ggMap;
 @Component({
   selector: 'app-business-partner-detail',
@@ -338,6 +339,46 @@ savedChange(savedItem = null, form = this.formGroup) {
   else this.isShowAddAddress = true;
    
 }
+async openRequestDataConnectionModal() {
+  // let formGroup = clone
+   const modal = await this.modalController.create({
+     component: DataCorrectionRequestModalPage,
+     componentProps: {
+       item: {
+         IDBranch: this.formGroup.get('IDBranch').value,
+         Id : this.formGroup.get('Id').value,
+         Code : this.formGroup.get('Code').value,
+         CompanyName : this.formGroup.get('CompanyName').value,
+         Name : this.formGroup.get('Name').value,
+         Addresses:[this.formGroup.get('Addresses').getRawValue().map(s=> {
+          return {
+            Id : s.Id, AddressLine1: s.AddressLine1, Phone1: s.Phone1
+          }
+         })
+       ]
+       },
+       model: {
+         Type: 'Outlet', Fields: [
+           { id: 'Id', type: 'number', label: 'Id',disabled : true },
+           { id: 'IDBranch', type: 'number', label: 'Branch',disabled : true },
+           { id: 'Name', type: 'text', label: 'Name'},
+           { id: 'Code', type: 'text', label: 'Code'},
+           { id: 'CompanyName', type: 'text', label: 'CompanyName' },
+          //  { id: 'DeletedAddressFields',type:'nonRender'},
+           { id: 'Addresses', type: 'FormArray', label: 'Addresses',Fields:[
+             { id: 'Id', type: 'number', label: 'Id',disabled : true},
+             { id: 'AddressLine1', type: 'text', label: 'AddressLine1' },
+           ] },
+         ]
+       },
+       cssClass: 'modal90',
+     }
+   });
+
+   await modal.present();
+   const { data } = await modal.onWillDismiss();
+
+ }
   //https://www.google.com/maps/dir/?api=1&origin=10.764310,106.764643&destination=10.764310,106.764643&waypoints=10.7830526,106.94224159999999|10.791549,107.07479179999996|10.7915375,107.0749568|10.7922551,107.0781187|10.725809,107.05181330000005|10.7897802,107.10178040000005
   //https://www.google.com/maps/dir/10.7830526,106.94224159999999/10.791549,107.07479179999996/10.7915375,107.0749568/10.7922551,107.0781187/10.725809,107.05181330000005/10.7897802,107.10178040000005
 }

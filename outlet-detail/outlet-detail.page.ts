@@ -1,5 +1,5 @@
 import { Component, ChangeDetectorRef } from '@angular/core';
-import { NavController, LoadingController, AlertController, PopoverController } from '@ionic/angular';
+import { NavController, LoadingController, AlertController, PopoverController, ModalController } from '@ionic/angular';
 import { PageBase } from 'src/app/page-base';
 import { ActivatedRoute } from '@angular/router';
 import { EnvService } from 'src/app/services/core/env.service';
@@ -10,6 +10,7 @@ import { concat, of, Subject } from 'rxjs';
 import { catchError, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
 import { thirdPartyLibs } from 'src/app/services/static/thirdPartyLibs';
 import { AddressService, DynamicScriptLoaderService } from 'src/app/services/custom.service';
+import { DataCorrectionRequestModalPage } from 'src/app/modals/data-correction-request-modal/data-correction-request-modal.page';
 declare var ggMap;
 
 @Component({
@@ -29,6 +30,7 @@ export class OutletDetailPage extends PageBase {
     public navCtrl: NavController,
     public route: ActivatedRoute,
     public alertCtrl: AlertController,
+    public modalController: ModalController,
     public formBuilder: FormBuilder,
     public cdr: ChangeDetectorRef,
     public loadingController: LoadingController,
@@ -262,6 +264,46 @@ export class OutletDetailPage extends PageBase {
         .catch((error) => console.error('Error loading script', error));
   }
 }
+
+async openRequestDataConnectionModal() {
+  // let formGroup = clone
+   const modal = await this.modalController.create({
+     component: DataCorrectionRequestModalPage,
+     componentProps: {
+       item: {
+         IDBranch: this.formGroup.get('IDBranch').value,
+         Id : this.formGroup.get('Id').value,
+         CompanyName : this.formGroup.get('CompanyName').value,
+         Name : this.formGroup.get('Name').value,
+         Addresses:[this.formGroup.get('Addresses').getRawValue().map(s=> {
+          return {
+            Id : s.Id, AddressLine1: s.AddressLine1, Phone1: s.Phone1
+          }
+         })
+       ]
+       },
+       model: {
+         Type: 'Outlet', Fields: [
+           { id: 'Id', type: 'number', label: 'Id',disabled : true },
+           { id: 'IDBranch', type: 'number', label: 'Branch',disabled : true },
+           { id: 'Name', type: 'text', label: 'Name'},
+           { id: 'CompanyName', type: 'text', label: 'CompanyName' },
+          //  { id: 'DeletedAddressFields',type:'nonRender'},
+           { id: 'Addresses', type: 'FormArray', label: 'Addresses',Fields:[
+             { id: 'Id', type: 'number', label: 'Id',disabled : true},
+             { id: 'AddressLine1', type: 'text', label: 'AddressLine1' },
+           ] },
+         ]
+       },
+       cssClass: 'modal90',
+     }
+   });
+
+   await modal.present();
+   const { data } = await modal.onWillDismiss();
+
+ }
+ 
   segmentView = 's1';
   segmentChanged(ev: any) {
     this.segmentView = ev.detail.value;
