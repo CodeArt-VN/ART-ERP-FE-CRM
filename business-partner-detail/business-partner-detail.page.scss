@@ -29,6 +29,11 @@
 .full-screen {
   min-height: calc(100vh - 385px);
 }
-
+::ng-deep{
+  ion-modal{
+    --width: 80% !important;
+    --height: 600px;
+  }
+}
 #s2 {
 }
