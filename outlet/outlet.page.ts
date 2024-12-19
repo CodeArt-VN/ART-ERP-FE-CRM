@@ -8,9 +8,10 @@ import { lib } from 'src/app/services/static/global-functions';
 import { ApiSetting } from 'src/app/services/static/api-setting';
 
 @Component({
-  selector: 'app-outlet',
-  templateUrl: 'outlet.page.html',
-  styleUrls: ['outlet.page.scss'],
+    selector: 'app-outlet',
+    templateUrl: 'outlet.page.html',
+    styleUrls: ['outlet.page.scss'],
+    standalone: false
 })
 export class OutletPage extends PageBase {
   branchList = [];

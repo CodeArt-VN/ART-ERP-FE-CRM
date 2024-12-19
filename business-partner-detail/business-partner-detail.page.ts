@@ -17,9 +17,10 @@ import { AddressService, DynamicScriptLoaderService } from 'src/app/services/cus
 import { DataCorrectionRequestModalPage } from 'src/app/modals/data-correction-request-modal/data-correction-request-modal.page';
  declare var ggMap;
 @Component({
-  selector: 'app-business-partner-detail',
-  templateUrl: './business-partner-detail.page.html',
-  styleUrls: ['./business-partner-detail.page.scss'],
+    selector: 'app-business-partner-detail',
+    templateUrl: './business-partner-detail.page.html',
+    styleUrls: ['./business-partner-detail.page.scss'],
+    standalone: false
 })
 export class BusinessPartnerDetailPage extends PageBase {
   avatarURL = 'assets/imgs/avartar-empty.jpg';

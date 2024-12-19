@@ -9,9 +9,10 @@ import { lib } from 'src/app/services/static/global-functions';
 import { ApiSetting } from 'src/app/services/static/api-setting';
 
 @Component({
-  selector: 'app-mcp-customer-picker-modal',
-  templateUrl: './mcp-customer-picker-modal.page.html',
-  styleUrls: ['./mcp-customer-picker-modal.page.scss'],
+    selector: 'app-mcp-customer-picker-modal',
+    templateUrl: './mcp-customer-picker-modal.page.html',
+    styleUrls: ['./mcp-customer-picker-modal.page.scss'],
+    standalone: false
 })
 export class MCPCustomerPickerModalPage extends PageBase {
   constructor(

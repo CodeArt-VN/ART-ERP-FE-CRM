@@ -9,9 +9,10 @@ import { lib } from 'src/app/services/static/global-functions';
 import { CRM_PersonInfoProvider } from 'src/app/services/static/services.service';
 
 @Component({
-  selector: 'app-bp-person-info',
-  templateUrl: './bp-person-info.component.html',
-  styleUrls: ['./bp-person-info.component.scss'],
+    selector: 'app-bp-person-info',
+    templateUrl: './bp-person-info.component.html',
+    styleUrls: ['./bp-person-info.component.scss'],
+    standalone: false
 })
 export class BpPersonInfoComponent extends PageBase {
   @Input() canEdit;

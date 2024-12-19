@@ -7,9 +7,10 @@ import { Location } from '@angular/common';
 import { ApiSetting } from 'src/app/services/static/api-setting';
 
 @Component({
-  selector: 'app-mcp',
-  templateUrl: 'mcp.page.html',
-  styleUrls: ['mcp.page.scss'],
+    selector: 'app-mcp',
+    templateUrl: 'mcp.page.html',
+    styleUrls: ['mcp.page.scss'],
+    standalone: false
 })
 export class MCPPage extends PageBase {
   branchList = [];

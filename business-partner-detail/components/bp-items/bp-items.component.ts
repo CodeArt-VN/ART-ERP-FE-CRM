@@ -10,9 +10,10 @@ import { concat, of, Subject } from 'rxjs';
 import { catchError, distinctUntilChanged, mergeMap, switchMap, tap } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-bp-items',
-  templateUrl: './bp-items.component.html',
-  styleUrls: ['./bp-items.component.scss'],
+    selector: 'app-bp-items',
+    templateUrl: './bp-items.component.html',
+    styleUrls: ['./bp-items.component.scss'],
+    standalone: false
 })
 export class BPItemsComponent extends PageBase {
   @Input() canEdit;

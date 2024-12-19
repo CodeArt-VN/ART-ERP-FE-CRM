@@ -21,9 +21,10 @@ import { catchError, distinctUntilChanged, switchMap, tap } from 'rxjs/operators
 import { MCPCustomerPickerModalPage } from '../mcp-customer-picker-modal/mcp-customer-picker-modal.page';
 
 @Component({
-  selector: 'app-mcp-detail',
-  templateUrl: './mcp-detail.page.html',
-  styleUrls: ['./mcp-detail.page.scss'],
+    selector: 'app-mcp-detail',
+    templateUrl: './mcp-detail.page.html',
+    styleUrls: ['./mcp-detail.page.scss'],
+    standalone: false
 })
 export class MCPDetailPage extends PageBase {
   @ViewChild('importfile') importfile: any;

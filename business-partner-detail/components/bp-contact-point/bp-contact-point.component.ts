@@ -13,9 +13,10 @@ import { catchError, distinctUntilChanged, mergeMap, switchMap, tap } from 'rxjs
 import { lib } from 'src/app/services/static/global-functions';
 
 @Component({
-  selector: 'app-bp-contact-point',
-  templateUrl: './bp-contact-point.component.html',
-  styleUrls: ['./bp-contact-point.component.scss'],
+    selector: 'app-bp-contact-point',
+    templateUrl: './bp-contact-point.component.html',
+    styleUrls: ['./bp-contact-point.component.scss'],
+    standalone: false
 })
 export class BpContactPointComponent extends PageBase {
   @Input() canEdit;

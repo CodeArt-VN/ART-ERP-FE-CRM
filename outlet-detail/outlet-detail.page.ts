@@ -14,9 +14,10 @@ import { DataCorrectionRequestModalPage } from 'src/app/modals/data-correction-r
 declare var ggMap;
 
 @Component({
-  selector: 'app-outlet-detail',
-  templateUrl: './outlet-detail.page.html',
-  styleUrls: ['./outlet-detail.page.scss'],
+    selector: 'app-outlet-detail',
+    templateUrl: './outlet-detail.page.html',
+    styleUrls: ['./outlet-detail.page.scss'],
+    standalone: false
 })
 export class OutletDetailPage extends PageBase {
   statusList = [];

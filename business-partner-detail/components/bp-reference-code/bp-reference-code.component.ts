@@ -7,9 +7,10 @@ import { EnvService } from 'src/app/services/core/env.service';
 import { CRM_ContactProvider, CRM_ContactReferenceProvider } from 'src/app/services/static/services.service';
 
 @Component({
-  selector: 'app-bp-reference-code',
-  templateUrl: './bp-reference-code.component.html',
-  styleUrls: ['./bp-reference-code.component.scss'],
+    selector: 'app-bp-reference-code',
+    templateUrl: './bp-reference-code.component.html',
+    styleUrls: ['./bp-reference-code.component.scss'],
+    standalone: false
 })
 export class BpReferenceCodeComponent extends PageBase {
   @Input() canEdit;

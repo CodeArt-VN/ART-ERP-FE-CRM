@@ -9,9 +9,10 @@ import { EnvService } from 'src/app/services/core/env.service';
 import { CRM_PartnerTaxInfoProvider } from 'src/app/services/static/services.service';
 
 @Component({
-  selector: 'app-bp-tax-address',
-  templateUrl: './bp-tax-address.component.html',
-  styleUrls: ['./bp-tax-address.component.scss'],
+    selector: 'app-bp-tax-address',
+    templateUrl: './bp-tax-address.component.html',
+    styleUrls: ['./bp-tax-address.component.scss'],
+    standalone: false
 })
 export class BpTaxAddressComponent extends PageBase {
   @Input() canEdit;

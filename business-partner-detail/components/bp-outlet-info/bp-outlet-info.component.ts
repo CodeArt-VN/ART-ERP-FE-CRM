@@ -9,9 +9,10 @@ import { lib } from 'src/app/services/static/global-functions';
 import { CRM_OutletsProvider, SYS_TypeProvider, WMS_StorerProvider } from 'src/app/services/static/services.service';
 
 @Component({
-  selector: 'app-bp-outlet-info',
-  templateUrl: './bp-outlet-info.component.html',
-  styleUrls: ['./bp-outlet-info.component.scss'],
+    selector: 'app-bp-outlet-info',
+    templateUrl: './bp-outlet-info.component.html',
+    styleUrls: ['./bp-outlet-info.component.scss'],
+    standalone: false
 })
 export class BpOutletInfoComponent extends PageBase {
   @Input() canEdit;

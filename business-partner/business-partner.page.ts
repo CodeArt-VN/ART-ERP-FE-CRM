@@ -10,9 +10,10 @@ import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { AddressService } from 'src/app/services/custom.service';
 
 @Component({
-  selector: 'app-business-partner',
-  templateUrl: 'business-partner.page.html',
-  styleUrls: ['business-partner.page.scss'],
+    selector: 'app-business-partner',
+    templateUrl: 'business-partner.page.html',
+    styleUrls: ['business-partner.page.scss'],
+    standalone: false
 })
 export class BusinessPartnerPage extends PageBase {
   branchList = [];

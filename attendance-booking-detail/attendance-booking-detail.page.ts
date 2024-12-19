@@ -9,9 +9,10 @@ import { CommonService } from 'src/app/services/core/common.service';
 import { lib } from 'src/app/services/static/global-functions';
 
 @Component({
-  selector: 'app-attendance-booking-detail',
-  templateUrl: './attendance-booking-detail.page.html',
-  styleUrls: ['./attendance-booking-detail.page.scss'],
+    selector: 'app-attendance-booking-detail',
+    templateUrl: './attendance-booking-detail.page.html',
+    styleUrls: ['./attendance-booking-detail.page.scss'],
+    standalone: false
 })
 export class AttendanceBookingDetailPage extends PageBase {
   constructor(

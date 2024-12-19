@@ -13,9 +13,10 @@ import {
 import { lib } from 'src/app/services/static/global-functions';
 
 @Component({
-  selector: 'app-bp-storer-info',
-  templateUrl: './bp-storer-info.component.html',
-  styleUrls: ['./bp-storer-info.component.scss'],
+    selector: 'app-bp-storer-info',
+    templateUrl: './bp-storer-info.component.html',
+    styleUrls: ['./bp-storer-info.component.scss'],
+    standalone: false
 })
 export class BpStorerInfoComponent extends PageBase {
   @Input() canEdit;

@@ -7,9 +7,10 @@ import { Location } from '@angular/common';
 import { lib } from 'src/app/services/static/global-functions';
 
 @Component({
-  selector: 'app-attendance-booking',
-  templateUrl: 'attendance-booking.page.html',
-  styleUrls: ['attendance-booking.page.scss'],
+    selector: 'app-attendance-booking',
+    templateUrl: 'attendance-booking.page.html',
+    styleUrls: ['attendance-booking.page.scss'],
+    standalone: false
 })
 export class AttendanceBookingPage extends PageBase {
   constructor(

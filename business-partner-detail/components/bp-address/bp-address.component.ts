@@ -12,9 +12,10 @@ import { EnvService } from 'src/app/services/core/env.service';
 import { CRM_PartnerAddressProvider } from 'src/app/services/static/services.service';
 
 @Component({
-  selector: 'app-bp-address',
-  templateUrl: './bp-address.component.html',
-  styleUrls: ['./bp-address.component.scss'],
+    selector: 'app-bp-address',
+    templateUrl: './bp-address.component.html',
+    styleUrls: ['./bp-address.component.scss'],
+    standalone: false
 })
 export class BpAddressComponent extends PageBase {
   @Input() canEdit;
