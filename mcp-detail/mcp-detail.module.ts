@@ -8,22 +8,14 @@ import { MCPDetailPage } from './mcp-detail.page';
 import { MapCompsModule } from '../../../components/map-comps/map-comps.module';
 
 const routes: Routes = [
-  {
-    path: '',
-    component: MCPDetailPage,
-  },
+	{
+		path: '',
+		component: MCPDetailPage,
+	},
 ];
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    ReactiveFormsModule,
-    MapCompsModule,
-    ShareModule,
-    RouterModule.forChild(routes),
-  ],
-  declarations: [MCPDetailPage],
+	imports: [CommonModule, FormsModule, IonicModule, ReactiveFormsModule, MapCompsModule, ShareModule, RouterModule.forChild(routes)],
+	declarations: [MCPDetailPage],
 })
 export class MCPDetailPageModule {}

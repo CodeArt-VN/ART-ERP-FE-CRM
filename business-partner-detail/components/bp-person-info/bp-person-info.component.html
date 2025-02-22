@@ -1,378 +1,267 @@
 <form [formGroup]="formGroup">
-  <!-- Thông tin cá nhân -->
-  <ion-row class="hr-group">
-    <ion-col size="12" size-sm="12" size-md="12" size-lg="12" size-xl="3">
-      <ion-list-header class="ion-no-padding">
-        <ion-label color="primary">{{ 'Personal information' | translate }}</ion-label>
-      </ion-list-header>
-    </ion-col>
-    <ion-col size="12" size-sm="6" size-xl="4">
-      <div class="c-control">
-        <label class="c-label" for="FullName"
-          >{{ 'Full name' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.FullName.valid &&
-              !formGroup.controls.FullName.pending &&
-              (formGroup.controls.FullName.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <input class="c-input" id="FullName" (change)="calcName()" formControlName="FullName" type="text" />
-      </div>
-      <div class="c-control">
-        <label class="c-label" for="LastName"
-          >{{ 'Last name' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.LastName.valid &&
-              !formGroup.controls.LastName.pending &&
-              (formGroup.controls.LastName.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <input readonly class="c-input" id="LastName" formControlName="LastName" type="text" />
-      </div>
-      <div class="c-control">
-        <label class="c-label" for="FirstName"
-          >{{ 'Name' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.FirstName.valid &&
-              !formGroup.controls.FirstName.pending &&
-              (formGroup.controls.FirstName.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <input readonly class="c-input" id="FirstName" formControlName="FirstName" type="text" />
-      </div>
-      <div class="c-control">
-        <input
-          (change)="saveChange()"
-          id="Gender1"
-          type="radio"
-          [value]="true"
-          formControlName="Gender"
-          class="c-checkbox"
-        />
-        <label class="c-label radio" for="Gender1">
-          <span>{{ 'Male' | translate }}</span>
-        </label>
-        <input
-          (change)="saveChange()"
-          id="Gender2"
-          type="radio"
-          [value]="false"
-          formControlName="Gender"
-          class="c-checkbox"
-        />
-        <label class="c-label radio" for="Gender2">
-          <span>{{ 'Female' | translate }}</span>
-          <span
-            *ngIf="
-              !formGroup.controls.Gender.valid &&
-              !formGroup.controls.Gender.pending &&
-              (formGroup.controls.Gender.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-      </div>
-    </ion-col>
-    <ion-col size="12" size-sm="6" size-xl="4">
-      <div class="c-control">
-        <label class="c-label" for="DateOfBirth"
-          >{{ 'Date of birth' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.DateOfBirth.valid &&
-              !formGroup.controls.DateOfBirth.pending &&
-              (formGroup.controls.DateOfBirth.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <input
-          class="c-input"
-          id="DateOfBirth"
-          formControlName="DateOfBirth"
-          type="date"
-          [min]="minDateOfBirth"
-          [max]="maxDateOfBirth"
-        />
-      </div>
-      <div class="c-control">
-        <label class="c-label" for="PlaceOfBirth"
-          >{{ 'Place of birth' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.PlaceOfBirth.valid &&
-              !formGroup.controls.PlaceOfBirth.pending &&
-              (formGroup.controls.PlaceOfBirth.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <input class="c-input" id="PlaceOfBirth" (change)="saveChange()" formControlName="PlaceOfBirth" type="text" />
-      </div>
-      <div class="c-control">
-        <label class="c-label" for="Nationality"
-          >{{ 'Nationality' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.Nationality.valid &&
-              !formGroup.controls.Nationality.pending &&
-              (formGroup.controls.Nationality.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <input class="c-input" id="Nationality" (change)="saveChange()" formControlName="Nationality" type="text" />
-      </div>
-      <div class="c-control">
-        <label class="c-label" for="PlaceOfOrigin"
-          >{{ 'Place of origin' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.PlaceOfOrigin.valid &&
-              !formGroup.controls.PlaceOfOrigin.pending &&
-              (formGroup.controls.PlaceOfOrigin.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <input (change)="saveChange()" class="c-input" id="PlaceOfOrigin" formControlName="PlaceOfOrigin" type="text" />
-      </div>
-    </ion-col>
-    <ion-col size="12" size-sm="6" size-xl="4" offset-xl="3">
-      <div class="c-control">
-        <label class="c-label" for="MaritalStatus"
-          >{{ 'Marital status' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.MaritalStatus.valid &&
-              !formGroup.controls.MaritalStatus.pending &&
-              (formGroup.controls.MaritalStatus.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <input class="c-input" id="MaritalStatus" (change)="saveChange()" formControlName="MaritalStatus" type="text" />
-      </div>
-      <div class="c-control">
-        <label class="c-label" for="MobilePhone"
-          >{{ 'Telephone number' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.MobilePhone.valid &&
-              !formGroup.controls.MobilePhone.pending &&
-              (formGroup.controls.MobilePhone.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <input (change)="saveChange()" class="c-input" formControlName="MobilePhone" type="text" />
-      </div>
-      <div class="c-control">
-        <label class="c-label" for="HomePhone"
-          >{{ 'Home phone number' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.HomePhone.valid &&
-              !formGroup.controls.HomePhone.pending &&
-              (formGroup.controls.HomePhone.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <input (change)="saveChange()" class="c-input" formControlName="HomePhone" type="text" />
-      </div>
-      <div class="c-control">
-        <label class="c-label" for="Email"
-          >{{ 'Email' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.Email.valid &&
-              !formGroup.controls.Email.pending &&
-              (formGroup.controls.Email.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <input (change)="saveChange()" class="c-input" formControlName="Email" type="email" />
-      </div>
-    </ion-col>
-    <ion-col size="12" size-sm="6" size-xl="4">
-      <div class="c-control">
-        <label class="c-label" for="Ethnic"
-          >{{ 'Ethnic' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.Ethnic.valid &&
-              !formGroup.controls.Ethnic.pending &&
-              (formGroup.controls.Ethnic.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <input class="c-input" id="Ethnic" (change)="saveChange()" formControlName="Ethnic" type="text" />
-      </div>
-      <div class="c-control">
-        <label class="c-label" for="Religion"
-          >{{ 'Religion' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.Religion.valid &&
-              !formGroup.controls.Religion.pending &&
-              (formGroup.controls.Religion.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <input class="c-input" id="Religion" (change)="saveChange()" formControlName="Religion" type="text" />
-      </div>
-      <div class="c-control">
-        <label class="c-label" for="Remark"
-          >{{ 'Remark' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.Remark.valid &&
-              !formGroup.controls.Remark.pending &&
-              (formGroup.controls.Remark.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <textarea
-          (change)="saveChange()"
-          rows="3"
-          class="c-input"
-          id="Remark"
-          formControlName="Remark"
-          type="textarea"
-        ></textarea>
-      </div>
-    </ion-col>
-  </ion-row>
-  <!-- CMND / Thẻ căn cước -->
-  <ion-row class="hr-group border">
-    <ion-col size="12" size-sm="12" size-md="12" size-xl="3">
-      <ion-list-header class="ion-no-padding">
-        <ion-label color="primary">{{ 'National ID Card' | translate }}</ion-label>
-      </ion-list-header>
-    </ion-col>
-    <ion-col size="12" size-sm="6" size-xl="4">
-      <div class="c-control">
-        <label class="c-label" for="IdentityCardNumber"
-          >{{ 'National ID' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.IdentityCardNumber.valid &&
-              !formGroup.controls.IdentityCardNumber.pending &&
-              (formGroup.controls.IdentityCardNumber.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <input
-          (change)="saveChange()"
-          class="c-input"
-          id="IdentityCardNumber"
-          formControlName="IdentityCardNumber"
-          type="text"
-        />
-      </div>
-      <div class="c-control">
-        <label class="c-label" for="PlaceOfIssue"
-          >{{ 'Place of issue' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.PlaceOfIssue.valid &&
-              !formGroup.controls.PlaceOfIssue.pending &&
-              (formGroup.controls.PlaceOfIssue.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <input (change)="saveChange()" class="c-input" id="PlaceOfIssue" formControlName="PlaceOfIssue" type="text" />
-      </div>
-    </ion-col>
-    <ion-col size="12" size-sm="6" size-xl="4">
-      <div class="c-control">
-        <label class="c-label" for="DateOfIssue"
-          >{{ 'Date of issue' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.DateOfIssue.valid &&
-              !formGroup.controls.DateOfIssue.pending &&
-              (formGroup.controls.DateOfIssue.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <input (change)="saveChange()" class="c-input" id="DateOfIssue" formControlName="DateOfIssue" type="date" />
-      </div>
-      <div class="c-control">
-        <label class="c-label" for="DateOfExpiration"
-          >{{ 'Expiration date' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.DateOfExpiration.valid &&
-              !formGroup.controls.DateOfExpiration.pending &&
-              (formGroup.controls.DateOfExpiration.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <input
-          (change)="saveChange()"
-          class="c-input"
-          id="DateOfExpiration"
-          formControlName="DateOfExpiration"
-          type="date"
-        />
-      </div>
-    </ion-col>
-  </ion-row>
+	<!-- Thông tin cá nhân -->
+	<ion-row class="hr-group">
+		<ion-col size="12" size-sm="12" size-md="12" size-lg="12" size-xl="3">
+			<ion-list-header class="ion-no-padding">
+				<ion-label color="primary">{{ 'Personal information' | translate }}</ion-label>
+			</ion-list-header>
+		</ion-col>
+		<ion-col size="12" size-sm="6" size-xl="4">
+			<div class="c-control">
+				<label class="c-label" for="FullName"
+					>{{ 'Full name' | translate }}
+					<span
+						*ngIf="!formGroup.controls.FullName.valid && !formGroup.controls.FullName.pending && (formGroup.controls.FullName.dirty || submitAttempt)"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<input class="c-input" id="FullName" (change)="calcName()" formControlName="FullName" type="text" />
+			</div>
+			<div class="c-control">
+				<label class="c-label" for="LastName"
+					>{{ 'Last name' | translate }}
+					<span
+						*ngIf="!formGroup.controls.LastName.valid && !formGroup.controls.LastName.pending && (formGroup.controls.LastName.dirty || submitAttempt)"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<input readonly class="c-input" id="LastName" formControlName="LastName" type="text" />
+			</div>
+			<div class="c-control">
+				<label class="c-label" for="FirstName"
+					>{{ 'Name' | translate }}
+					<span
+						*ngIf="!formGroup.controls.FirstName.valid && !formGroup.controls.FirstName.pending && (formGroup.controls.FirstName.dirty || submitAttempt)"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<input readonly class="c-input" id="FirstName" formControlName="FirstName" type="text" />
+			</div>
+			<div class="c-control">
+				<input (change)="saveChange()" id="Gender1" type="radio" [value]="true" formControlName="Gender" class="c-checkbox" />
+				<label class="c-label radio" for="Gender1">
+					<span>{{ 'Male' | translate }}</span>
+				</label>
+				<input (change)="saveChange()" id="Gender2" type="radio" [value]="false" formControlName="Gender" class="c-checkbox" />
+				<label class="c-label radio" for="Gender2">
+					<span>{{ 'Female' | translate }}</span>
+					<span
+						*ngIf="!formGroup.controls.Gender.valid && !formGroup.controls.Gender.pending && (formGroup.controls.Gender.dirty || submitAttempt)"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+			</div>
+		</ion-col>
+		<ion-col size="12" size-sm="6" size-xl="4">
+			<div class="c-control">
+				<label class="c-label" for="DateOfBirth"
+					>{{ 'Date of birth' | translate }}
+					<span
+						*ngIf="!formGroup.controls.DateOfBirth.valid && !formGroup.controls.DateOfBirth.pending && (formGroup.controls.DateOfBirth.dirty || submitAttempt)"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<input class="c-input" id="DateOfBirth" formControlName="DateOfBirth" type="date" [min]="minDateOfBirth" [max]="maxDateOfBirth" />
+			</div>
+			<div class="c-control">
+				<label class="c-label" for="PlaceOfBirth"
+					>{{ 'Place of birth' | translate }}
+					<span
+						*ngIf="!formGroup.controls.PlaceOfBirth.valid && !formGroup.controls.PlaceOfBirth.pending && (formGroup.controls.PlaceOfBirth.dirty || submitAttempt)"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<input class="c-input" id="PlaceOfBirth" (change)="saveChange()" formControlName="PlaceOfBirth" type="text" />
+			</div>
+			<div class="c-control">
+				<label class="c-label" for="Nationality"
+					>{{ 'Nationality' | translate }}
+					<span
+						*ngIf="!formGroup.controls.Nationality.valid && !formGroup.controls.Nationality.pending && (formGroup.controls.Nationality.dirty || submitAttempt)"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<input class="c-input" id="Nationality" (change)="saveChange()" formControlName="Nationality" type="text" />
+			</div>
+			<div class="c-control">
+				<label class="c-label" for="PlaceOfOrigin"
+					>{{ 'Place of origin' | translate }}
+					<span
+						*ngIf="!formGroup.controls.PlaceOfOrigin.valid && !formGroup.controls.PlaceOfOrigin.pending && (formGroup.controls.PlaceOfOrigin.dirty || submitAttempt)"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<input (change)="saveChange()" class="c-input" id="PlaceOfOrigin" formControlName="PlaceOfOrigin" type="text" />
+			</div>
+		</ion-col>
+		<ion-col size="12" size-sm="6" size-xl="4" offset-xl="3">
+			<div class="c-control">
+				<label class="c-label" for="MaritalStatus"
+					>{{ 'Marital status' | translate }}
+					<span
+						*ngIf="!formGroup.controls.MaritalStatus.valid && !formGroup.controls.MaritalStatus.pending && (formGroup.controls.MaritalStatus.dirty || submitAttempt)"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<input class="c-input" id="MaritalStatus" (change)="saveChange()" formControlName="MaritalStatus" type="text" />
+			</div>
+			<div class="c-control">
+				<label class="c-label" for="MobilePhone"
+					>{{ 'Telephone number' | translate }}
+					<span
+						*ngIf="!formGroup.controls.MobilePhone.valid && !formGroup.controls.MobilePhone.pending && (formGroup.controls.MobilePhone.dirty || submitAttempt)"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<input (change)="saveChange()" class="c-input" formControlName="MobilePhone" type="text" />
+			</div>
+			<div class="c-control">
+				<label class="c-label" for="HomePhone"
+					>{{ 'Home phone number' | translate }}
+					<span
+						*ngIf="!formGroup.controls.HomePhone.valid && !formGroup.controls.HomePhone.pending && (formGroup.controls.HomePhone.dirty || submitAttempt)"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<input (change)="saveChange()" class="c-input" formControlName="HomePhone" type="text" />
+			</div>
+			<div class="c-control">
+				<label class="c-label" for="Email"
+					>{{ 'Email' | translate }}
+					<span *ngIf="!formGroup.controls.Email.valid && !formGroup.controls.Email.pending && (formGroup.controls.Email.dirty || submitAttempt)" ion-text color="danger"
+						>(*)</span
+					>
+				</label>
+				<input (change)="saveChange()" class="c-input" formControlName="Email" type="email" />
+			</div>
+		</ion-col>
+		<ion-col size="12" size-sm="6" size-xl="4">
+			<div class="c-control">
+				<label class="c-label" for="Ethnic"
+					>{{ 'Ethnic' | translate }}
+					<span
+						*ngIf="!formGroup.controls.Ethnic.valid && !formGroup.controls.Ethnic.pending && (formGroup.controls.Ethnic.dirty || submitAttempt)"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<input class="c-input" id="Ethnic" (change)="saveChange()" formControlName="Ethnic" type="text" />
+			</div>
+			<div class="c-control">
+				<label class="c-label" for="Religion"
+					>{{ 'Religion' | translate }}
+					<span
+						*ngIf="!formGroup.controls.Religion.valid && !formGroup.controls.Religion.pending && (formGroup.controls.Religion.dirty || submitAttempt)"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<input class="c-input" id="Religion" (change)="saveChange()" formControlName="Religion" type="text" />
+			</div>
+			<div class="c-control">
+				<label class="c-label" for="Remark"
+					>{{ 'Remark' | translate }}
+					<span
+						*ngIf="!formGroup.controls.Remark.valid && !formGroup.controls.Remark.pending && (formGroup.controls.Remark.dirty || submitAttempt)"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<textarea (change)="saveChange()" rows="3" class="c-input" id="Remark" formControlName="Remark" type="textarea"></textarea>
+			</div>
+		</ion-col>
+	</ion-row>
+	<!-- CMND / Thẻ căn cước -->
+	<ion-row class="hr-group border">
+		<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
+			<ion-list-header class="ion-no-padding">
+				<ion-label color="primary">{{ 'National ID Card' | translate }}</ion-label>
+			</ion-list-header>
+		</ion-col>
+		<ion-col size="12" size-sm="6" size-xl="4">
+			<div class="c-control">
+				<label class="c-label" for="IdentityCardNumber"
+					>{{ 'National ID' | translate }}
+					<span
+						*ngIf="
+							!formGroup.controls.IdentityCardNumber.valid &&
+							!formGroup.controls.IdentityCardNumber.pending &&
+							(formGroup.controls.IdentityCardNumber.dirty || submitAttempt)
+						"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<input (change)="saveChange()" class="c-input" id="IdentityCardNumber" formControlName="IdentityCardNumber" type="text" />
+			</div>
+			<div class="c-control">
+				<label class="c-label" for="PlaceOfIssue"
+					>{{ 'Place of issue' | translate }}
+					<span
+						*ngIf="!formGroup.controls.PlaceOfIssue.valid && !formGroup.controls.PlaceOfIssue.pending && (formGroup.controls.PlaceOfIssue.dirty || submitAttempt)"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<input (change)="saveChange()" class="c-input" id="PlaceOfIssue" formControlName="PlaceOfIssue" type="text" />
+			</div>
+		</ion-col>
+		<ion-col size="12" size-sm="6" size-xl="4">
+			<div class="c-control">
+				<label class="c-label" for="DateOfIssue"
+					>{{ 'Date of issue' | translate }}
+					<span
+						*ngIf="!formGroup.controls.DateOfIssue.valid && !formGroup.controls.DateOfIssue.pending && (formGroup.controls.DateOfIssue.dirty || submitAttempt)"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<input (change)="saveChange()" class="c-input" id="DateOfIssue" formControlName="DateOfIssue" type="date" />
+			</div>
+			<div class="c-control">
+				<label class="c-label" for="DateOfExpiration"
+					>{{ 'Expiration date' | translate }}
+					<span
+						*ngIf="
+							!formGroup.controls.DateOfExpiration.valid &&
+							!formGroup.controls.DateOfExpiration.pending &&
+							(formGroup.controls.DateOfExpiration.dirty || submitAttempt)
+						"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<input (change)="saveChange()" class="c-input" id="DateOfExpiration" formControlName="DateOfExpiration" type="date" />
+			</div>
+		</ion-col>
+	</ion-row>
 </form>

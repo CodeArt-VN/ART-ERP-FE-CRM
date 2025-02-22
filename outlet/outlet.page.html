@@ -1,285 +1,186 @@
 <ion-header>
-  <app-list-toolbar
-    pageTitle="{{'List' | translate}}"
-    [ShowFeature]="false"
-    [pageConfig]="pageConfig"
-    [selectedItems]="selectedItems"
-    [query]="query"
-    (add)="add()"
-    (refresh)="refresh()"
-    (export)="export()"
-    (import)="import($event)"
-    (help)="help()"
-    (unselect)="unselect()"
-    (archiveItems)="archiveItems()"
-    (deleteItems)="deleteItems()"
-    (changeBranch)="changeBranch($event)"
-    (submitBusinessPartner)="submitBusinessPartner()"
-    (approveBusinessPartner)="approveBusinessPartner()"
-    (disapproveBusinessPartner)="disapproveBusinessPartner()"
-  ></app-list-toolbar>
+	<app-list-toolbar
+		pageTitle="{{'List' | translate}}"
+		[ShowFeature]="false"
+		[pageConfig]="pageConfig"
+		[selectedItems]="selectedItems"
+		[query]="query"
+		(add)="add()"
+		(refresh)="refresh()"
+		(export)="export()"
+		(import)="import($event)"
+		(help)="help()"
+		(unselect)="unselect()"
+		(archiveItems)="archiveItems()"
+		(deleteItems)="deleteItems()"
+		(changeBranch)="changeBranch($event)"
+		(submitBusinessPartner)="submitBusinessPartner()"
+		(approveBusinessPartner)="approveBusinessPartner()"
+		(disapproveBusinessPartner)="disapproveBusinessPartner()"
+	></app-list-toolbar>
 </ion-header>
 
 <ion-content appScrollbarTheme class="scrollx" scroll-x="true">
-  <ion-refresher
-    [disabled]="!pageConfig.refresher"
-    [disabled]="!pageConfig.refresher"
-    slot="fixed"
-    (ionRefresh)="refresh($event)"
-  >
-    <ion-refresher-content></ion-refresher-content>
-  </ion-refresher>
-  <ion-fab *ngIf="pageConfig.isShowFeature" class="feature" vertical="top" horizontal="end" slot="fixed">
-    <div class="ion-padding"></div>
-  </ion-fab>
+	<ion-refresher [disabled]="!pageConfig.refresher" [disabled]="!pageConfig.refresher" slot="fixed" (ionRefresh)="refresh($event)">
+		<ion-refresher-content></ion-refresher-content>
+	</ion-refresher>
+	<ion-fab *ngIf="pageConfig.isShowFeature" class="feature" vertical="top" horizontal="end" slot="fixed">
+		<div class="ion-padding"></div>
+	</ion-fab>
 
-  <section class="table responsive">
-    <header class="bold">
-      <div class="col-checkbox cell"></div>
-      <div class="col-id cell" (click)="sortToggle('Id')">
-        {{'Id' | translate}}
-        <ion-icon class="min-btn" *ngIf="sort.Id" [name]="sort.Id == 'Id'?'arrow-down': 'arrow-up'"></ion-icon>
-        <ion-icon
-          class="min-btn"
-          (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch"
-          *ngIf="query.Id"
-          name="search"
-          color="primary"
-        ></ion-icon>
-      </div>
-      <div class="col-icon cell clickable" (click)="sortToggle('IsPersonal')">
-        <ion-icon name="people-circle-outline"></ion-icon>
-        <ion-icon
-          class="min-btn"
-          *ngIf="sort.IsPersonal"
-          [name]="sort.IsPersonal == 'IsPersonal'?'arrow-down': 'arrow-up'"
-        ></ion-icon>
-        <ion-icon
-          class="min-btn"
-          (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch"
-          *ngIf="query.IsPersonal"
-          name="search"
-          color="primary"
-        ></ion-icon>
-      </div>
-      <div class="col-name cell" (click)="sortToggle('Name')">
-        {{'Name' | translate}}
-        <ion-icon class="min-btn" *ngIf="sort.Name" [name]="sort.Name == 'Name'?'arrow-down': 'arrow-up'"></ion-icon>
-        <ion-icon
-          class="min-btn"
-          (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch"
-          *ngIf="query.CustomerName"
-          name="search"
-          color="primary"
-        ></ion-icon>
-      </div>
-      <div class="col-saleMan cell" (click)="sortToggle('Owner')">
-        {{'Sales staff' | translate}}
-        <ion-icon class="min-btn" *ngIf="sort.Owner" [name]="sort.Owner == 'Owner'?'arrow-down': 'arrow-up'"></ion-icon>
-        <ion-icon
-          class="min-btn"
-          (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch"
-          *ngIf="query.Owner"
-          name="search"
-          color="primary"
-        ></ion-icon>
-      </div>
-      <div class="col-code cell" (click)="sortToggle('Code')">
-        {{'Vendor code' | translate}}
-        <ion-icon class="min-btn" *ngIf="sort.Code" [name]="sort.Code == 'Code'?'arrow-down': 'arrow-up'"></ion-icon>
-        <ion-icon
-          class="min-btn"
-          (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch"
-          *ngIf="query.Code"
-          name="search"
-          color="primary"
-        ></ion-icon>
-      </div>
-      <div class="col-status cell" (click)="sortToggle('IDStatus')">
-        {{'Status' | translate}}
-        <ion-icon
-          class="min-btn"
-          *ngIf="sort.IDStatus"
-          [name]="sort.IDStatus == 'IDStatus'?'arrow-down': 'arrow-up'"
-        ></ion-icon>
-        <ion-icon
-          class="min-btn"
-          (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch"
-          *ngIf="query.IDStatus"
-          name="search"
-          color="primary"
-        ></ion-icon>
-      </div>
-    </header>
-    <form (keydown.enter)="refresh()" (submit)="refresh()" action="#">
-      <header class="filter" *ngIf="pageConfig.isShowSearch">
-        <div class="col-checkbox cell"></div>
-        <div class="col-id cell">
-          <input
-            (keydown.enter)="refresh()"
-            [ngModelOptions]="{standalone: true}"
-            [(ngModel)]="query.Id"
-            class="c-input"
-            [ngClass]="{active: query.Id}"
-            type="search"
-            placeholder="{{'Id' | translate}}"
-          />
-          <ion-icon
-            class="min-btn"
-            (click)="query.Id=''; refresh()"
-            *ngIf="query.Id"
-            name="close-circle-outline"
-          ></ion-icon>
-        </div>
-        <div
-          class="col-icon col-hide-small cell clickable"
-          (click)="query.IsPersonal=query.IsPersonal===true?false:(query.IsPersonal===false? '': true); refresh()"
-        >
-          <ion-icon
-            [name]="query.IsPersonal===true?'person-outline':(query.IsPersonal===false?'business-outline':'people-circle-outline')"
-          ></ion-icon>
-        </div>
-        <div class="col-name cell">
-          <input
-            (keydown.enter)="refresh()"
-            placeholder="{{'Search by code, name, phone number' | translate}}"
-            [ngModelOptions]="{standalone: true}"
-            [(ngModel)]="query.CustomerName"
-            class="c-input"
-            [ngClass]="{active: query.CustomerName}"
-            type="search"
-          />
-          <ion-icon
-            class="min-btn"
-            (click)="query.CustomerName=''; refresh()"
-            *ngIf="query.CustomerName"
-            name="close-circle-outline"
-          ></ion-icon>
-        </div>
-        <div class="col-saleMan cell col-hide-small">
-          <input
-            (keydown.enter)="refresh()"
-            placeholder="{{'Sales staff' | translate}}"
-            [ngModelOptions]="{standalone: true}"
-            [(ngModel)]="query.Owner"
-            class="c-input"
-            [ngClass]="{active: query.Owner}"
-            type="search"
-          />
-          <ion-icon
-            class="min-btn"
-            (click)="query.Owner=''; refresh()"
-            *ngIf="query.Owner"
-            name="close-circle-outline"
-          ></ion-icon>
-        </div>
-        <div class="col-code cell col-hide-small">
-          <input
-            (keydown.enter)="refresh()"
-            placeholder="{{'Vendor code' | translate}}"
-            [ngModelOptions]="{standalone: true}"
-            [(ngModel)]="query.Code"
-            class="c-input"
-            [ngClass]="{active: query.Code}"
-            type="search"
-          />
-          <ion-icon
-            class="min-btn"
-            (click)="query.Code=''; refresh()"
-            *ngIf="query.Code"
-            name="close-circle-outline"
-          ></ion-icon>
-        </div>
-        <div class="col-status cell">
-          <select
-            (change)="refresh()"
-            class="c-input c-dropdown"
-            [ngModelOptions]="{standalone: true}"
-            [(ngModel)]="query.Status"
-            [ngClass]="{active: query.Status}"
-          >
-            <option value="">{{'All' | translate}}</option>
-            <option disabled value="">----------</option>
-            <option *ngFor="let t of statusList" [value]="t.Code">{{t.Name}}</option>
-          </select>
-          <ion-icon
-            class="min-btn"
-            (click)="query.Status=''; refresh()"
-            *ngIf="query.Status !=''"
-            name="close-circle-outline"
-          ></ion-icon>
-        </div>
-        <button mat-raised-button type="submit" style="display: none">{{'Search' | translate}}</button>
-      </header>
-    </form>
+	<section class="table responsive">
+		<header class="bold">
+			<div class="col-checkbox cell"></div>
+			<div class="col-id cell" (click)="sortToggle('Id')">
+				{{'Id' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.Id" [name]="sort.Id == 'Id'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Id" name="search" color="primary"></ion-icon>
+			</div>
+			<div class="col-icon cell clickable" (click)="sortToggle('IsPersonal')">
+				<ion-icon name="people-circle-outline"></ion-icon>
+				<ion-icon class="min-btn" *ngIf="sort.IsPersonal" [name]="sort.IsPersonal == 'IsPersonal'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.IsPersonal" name="search" color="primary"></ion-icon>
+			</div>
+			<div class="col-name cell" (click)="sortToggle('Name')">
+				{{'Name' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.Name" [name]="sort.Name == 'Name'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.CustomerName" name="search" color="primary"></ion-icon>
+			</div>
+			<div class="col-saleMan cell" (click)="sortToggle('Owner')">
+				{{'Sales staff' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.Owner" [name]="sort.Owner == 'Owner'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Owner" name="search" color="primary"></ion-icon>
+			</div>
+			<div class="col-code cell" (click)="sortToggle('Code')">
+				{{'Vendor code' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.Code" [name]="sort.Code == 'Code'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Code" name="search" color="primary"></ion-icon>
+			</div>
+			<div class="col-status cell" (click)="sortToggle('IDStatus')">
+				{{'Status' | translate}}
+				<ion-icon class="min-btn" *ngIf="sort.IDStatus" [name]="sort.IDStatus == 'IDStatus'?'arrow-down': 'arrow-up'"></ion-icon>
+				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.IDStatus" name="search" color="primary"></ion-icon>
+			</div>
+		</header>
+		<form (keydown.enter)="refresh()" (submit)="refresh()" action="#">
+			<header class="filter" *ngIf="pageConfig.isShowSearch">
+				<div class="col-checkbox cell"></div>
+				<div class="col-id cell">
+					<input
+						(keydown.enter)="refresh()"
+						[ngModelOptions]="{standalone: true}"
+						[(ngModel)]="query.Id"
+						class="c-input"
+						[ngClass]="{active: query.Id}"
+						type="search"
+						placeholder="{{'Id' | translate}}"
+					/>
+					<ion-icon class="min-btn" (click)="query.Id=''; refresh()" *ngIf="query.Id" name="close-circle-outline"></ion-icon>
+				</div>
+				<div class="col-icon col-hide-small cell clickable" (click)="query.IsPersonal=query.IsPersonal===true?false:(query.IsPersonal===false? '': true); refresh()">
+					<ion-icon [name]="query.IsPersonal===true?'person-outline':(query.IsPersonal===false?'business-outline':'people-circle-outline')"></ion-icon>
+				</div>
+				<div class="col-name cell">
+					<input
+						(keydown.enter)="refresh()"
+						placeholder="{{'Search by code, name, phone number' | translate}}"
+						[ngModelOptions]="{standalone: true}"
+						[(ngModel)]="query.CustomerName"
+						class="c-input"
+						[ngClass]="{active: query.CustomerName}"
+						type="search"
+					/>
+					<ion-icon class="min-btn" (click)="query.CustomerName=''; refresh()" *ngIf="query.CustomerName" name="close-circle-outline"></ion-icon>
+				</div>
+				<div class="col-saleMan cell col-hide-small">
+					<input
+						(keydown.enter)="refresh()"
+						placeholder="{{'Sales staff' | translate}}"
+						[ngModelOptions]="{standalone: true}"
+						[(ngModel)]="query.Owner"
+						class="c-input"
+						[ngClass]="{active: query.Owner}"
+						type="search"
+					/>
+					<ion-icon class="min-btn" (click)="query.Owner=''; refresh()" *ngIf="query.Owner" name="close-circle-outline"></ion-icon>
+				</div>
+				<div class="col-code cell col-hide-small">
+					<input
+						(keydown.enter)="refresh()"
+						placeholder="{{'Vendor code' | translate}}"
+						[ngModelOptions]="{standalone: true}"
+						[(ngModel)]="query.Code"
+						class="c-input"
+						[ngClass]="{active: query.Code}"
+						type="search"
+					/>
+					<ion-icon class="min-btn" (click)="query.Code=''; refresh()" *ngIf="query.Code" name="close-circle-outline"></ion-icon>
+				</div>
+				<div class="col-status cell">
+					<select (change)="refresh()" class="c-input c-dropdown" [ngModelOptions]="{standalone: true}" [(ngModel)]="query.Status" [ngClass]="{active: query.Status}">
+						<option value="">{{'All' | translate}}</option>
+						<option disabled value="">----------</option>
+						<option *ngFor="let t of statusList" [value]="t.Code">{{t.Name}}</option>
+					</select>
+					<ion-icon class="min-btn" (click)="query.Status=''; refresh()" *ngIf="query.Status !=''" name="close-circle-outline"></ion-icon>
+				</div>
+				<button mat-raised-button type="submit" style="display: none">{{'Search' | translate}}</button>
+			</header>
+		</form>
 
-    <app-page-message [itemsLength]="items.length" [showSpinner]="pageConfig.showSpinner"></app-page-message>
-    <div
-      *ngFor="let i of items; let j = index;"
-      class="row"
-      [ngClass]="{odd: j % 2 != 0}"
-      [ngClass]="{selected: i.checked}"
-    >
-      <div class="col-checkbox cell">
-        <input (click)="changeSelection(i, $event)" class="c-checkbox" [(ngModel)]="i.checked" type="checkbox" />
-      </div>
-      <div (click)="nav(this.pageConfig.pageName+'/'+i.Id,'forward')" class="col-id cell">
-        <a [routerLink]="['/'+pageConfig.pageName+'/'+i.Id]">{{i.Id}}</a>
-      </div>
+		<app-page-message [itemsLength]="items.length" [showSpinner]="pageConfig.showSpinner"></app-page-message>
+		<div *ngFor="let i of items; let j = index;" class="row" [ngClass]="{odd: j % 2 != 0}" [ngClass]="{selected: i.checked}">
+			<div class="col-checkbox cell">
+				<input (click)="changeSelection(i, $event)" class="c-checkbox" [(ngModel)]="i.checked" type="checkbox" />
+			</div>
+			<div (click)="nav(this.pageConfig.pageName+'/'+i.Id,'forward')" class="col-id cell">
+				<a [routerLink]="['/'+pageConfig.pageName+'/'+i.Id]">{{i.Id}}</a>
+			</div>
 
-      <div class="col-icon large cell">
-        <ion-icon
-          class="min-btn"
-          [color]="i.IsPersonal?'success':'warning'"
-          [name]="i.IsPersonal?'person-outline':'business-outline'"
-        ></ion-icon>
-      </div>
+			<div class="col-icon large cell">
+				<ion-icon class="min-btn" [color]="i.IsPersonal?'success':'warning'" [name]="i.IsPersonal?'person-outline':'business-outline'"></ion-icon>
+			</div>
 
-      <div class="col-seperator"></div>
+			<div class="col-seperator"></div>
 
-      <div class="col-name cell">
-        <div>
-          <span class="outlet-name" (click)="nav(this.pageConfig.pageName+'/'+i.Id,'forward')">{{i.Name}}</span>
+			<div class="col-name cell">
+				<div>
+					<span class="outlet-name" (click)="nav(this.pageConfig.pageName+'/'+i.Id,'forward')">{{i.Name}}</span>
 
-          <div class="address" *ngFor="let a of i.Addresses">
-            <ion-text color="medium">
-              <ion-icon color="success" name="call" *ngIf="a.Phone1"></ion-icon>
-              <span *ngIf="a.Contact">
-                <b>{{a.Contact}}</b>
-                <a [href]="'tel:'+a.Phone1" *ngIf="a.Phone1"> {{a.Phone1}}</a>
-                <br />
-              </span>
-              <span>{{a.AddressLine1}}, {{a.Ward}}, {{a.District}}</span>
-            </ion-text>
-          </div>
-        </div>
-      </div>
-      <div class="col-saleMan cell">{{i._Owner? i._Owner.FullName :''}}</div>
-      <div class="col-code col-vendorCode cell">
-        <span *ngIf="i.Code">{{i.Code}}</span>
-      </div>
+					<div class="address" *ngFor="let a of i.Addresses">
+						<ion-text color="medium">
+							<ion-icon color="success" name="call" *ngIf="a.Phone1"></ion-icon>
+							<span *ngIf="a.Contact">
+								<b>{{a.Contact}}</b>
+								<a [href]="'tel:'+a.Phone1" *ngIf="a.Phone1"> {{a.Phone1}}</a>
+								<br />
+							</span>
+							<span>{{a.AddressLine1}}, {{a.Ward}}, {{a.District}}</span>
+						</ion-text>
+					</div>
+				</div>
+			</div>
+			<div class="col-saleMan cell">{{i._Owner? i._Owner.FullName :''}}</div>
+			<div class="col-code col-vendorCode cell">
+				<span *ngIf="i.Code">{{i.Code}}</span>
+			</div>
 
-      <div class="col-status cell">
-        <span class="bar-holder">
-          <ion-text class="bar-title" [color]="i.StatusColor">{{i.StatusText}}</ion-text>
-          <span
-            class="bar"
-            [ngClass]="{active: s.Code==i.Status}"
-            [ngStyle]="{'background-color': 'var(--ion-color-'+s.Color+')'}"
-            *ngFor="let s of statusList"
-            [title]="s.Name"
-          ></span>
-        </span>
-      </div>
-    </div>
-  </section>
+			<div class="col-status cell">
+				<span class="bar-holder">
+					<ion-text class="bar-title" [color]="i.StatusColor">{{i.StatusText}}</ion-text>
+					<span
+						class="bar"
+						[ngClass]="{active: s.Code==i.Status}"
+						[ngStyle]="{'background-color': 'var(--ion-color-'+s.Color+')'}"
+						*ngFor="let s of statusList"
+						[title]="s.Name"
+					></span>
+				</span>
+			</div>
+		</div>
+	</section>
 
-  <ion-infinite-scroll
-    color="primary"
-    threshold="20%"
-    (ionInfinite)="loadData($event)"
-    [disabled]="!pageConfig.infiniteScroll || pageConfig.isEndOfData"
-  >
-    <ion-infinite-scroll-content loadingSpinner="dots"></ion-infinite-scroll-content>
-  </ion-infinite-scroll>
+	<ion-infinite-scroll color="primary" threshold="20%" (ionInfinite)="loadData($event)" [disabled]="!pageConfig.infiniteScroll || pageConfig.isEndOfData">
+		<ion-infinite-scroll-content loadingSpinner="dots"></ion-infinite-scroll-content>
+	</ion-infinite-scroll>
 </ion-content>

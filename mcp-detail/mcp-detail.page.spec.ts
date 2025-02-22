@@ -4,23 +4,23 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { MCPDetailPage } from './mcp-detail.page';
 
 describe('MCPDetailPage', () => {
-  let component: MCPDetailPage;
-  let fixture: ComponentFixture<MCPDetailPage>;
+	let component: MCPDetailPage;
+	let fixture: ComponentFixture<MCPDetailPage>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [MCPDetailPage],
-      schemas: [CUSTOM_ELEMENTS_SCHEMA],
-    }).compileComponents();
-  }));
+	beforeEach(async(() => {
+		TestBed.configureTestingModule({
+			declarations: [MCPDetailPage],
+			schemas: [CUSTOM_ELEMENTS_SCHEMA],
+		}).compileComponents();
+	}));
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(MCPDetailPage);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+	beforeEach(() => {
+		fixture = TestBed.createComponent(MCPDetailPage);
+		component = fixture.componentInstance;
+		fixture.detectChanges();
+	});
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+	it('should create', () => {
+		expect(component).toBeTruthy();
+	});
 });

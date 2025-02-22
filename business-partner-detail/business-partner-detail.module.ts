@@ -9,23 +9,14 @@ import { BusinessPartnerComponentsModule } from './components/business-partner-c
 import { MapCompsModule } from 'src/app/components/map-comps/map-comps.module';
 
 const routes: Routes = [
-  {
-    path: '',
-    component: BusinessPartnerDetailPage,
-  },
+	{
+		path: '',
+		component: BusinessPartnerDetailPage,
+	},
 ];
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    ReactiveFormsModule,
-    BusinessPartnerComponentsModule,
-    MapCompsModule,
-    ShareModule,
-    RouterModule.forChild(routes),
-  ],
-  declarations: [BusinessPartnerDetailPage],
+	imports: [CommonModule, FormsModule, IonicModule, ReactiveFormsModule, BusinessPartnerComponentsModule, MapCompsModule, ShareModule, RouterModule.forChild(routes)],
+	declarations: [BusinessPartnerDetailPage],
 })
 export class ContactDetailPageModule {}

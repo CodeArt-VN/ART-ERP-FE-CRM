@@ -1,75 +1,64 @@
 <form [formGroup]="formGroup">
-  <ion-row class="hr-group">
-    <ion-col size="12" size-sm="12" size-md="12" size-xl="3">
-      <ion-list-header class="ion-no-padding">
-        <ion-label color="primary">{{ 'Product list' | translate }}</ion-label>
-      </ion-list-header>
-      <div>
-        <ion-button fill="clear" size="small">
-          <ion-icon slot="start" name="cloud-upload"></ion-icon>
-          {{ 'Import product/price list' | translate }}
-        </ion-button>
-      </div>
-    </ion-col>
-    <ion-col size="12" size-sm size-xl="8">
-      <div class="table-contain">
-        <section class="table">
-          <header class="bold" style="padding-right: 0">
-            <div class="col-id cell">{{ 'Id' | translate }}</div>
-            <div class="col-code cell">
-              {{ 'Product code' | translate }}
-            </div>
-            <div class="col-name cell">
-              {{ 'Product name' | translate }}
-            </div>
-            <div class="col-money cell">
-              {{ 'Price' | translate }}
-            </div>
+	<ion-row class="hr-group">
+		<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
+			<ion-list-header class="ion-no-padding">
+				<ion-label color="primary">{{ 'Product list' | translate }}</ion-label>
+			</ion-list-header>
+			<div>
+				<ion-button fill="clear" size="small">
+					<ion-icon slot="start" name="cloud-upload"></ion-icon>
+					{{ 'Import product/price list' | translate }}
+				</ion-button>
+			</div>
+		</ion-col>
+		<ion-col size="12" size-sm size-xl="8">
+			<div class="table-contain">
+				<section class="table">
+					<header class="bold" style="padding-right: 0">
+						<div class="col-id cell">{{ 'Id' | translate }}</div>
+						<div class="col-code cell">
+							{{ 'Product code' | translate }}
+						</div>
+						<div class="col-name cell">
+							{{ 'Product name' | translate }}
+						</div>
+						<div class="col-money cell">
+							{{ 'Price' | translate }}
+						</div>
 
-            <div class="col-checkbox cell" *ngIf="pageConfig.canEdit"></div>
-          </header>
-          <ng-container formArrayName="Items">
-            <div
-              class="row"
-              [ngClass]="{ odd: j % 2 != 0 }"
-              *ngFor="let c of formGroup.get('Items')['controls']; let j = index"
-            >
-              <ng-container [formGroup]="c">
-                <div class="col-id cell">
-                  <a [routerLink]="['/item/' + c.controls._Item.value.Id]">{{ c.controls._Item.value.Id }}</a>
-                </div>
-                <div class="col-code cell">
-                  {{ c.controls._Item.value.Code }}
-                </div>
-                <div class="col-name cell">
-                  {{ c.controls._Item.value.Name }}
-                </div>
-                <div class="col-money cell">
-                  <input
-                    formControlName="Price"
-                    class="c-input"
-                    mask="separator.4"
-                    thousandSeparator=","
-                    [allowNegativeNumbers]="false"
-                    type="tel"
-                  />
-                </div>
+						<div class="col-checkbox cell" *ngIf="pageConfig.canEdit"></div>
+					</header>
+					<ng-container formArrayName="Items">
+						<div class="row" [ngClass]="{ odd: j % 2 != 0 }" *ngFor="let c of formGroup.get('Items')['controls']; let j = index">
+							<ng-container [formGroup]="c">
+								<div class="col-id cell">
+									<a [routerLink]="['/item/' + c.controls._Item.value.Id]">{{ c.controls._Item.value.Id }}</a>
+								</div>
+								<div class="col-code cell">
+									{{ c.controls._Item.value.Code }}
+								</div>
+								<div class="col-name cell">
+									{{ c.controls._Item.value.Name }}
+								</div>
+								<div class="col-money cell">
+									<input formControlName="Price" class="c-input" mask="separator.4" thousandSeparator="," [allowNegativeNumbers]="false" type="tel" />
+								</div>
 
-                <!-- <div class="col-name cell">
+								<!-- <div class="col-name cell">
 										<input class="c-input" (change)="saveContact(c)" formControlName="Name">
 									</div>
 									<div class="col-title cell">
 										<input class="c-input" (change)="saveContact(c)" formControlName="Title">
 									</div> -->
 
-                <!-- <div (click)="nav(pageConfig.pageName+'/'+i.Id,'forward')"><ion-icon name="open-outline"></ion-icon></div> -->
-                <div class="col-checkbox cell" *ngIf="pageConfig.canEdit">
-                  <ion-icon color="danger" class="min-btn" name="trash-outline"></ion-icon>
-                </div>
-              </ng-container>
-            </div>
-          </ng-container>
-          <!-- <div *ngIf="pageConfig.canEdit" class="row footer">
+								<!-- <div (click)="nav(pageConfig.pageName+'/'+i.Id,'forward')"><ion-icon name="open-outline"></ion-icon></div> -->
+								<div class="col-checkbox cell" *ngIf="pageConfig.canEdit">
+									<ion-icon color="danger" class="min-btn" name="trash-outline"></ion-icon>
+								</div>
+							</ng-container>
+						</div>
+					</ng-container>
+					<!-- <div *ngIf="pageConfig.canEdit" class="row footer">
 							<div class="cell">
 								<ng-select class="c-input" [readonly]="submitAttempt" (change)="selectContact($event)" [addTag]="addContactLine.bind(this)" appendTo="#selectholder" [items]="contactList$ | async" [typeahead]="contactListInput$" [loading]='contactListLoading' [virtualScroll]="true" placeholder="{{'contact-placeholder' | translate}}">
 									<ng-template ng-option-tmp let-i="item" let-search="searchTerm">
@@ -87,8 +76,8 @@
 								<ion-icon color="success" class="min-btn" name="add-circle-outline"></ion-icon>
 							</div>
 						</div> -->
-        </section>
-      </div>
-    </ion-col>
-  </ion-row>
+				</section>
+			</div>
+		</ion-col>
+	</ion-row>
 </form>

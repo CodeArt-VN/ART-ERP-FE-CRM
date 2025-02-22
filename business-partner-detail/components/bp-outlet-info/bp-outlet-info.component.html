@@ -1,256 +1,224 @@
 <form [formGroup]="formGroup" *ngIf="this.typeList.length">
-  <!-- Phân loại outlets -->
-  <ion-row class="hr-group border">
-    <ion-col size="12" size-sm="12" size-md="12" size-xl="3">
-      <ion-list-header class="ion-no-padding">
-        <ion-label color="primary">{{ 'Outlets classification' | translate }}</ion-label>
-      </ion-list-header>
-    </ion-col>
-    <ion-col size="12" size-sm="6" size-xl="4">
-      <!-- Type -->
-      <div class="c-control">
-        <label class="c-label" for="Type"
-          >{{ 'Consumption channel' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.Type.valid &&
-              !formGroup.controls.Type.pending &&
-              (formGroup.controls.Type.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <ng-select
-          class="c-input"
-          (change)="saveChange()"
-          labelForId="Type"
-          formControlName="Type"
-          [items]="TypeSource"
-          bindLabel="Name"
-          bindValue="Code"
-          [searchFn]="searchShowAllChildren"
-          placeholder="{{ 'Search' | translate }}"
-        >
-          <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
-            <div *ngIf="i">
-              <div>
-                <span *ngFor="let l of i.levels">&nbsp;&nbsp;&nbsp;</span>
-                <span [ngOptionHighlight]="search">{{ i.Name }}</span>
-              </div>
-            </div>
-          </ng-template>
-        </ng-select>
-      </div>
-      <!-- Location -->
-      <div class="c-control">
-        <label class="c-label" for="Location"
-          >{{ 'Operating location' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.Location.valid &&
-              !formGroup.controls.Location.pending &&
-              (formGroup.controls.Location.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <ng-select
-          class="c-input"
-          (change)="saveChange()"
-          labelForId="Location"
-          formControlName="Location"
-          [items]="LocationSource"
-          bindLabel="Name"
-          bindValue="Code"
-          [searchFn]="searchShowAllChildren"
-          placeholder="{{ 'Search' | translate }}"
-        >
-          <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
-            <div *ngIf="i">
-              <div>
-                <span *ngFor="let l of i.levels">&nbsp;&nbsp;&nbsp;</span>
-                <span [ngOptionHighlight]="search">{{ i.Name }}</span>
-              </div>
-            </div>
-          </ng-template>
-        </ng-select>
-      </div>
-      <!-- BusinessType -->
-      <div class="c-control">
-        <label class="c-label" for="BusinessType"
-          >{{ 'Business type' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.BusinessType.valid &&
-              !formGroup.controls.BusinessType.pending &&
-              (formGroup.controls.BusinessType.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <ng-select
-          class="c-input"
-          (change)="saveChange()"
-          labelForId="BusinessType"
-          formControlName="BusinessType"
-          [items]="BusinessTypeSource"
-          bindLabel="Name"
-          bindValue="Code"
-          [searchFn]="searchShowAllChildren"
-          placeholder="{{ 'Search' | translate }}"
-        >
-          <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
-            <div *ngIf="i">
-              <div>
-                <span *ngFor="let l of i.levels">&nbsp;&nbsp;&nbsp;</span>
-                <span [ngOptionHighlight]="search">{{ i.Name }}</span>
-              </div>
-            </div>
-          </ng-template>
-        </ng-select>
-      </div>
-      <!-- PopulationDistribution -->
-      <div class="c-control">
-        <label class="c-label" for="PopulationDistribution"
-          >{{ 'Population distribution' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.PopulationDistribution.valid &&
-              !formGroup.controls.PopulationDistribution.pending &&
-              (formGroup.controls.PopulationDistribution.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <ng-select
-          class="c-input"
-          (change)="saveChange()"
-          labelForId="PopulationDistribution"
-          formControlName="PopulationDistribution"
-          [items]="PopulationDistributionSource"
-          bindLabel="Name"
-          bindValue="Code"
-          [searchFn]="searchShowAllChildren"
-          placeholder="{{ 'Search' | translate }}"
-        >
-          <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
-            <div *ngIf="i">
-              <div>
-                <span *ngFor="let l of i.levels">&nbsp;&nbsp;&nbsp;</span>
-                <span [ngOptionHighlight]="search">{{ i.Name }}</span>
-              </div>
-            </div>
-          </ng-template>
-        </ng-select>
-      </div>
-    </ion-col>
-    <ion-col size="12" size-sm="6" size-xl="4">
-      <!-- CustomersAccess -->
-      <div class="c-control">
-        <label class="c-label" for="CustomersAccess"
-          >{{ 'Access of customers' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.CustomersAccess.valid &&
-              !formGroup.controls.CustomersAccess.pending &&
-              (formGroup.controls.CustomersAccess.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <ng-select
-          class="c-input"
-          (change)="saveChange()"
-          labelForId="CustomersAccess"
-          formControlName="CustomersAccess"
-          [items]="CustomersAccessSource"
-          [virtualScroll]="true"
-          bindLabel="Name"
-          bindValue="Code"
-          [searchFn]="searchShowAllChildren"
-          placeholder="{{ 'Search' | translate }}"
-        >
-          <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
-            <div *ngIf="i">
-              <div>
-                <span *ngFor="let l of i.levels">&nbsp;&nbsp;&nbsp;</span>
-                <span [ngOptionHighlight]="search">{{ i.Name }}</span>
-              </div>
-            </div>
-          </ng-template>
-        </ng-select>
-      </div>
-      <!-- Display -->
-      <div class="c-control">
-        <label class="c-label" for="Display"
-          >{{ 'Samples' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.Display.valid &&
-              !formGroup.controls.Display.pending &&
-              (formGroup.controls.Display.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <ng-select
-          class="c-input"
-          (change)="saveChange()"
-          labelForId="Display"
-          formControlName="Display"
-          [items]="DisplaySource"
-          [virtualScroll]="true"
-          bindLabel="Name"
-          bindValue="Code"
-          [searchFn]="searchShowAllChildren"
-          placeholder="{{ 'Search' | translate }}"
-        >
-          <ng-template ng-option-tmp let-i="item" let-search="searchTerm">
-            <div *ngIf="i">
-              <div>
-                <span *ngFor="let l of i.levels">&nbsp;&nbsp;&nbsp;</span>
-                <span [ngOptionHighlight]="search">{{ i.Name }}</span>
-              </div>
-            </div>
-          </ng-template>
-        </ng-select>
-      </div>
-      <!-- Remark -->
-      <div class="c-control">
-        <label class="c-label" for="Remark"
-          >{{ 'Remark' | translate }}
-          <span
-            *ngIf="
-              !formGroup.controls.Remark.valid &&
-              !formGroup.controls.Remark.pending &&
-              (formGroup.controls.Remark.dirty || submitAttempt)
-            "
-            ion-text
-            color="danger"
-            >(*)</span
-          >
-        </label>
-        <textarea
-          rows="3"
-          class="c-input"
-          (change)="saveChange()"
-          id="Remark"
-          formControlName="Remark"
-          type="textarea"
-        ></textarea>
-      </div>
-    </ion-col>
-  </ion-row>
+	<!-- Phân loại outlets -->
+	<ion-row class="hr-group border">
+		<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
+			<ion-list-header class="ion-no-padding">
+				<ion-label color="primary">{{ 'Outlets classification' | translate }}</ion-label>
+			</ion-list-header>
+		</ion-col>
+		<ion-col size="12" size-sm="6" size-xl="4">
+			<!-- Type -->
+			<div class="c-control">
+				<label class="c-label" for="Type"
+					>{{ 'Consumption channel' | translate }}
+					<span *ngIf="!formGroup.controls.Type.valid && !formGroup.controls.Type.pending && (formGroup.controls.Type.dirty || submitAttempt)" ion-text color="danger"
+						>(*)</span
+					>
+				</label>
+				<ng-select
+					class="c-input"
+					(change)="saveChange()"
+					labelForId="Type"
+					formControlName="Type"
+					[items]="TypeSource"
+					bindLabel="Name"
+					bindValue="Code"
+					[searchFn]="searchShowAllChildren"
+					placeholder="{{ 'Search' | translate }}"
+				>
+					<ng-template ng-option-tmp let-i="item" let-search="searchTerm">
+						<div *ngIf="i">
+							<div>
+								<span *ngFor="let l of i.levels">&nbsp;&nbsp;&nbsp;</span>
+								<span [ngOptionHighlight]="search">{{ i.Name }}</span>
+							</div>
+						</div>
+					</ng-template>
+				</ng-select>
+			</div>
+			<!-- Location -->
+			<div class="c-control">
+				<label class="c-label" for="Location"
+					>{{ 'Operating location' | translate }}
+					<span
+						*ngIf="!formGroup.controls.Location.valid && !formGroup.controls.Location.pending && (formGroup.controls.Location.dirty || submitAttempt)"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<ng-select
+					class="c-input"
+					(change)="saveChange()"
+					labelForId="Location"
+					formControlName="Location"
+					[items]="LocationSource"
+					bindLabel="Name"
+					bindValue="Code"
+					[searchFn]="searchShowAllChildren"
+					placeholder="{{ 'Search' | translate }}"
+				>
+					<ng-template ng-option-tmp let-i="item" let-search="searchTerm">
+						<div *ngIf="i">
+							<div>
+								<span *ngFor="let l of i.levels">&nbsp;&nbsp;&nbsp;</span>
+								<span [ngOptionHighlight]="search">{{ i.Name }}</span>
+							</div>
+						</div>
+					</ng-template>
+				</ng-select>
+			</div>
+			<!-- BusinessType -->
+			<div class="c-control">
+				<label class="c-label" for="BusinessType"
+					>{{ 'Business type' | translate }}
+					<span
+						*ngIf="!formGroup.controls.BusinessType.valid && !formGroup.controls.BusinessType.pending && (formGroup.controls.BusinessType.dirty || submitAttempt)"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<ng-select
+					class="c-input"
+					(change)="saveChange()"
+					labelForId="BusinessType"
+					formControlName="BusinessType"
+					[items]="BusinessTypeSource"
+					bindLabel="Name"
+					bindValue="Code"
+					[searchFn]="searchShowAllChildren"
+					placeholder="{{ 'Search' | translate }}"
+				>
+					<ng-template ng-option-tmp let-i="item" let-search="searchTerm">
+						<div *ngIf="i">
+							<div>
+								<span *ngFor="let l of i.levels">&nbsp;&nbsp;&nbsp;</span>
+								<span [ngOptionHighlight]="search">{{ i.Name }}</span>
+							</div>
+						</div>
+					</ng-template>
+				</ng-select>
+			</div>
+			<!-- PopulationDistribution -->
+			<div class="c-control">
+				<label class="c-label" for="PopulationDistribution"
+					>{{ 'Population distribution' | translate }}
+					<span
+						*ngIf="
+							!formGroup.controls.PopulationDistribution.valid &&
+							!formGroup.controls.PopulationDistribution.pending &&
+							(formGroup.controls.PopulationDistribution.dirty || submitAttempt)
+						"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<ng-select
+					class="c-input"
+					(change)="saveChange()"
+					labelForId="PopulationDistribution"
+					formControlName="PopulationDistribution"
+					[items]="PopulationDistributionSource"
+					bindLabel="Name"
+					bindValue="Code"
+					[searchFn]="searchShowAllChildren"
+					placeholder="{{ 'Search' | translate }}"
+				>
+					<ng-template ng-option-tmp let-i="item" let-search="searchTerm">
+						<div *ngIf="i">
+							<div>
+								<span *ngFor="let l of i.levels">&nbsp;&nbsp;&nbsp;</span>
+								<span [ngOptionHighlight]="search">{{ i.Name }}</span>
+							</div>
+						</div>
+					</ng-template>
+				</ng-select>
+			</div>
+		</ion-col>
+		<ion-col size="12" size-sm="6" size-xl="4">
+			<!-- CustomersAccess -->
+			<div class="c-control">
+				<label class="c-label" for="CustomersAccess"
+					>{{ 'Access of customers' | translate }}
+					<span
+						*ngIf="
+							!formGroup.controls.CustomersAccess.valid && !formGroup.controls.CustomersAccess.pending && (formGroup.controls.CustomersAccess.dirty || submitAttempt)
+						"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<ng-select
+					class="c-input"
+					(change)="saveChange()"
+					labelForId="CustomersAccess"
+					formControlName="CustomersAccess"
+					[items]="CustomersAccessSource"
+					[virtualScroll]="true"
+					bindLabel="Name"
+					bindValue="Code"
+					[searchFn]="searchShowAllChildren"
+					placeholder="{{ 'Search' | translate }}"
+				>
+					<ng-template ng-option-tmp let-i="item" let-search="searchTerm">
+						<div *ngIf="i">
+							<div>
+								<span *ngFor="let l of i.levels">&nbsp;&nbsp;&nbsp;</span>
+								<span [ngOptionHighlight]="search">{{ i.Name }}</span>
+							</div>
+						</div>
+					</ng-template>
+				</ng-select>
+			</div>
+			<!-- Display -->
+			<div class="c-control">
+				<label class="c-label" for="Display"
+					>{{ 'Samples' | translate }}
+					<span
+						*ngIf="!formGroup.controls.Display.valid && !formGroup.controls.Display.pending && (formGroup.controls.Display.dirty || submitAttempt)"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<ng-select
+					class="c-input"
+					(change)="saveChange()"
+					labelForId="Display"
+					formControlName="Display"
+					[items]="DisplaySource"
+					[virtualScroll]="true"
+					bindLabel="Name"
+					bindValue="Code"
+					[searchFn]="searchShowAllChildren"
+					placeholder="{{ 'Search' | translate }}"
+				>
+					<ng-template ng-option-tmp let-i="item" let-search="searchTerm">
+						<div *ngIf="i">
+							<div>
+								<span *ngFor="let l of i.levels">&nbsp;&nbsp;&nbsp;</span>
+								<span [ngOptionHighlight]="search">{{ i.Name }}</span>
+							</div>
+						</div>
+					</ng-template>
+				</ng-select>
+			</div>
+			<!-- Remark -->
+			<div class="c-control">
+				<label class="c-label" for="Remark"
+					>{{ 'Remark' | translate }}
+					<span
+						*ngIf="!formGroup.controls.Remark.valid && !formGroup.controls.Remark.pending && (formGroup.controls.Remark.dirty || submitAttempt)"
+						ion-text
+						color="danger"
+						>(*)</span
+					>
+				</label>
+				<textarea rows="3" class="c-input" (change)="saveChange()" id="Remark" formControlName="Remark" type="textarea"></textarea>
+			</div>
+		</ion-col>
+	</ion-row>
 </form>

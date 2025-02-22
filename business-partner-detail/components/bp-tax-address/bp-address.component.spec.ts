@@ -4,21 +4,21 @@ import { IonicModule } from '@ionic/angular';
 import { BpAddressComponent } from './bp-tax-address.component';
 
 describe('BpAddressComponent', () => {
-  let component: BpAddressComponent;
-  let fixture: ComponentFixture<BpAddressComponent>;
+	let component: BpAddressComponent;
+	let fixture: ComponentFixture<BpAddressComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [BpAddressComponent],
-      imports: [IonicModule.forRoot()],
-    }).compileComponents();
+	beforeEach(waitForAsync(() => {
+		TestBed.configureTestingModule({
+			declarations: [BpAddressComponent],
+			imports: [IonicModule.forRoot()],
+		}).compileComponents();
 
-    fixture = TestBed.createComponent(BpAddressComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  }));
+		fixture = TestBed.createComponent(BpAddressComponent);
+		component = fixture.componentInstance;
+		fixture.detectChanges();
+	}));
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+	it('should create', () => {
+		expect(component).toBeTruthy();
+	});
 });

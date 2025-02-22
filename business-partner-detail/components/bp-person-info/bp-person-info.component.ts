@@ -9,107 +9,107 @@ import { lib } from 'src/app/services/static/global-functions';
 import { CRM_PersonInfoProvider } from 'src/app/services/static/services.service';
 
 @Component({
-    selector: 'app-bp-person-info',
-    templateUrl: './bp-person-info.component.html',
-    styleUrls: ['./bp-person-info.component.scss'],
-    standalone: false
+	selector: 'app-bp-person-info',
+	templateUrl: './bp-person-info.component.html',
+	styleUrls: ['./bp-person-info.component.scss'],
+	standalone: false,
 })
 export class BpPersonInfoComponent extends PageBase {
-  @Input() canEdit;
-  @Input() set bpId(value) {
-    this.id = value;
-  }
+	@Input() canEdit;
+	@Input() set bpId(value) {
+		this.id = value;
+	}
 
-  minDateOfBirth;
-  maxDateOfBirth;
+	minDateOfBirth;
+	maxDateOfBirth;
 
-  constructor(
-    public pageProvider: CRM_PersonInfoProvider,
-    public env: EnvService,
-    public route: ActivatedRoute,
-    public alertCtrl: AlertController,
-    public navCtrl: NavController,
-    public formBuilder: FormBuilder,
-    public cdr: ChangeDetectorRef,
-    public loadingController: LoadingController,
-  ) {
-    super();
-    this.pageConfig.isDetailPage = true;
-    this.pageConfig.isForceCreate = true; //Id===IDContact
+	constructor(
+		public pageProvider: CRM_PersonInfoProvider,
+		public env: EnvService,
+		public route: ActivatedRoute,
+		public alertCtrl: AlertController,
+		public navCtrl: NavController,
+		public formBuilder: FormBuilder,
+		public cdr: ChangeDetectorRef,
+		public loadingController: LoadingController
+	) {
+		super();
+		this.pageConfig.isDetailPage = true;
+		this.pageConfig.isForceCreate = true; //Id===IDContact
 
-    let cYear = new Date().getFullYear();
-    this.minDateOfBirth = cYear - 70 + '-01-01';
-    this.maxDateOfBirth = cYear - 16 + '-12-31';
+		let cYear = new Date().getFullYear();
+		this.minDateOfBirth = cYear - 70 + '-01-01';
+		this.maxDateOfBirth = cYear - 16 + '-12-31';
 
-    this.formGroup = formBuilder.group({
-      Id: new FormControl(),
-      FullName: ['', Validators.required],
-      FirstName: [''],
-      LastName: [''],
-      Gender: [true, Validators.required],
-      DateOfBirth: [''],
-      PlaceOfBirth: [''],
+		this.formGroup = formBuilder.group({
+			Id: new FormControl(),
+			FullName: ['', Validators.required],
+			FirstName: [''],
+			LastName: [''],
+			Gender: [true, Validators.required],
+			DateOfBirth: [''],
+			PlaceOfBirth: [''],
 
-      PlaceOfOrigin: [''],
-      IdentityCardNumber: [''],
-      DateOfIssue: [''],
-      PlaceOfIssue: [''],
-      DateOfExpiration: [''],
+			PlaceOfOrigin: [''],
+			IdentityCardNumber: [''],
+			DateOfIssue: [''],
+			PlaceOfIssue: [''],
+			DateOfExpiration: [''],
 
-      Nationality: [''],
-      Ethnic: [''],
-      Religion: [''],
-      MaritalStatus: [''],
+			Nationality: [''],
+			Ethnic: [''],
+			Religion: [''],
+			MaritalStatus: [''],
 
-      MobilePhone: [''],
-      HomePhone: [''],
-      Email: [''],
-      Remark: [''],
-    });
-  }
+			MobilePhone: [''],
+			HomePhone: [''],
+			Email: [''],
+			Remark: [''],
+		});
+	}
 
-  loadedData() {
-    if (!this.item) {
-      this.item = { Id: this.id };
-    }
-    if (this.item.Gender == undefined) {
-      this.item.Gender = true;
-    }
-    this.pageConfig.canEdit = this.canEdit;
+	loadedData() {
+		if (!this.item) {
+			this.item = { Id: this.id };
+		}
+		if (this.item.Gender == undefined) {
+			this.item.Gender = true;
+		}
+		this.pageConfig.canEdit = this.canEdit;
 
-    super.loadedData();
-    if (this.item) {
-      this.item.DateOfIssue = lib.dateFormat(this.item.DateOfIssue);
-      this.item.DateOfBirth = lib.dateFormat(this.item.DateOfBirth);
-      this.formGroup.controls.Id.setValue(this.id);
-    }
-  }
+		super.loadedData();
+		if (this.item) {
+			this.item.DateOfIssue = lib.dateFormat(this.item.DateOfIssue);
+			this.item.DateOfBirth = lib.dateFormat(this.item.DateOfBirth);
+			this.formGroup.controls.Id.setValue(this.id);
+		}
+	}
 
-  calcName() {
-    let fullName = this.formGroup.controls.FullName.value;
-    fullName = fullName.trim().replace(/(^\w|\s\w)/g, (m) => m.toUpperCase());
-    fullName = fullName
-      .replace(
-        /[^aAàÀảẢãÃáÁạẠăĂằẰẳẲẵẴắẮặẶâÂầẦẩẨẫẪấẤậẬbBcCdDđĐeEèÈẻẺẽẼéÉẹẸêÊềỀểỂễỄếẾệỆfFgGhHiIìÌỉỈĩĨíÍịỊjJkKlLmMnNoOòÒỏỎõÕóÓọỌôÔồỒổỔỗỖốỐộỘơƠờỜởỞỡỠớỚợỢpPqQrRsStTuUùÙủỦũŨúÚụỤưƯừỪửỬữỮứỨựỰvVwWxXyYỳỲỷỶỹỸýÝỵỴzZ|\s]?/g,
-        '',
-      )
-      .trim();
+	calcName() {
+		let fullName = this.formGroup.controls.FullName.value;
+		fullName = fullName.trim().replace(/(^\w|\s\w)/g, (m) => m.toUpperCase());
+		fullName = fullName
+			.replace(
+				/[^aAàÀảẢãÃáÁạẠăĂằẰẳẲẵẴắẮặẶâÂầẦẩẨẫẪấẤậẬbBcCdDđĐeEèÈẻẺẽẼéÉẹẸêÊềỀểỂễỄếẾệỆfFgGhHiIìÌỉỈĩĨíÍịỊjJkKlLmMnNoOòÒỏỎõÕóÓọỌôÔồỒổỔỗỖốỐộỘơƠờỜởỞỡỠớỚợỢpPqQrRsStTuUùÙủỦũŨúÚụỤưƯừỪửỬữỮứỨựỰvVwWxXyYỳỲỷỶỹỸýÝỵỴzZ|\s]?/g,
+				''
+			)
+			.trim();
 
-    this.formGroup.controls.FullName.setValue(fullName);
-    this.formGroup.controls.FullName.markAsDirty();
-    let names = fullName.split(' ');
-    if (names.length > 1) {
-      this.formGroup.controls.FirstName.setValue(names[names.length - 1]);
-      this.formGroup.controls.LastName.setValue(names[0]);
+		this.formGroup.controls.FullName.setValue(fullName);
+		this.formGroup.controls.FullName.markAsDirty();
+		let names = fullName.split(' ');
+		if (names.length > 1) {
+			this.formGroup.controls.FirstName.setValue(names[names.length - 1]);
+			this.formGroup.controls.LastName.setValue(names[0]);
 
-      this.formGroup.controls.FirstName.markAsDirty();
-      this.formGroup.controls.LastName.markAsDirty();
-    }
+			this.formGroup.controls.FirstName.markAsDirty();
+			this.formGroup.controls.LastName.markAsDirty();
+		}
 
-    this.saveChange();
-  }
+		this.saveChange();
+	}
 
-  async saveChange() {
-    super.saveChange2();
-  }
+	async saveChange() {
+		super.saveChange2();
+	}
 }

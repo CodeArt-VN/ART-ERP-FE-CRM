@@ -12,23 +12,14 @@ import { MapCompsModule } from 'src/app/components/map-comps/map-comps.module';
 import { BusinessPartnerComponentsModule } from '../business-partner-detail/components/business-partner-components.module';
 
 const routes: Routes = [
-  {
-    path: '',
-    component: OutletDetailPage,
-  },
+	{
+		path: '',
+		component: OutletDetailPage,
+	},
 ];
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    ReactiveFormsModule,
-    ShareModule,
-    MapCompsModule,
-    BusinessPartnerComponentsModule,
-    RouterModule.forChild(routes),
-  ],
-  declarations: [OutletDetailPage],
+	imports: [CommonModule, FormsModule, IonicModule, ReactiveFormsModule, ShareModule, MapCompsModule, BusinessPartnerComponentsModule, RouterModule.forChild(routes)],
+	declarations: [OutletDetailPage],
 })
 export class OutletDetailPageModule {}

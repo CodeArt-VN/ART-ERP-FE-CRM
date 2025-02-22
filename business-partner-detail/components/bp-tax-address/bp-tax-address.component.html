@@ -1,89 +1,86 @@
 <app-page-message [itemsLength]="1" [showSpinner]="pageConfig.showSpinner"></app-page-message>
 
 <ion-grid fixed *ngIf="pageConfig.showSpinner == false">
-  <form [formGroup]="formGroup">
-    <ng-container formArrayName="TaxAddresses">
-      <ion-row class="hr-group border" *ngFor="let add of formGroup.get('TaxAddresses')['controls']; let i = index">
-        <ng-container [formGroup]="add">
-          <ion-col size="12" size-sm="12" size-md="12" size-xl="3">
-            <ion-list-header class="ion-no-padding">
-              <ion-label color="primary"
-                >{{ 'Billing address' | translate }}
-                <span *ngIf="i > 0">{{ i + 1 }}</span>
-              </ion-label>
-            </ion-list-header>
-          </ion-col>
-          <ion-col size="12" size-sm size-xl="4">
-            <app-form-control
-              [field]="{
-                id: 'TaxCode',
-                label: 'Tax code',
-                type: 'text',
-                form: add
-              }"
-              (change)="onChangedTaxCode($event, add)"
-            ></app-form-control>
-            <app-form-control
-              [field]="{
-                id: 'CompanyName',
-                label: 'Company / organization name',
-                type: 'text',
-                form: add
-              }"
-              (change)="saveAddress(add)"
-            ></app-form-control>
-            <app-form-control
-              [field]="{ id: 'Email', type: 'text', form: add }"
-              (change)="saveAddress(add)"
-            ></app-form-control>
-          </ion-col>
-          <ion-col size="12" size-sm size-xl="4">
-            <app-form-control
-              [field]="{
-                id: 'WorkPhone',
-                label: 'Phone number',
-                type: 'text',
-                form: add
-              }"
-              (change)="saveAddress(add)"
-            ></app-form-control>
-            <app-form-control
-              [field]="{
-                id: 'BillingAddress',
-                label: 'Invoice address',
-                type: 'textarea',
-                form: add
-              }"
-              (change)="saveAddress(add)"
-            ></app-form-control>
-          </ion-col>
-          <ion-col size="12" size-sm="12" size-xl="8" offset-xl="3">
-            <app-form-control
-              [field]="{
-                id: 'IsDefault',
-                label: 'Default billing information',
-                type: 'checkbox',
-                form: add
-              }"
-              (change)="saveAddress(add)"
-            ></app-form-control>
-            <div class="c-control" *ngIf="pageConfig.canEdit">
-              <ion-button (click)="removeAddress(i)" size="small" fill="outline">
-                <ion-icon slot="start" name="trash"></ion-icon>
-                {{ 'Delete' | translate }}
-              </ion-button>
-            </div>
-          </ion-col>
-        </ng-container>
-      </ion-row>
+	<form [formGroup]="formGroup">
+		<ng-container formArrayName="TaxAddresses">
+			<ion-row class="hr-group border" *ngFor="let add of formGroup.get('TaxAddresses')['controls']; let i = index">
+				<ng-container [formGroup]="add">
+					<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
+						<ion-list-header class="ion-no-padding">
+							<ion-label color="primary"
+								>{{ 'Billing address' | translate }}
+								<span *ngIf="i > 0">{{ i + 1 }}</span>
+							</ion-label>
+						</ion-list-header>
+					</ion-col>
+					<ion-col size="12" size-sm size-xl="4">
+						<app-form-control
+							[field]="{
+								id: 'TaxCode',
+								label: 'Tax code',
+								type: 'text',
+								form: add,
+							}"
+							(change)="onChangedTaxCode($event, add)"
+						></app-form-control>
+						<app-form-control
+							[field]="{
+								id: 'CompanyName',
+								label: 'Company / organization name',
+								type: 'text',
+								form: add,
+							}"
+							(change)="saveAddress(add)"
+						></app-form-control>
+						<app-form-control [field]="{ id: 'Email', type: 'text', form: add }" (change)="saveAddress(add)"></app-form-control>
+					</ion-col>
+					<ion-col size="12" size-sm size-xl="4">
+						<app-form-control
+							[field]="{
+								id: 'WorkPhone',
+								label: 'Phone number',
+								type: 'text',
+								form: add,
+							}"
+							(change)="saveAddress(add)"
+						></app-form-control>
+						<app-form-control
+							[field]="{
+								id: 'BillingAddress',
+								label: 'Invoice address',
+								type: 'textarea',
+								form: add,
+							}"
+							(change)="saveAddress(add)"
+						></app-form-control>
+					</ion-col>
+					<ion-col size="12" size-sm="12" size-xl="8" offset-xl="3">
+						<app-form-control
+							[field]="{
+								id: 'IsDefault',
+								label: 'Default billing information',
+								type: 'checkbox',
+								form: add,
+							}"
+							(change)="saveAddress(add)"
+						></app-form-control>
+						<div class="c-control" *ngIf="pageConfig.canEdit">
+							<ion-button (click)="removeAddress(i)" size="small" fill="outline">
+								<ion-icon slot="start" name="trash"></ion-icon>
+								{{ 'Delete' | translate }}
+							</ion-button>
+						</div>
+					</ion-col>
+				</ng-container>
+			</ion-row>
 
-      <ion-row class="hr-group border" *ngIf="pageConfig.canEdit">
-        <ion-col size="12" size-sm size-xl="4" offset-xl="3">
-          <ion-button (click)="addAddress({ Id: 0 })">
-            {{ 'Add billing information' | translate }}
-          </ion-button>
-        </ion-col>
-      </ion-row>
-    </ng-container>
-  </form>
+			<ion-row class="hr-group border" *ngIf="pageConfig.canEdit">
+				<ion-col size="12" size-sm size-xl="4" offset-xl="3">
+					<ion-button (click)="addAddress({ Id: 0 })">
+						{{ 'Add billing information' | translate }}
+					</ion-button>
+				</ion-col>
+			</ion-row>
+		</ng-container>
+	</form>
 </ion-grid>
