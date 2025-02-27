@@ -1,5 +1,10 @@
 <ion-header>
-	<app-list-toolbar
+	<app-toolbar [page]="this">
+
+
+
+	</app-toolbar>
+	<!-- <app-list-toolbar
 		pageTitle="{{'List' | translate}}"
 		[ShowFeature]="false"
 		[pageConfig]="pageConfig"
@@ -17,7 +22,7 @@
 		(submitBusinessPartner)="submitBusinessPartner()"
 		(approveBusinessPartner)="approveBusinessPartner()"
 		(disapproveBusinessPartner)="disapproveBusinessPartner()"
-	></app-list-toolbar>
+	></app-list-toolbar> -->
 </ion-header>
 
 <ion-content appScrollbarTheme class="scrollx" scroll-x="true">
@@ -28,6 +33,13 @@
 		<div class="ion-padding"></div>
 	</ion-fab>
 
+	<app-page-title
+		class="ion-padding safe-max-width"
+		[icon]="pageConfig.pageIcon"
+		[color]="pageConfig.pageColor"
+		[title]="pageConfig.pageTitle"
+		[remark]="pageConfig.pageRemark"
+	></app-page-title>
 	<section class="table responsive">
 		<header class="bold">
 			<div class="col-checkbox cell"></div>
