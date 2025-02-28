@@ -113,6 +113,4 @@ export class OutletPage extends PageBase {
 
 		super.loadedData(event);
 	}
-
-	
 }
