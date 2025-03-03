@@ -31,6 +31,8 @@ export class OutletPage extends PageBase {
 
 	departmentList = [];
 	preLoadData() {
+		if (!this.pageConfig.canSubmit) this.pageConfig.canSubmit = this.pageConfig.canSubmitBusinessPartnerForApproval;
+
 		this.query.Status = '';
 		if (!this.sort.Id) {
 			this.sort.Id = 'Id';

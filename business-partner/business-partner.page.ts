@@ -142,7 +142,7 @@ export class BusinessPartnerPage extends PageBase {
 						this.pageConfig[e.Code] = JSON.parse(e.Value);
 						if (this.pageConfig.ContactUsedApprovalModule) {
 							this.pageConfig.canApprove = false;
-							this.pageConfig.canDisapprove = false;
+							this.pageConfig.canApprove = false;
 						}
 					});
 				}
