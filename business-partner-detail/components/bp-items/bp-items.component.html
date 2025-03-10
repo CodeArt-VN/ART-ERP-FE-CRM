@@ -5,9 +5,21 @@
 				<ion-label color="primary">{{ 'Product list' | translate }}</ion-label>
 			</ion-list-header>
 			<div>
-				<ion-button fill="clear" size="small">
+				<!-- <ion-button fill="clear" size="small">
 					<ion-icon slot="start" name="cloud-upload"></ion-icon>
 					{{ 'Import product/price list' | translate }}
+				</ion-button> -->
+				<ion-button fill="clear" size="small" (click)="onClickImport()">
+					<ion-icon slot="start" name="cloud-upload"></ion-icon>
+					{{ 'Import product' | translate }}
+				</ion-button>
+				<ion-button fill="clear" size="small" (click)="export()">
+					<ion-icon slot="start" name="cloud-upload"></ion-icon>
+					{{ 'Export product' | translate }}
+				</ion-button>
+				<ion-button fill="clear" size="small" (click) ='nav("/price-list/"+idPriceList,"forward")'>
+					<ion-icon slot="start" name="pricetag-outline"></ion-icon>
+					{{ 'Open price list' | translate }}
 				</ion-button>
 			</div>
 		</ion-col>
@@ -22,9 +34,9 @@
 						<div class="col-name cell">
 							{{ 'Product name' | translate }}
 						</div>
-						<div class="col-money cell">
+						<!-- <div class="col-money cell">
 							{{ 'Price' | translate }}
-						</div>
+						</div> -->
 
 						<div class="col-checkbox cell" *ngIf="pageConfig.canEdit"></div>
 					</header>
@@ -40,9 +52,9 @@
 								<div class="col-name cell">
 									{{ c.controls._Item.value.Name }}
 								</div>
-								<div class="col-money cell">
+								<!-- <div class="col-money cell">
 									<input formControlName="Price" class="c-input" mask="separator.4" thousandSeparator="," [allowNegativeNumbers]="false" type="tel" />
-								</div>
+								</div> -->
 
 								<!-- <div class="col-name cell">
 										<input class="c-input" (change)="saveContact(c)" formControlName="Name">
@@ -80,4 +92,6 @@
 			</div>
 		</ion-col>
 	</ion-row>
+	<input class="hide-all" #importfile type="file" [accept]="AcceptFile" (change)="importFileChange($event)" />
+
 </form>
