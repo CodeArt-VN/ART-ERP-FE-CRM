@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, Input, Output, EventEmitter } from '@angular/core';
+import { Component, ChangeDetectorRef, Input, Output, EventEmitter, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl, FormArray } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { AlertController, LoadingController, NavController } from '@ionic/angular';
@@ -16,12 +16,14 @@ import { catchError, distinctUntilChanged, mergeMap, switchMap, tap } from 'rxjs
 	standalone: false,
 })
 export class BPItemsComponent extends PageBase {
+	@ViewChild('importfile') importfile: any;
 	@Input() canEdit;
+	@Input() idPriceList;
 	@Input() set bpId(value) {
 		this.id = value;
 		this.query.IDVendor = this.id;
 	}
-
+	AcceptFile = '.xlsx';
 	constructor(
 		public pageProvider: PROD_ItemInVendorProvider,
 		public itemProvider: WMS_ItemProvider,
@@ -120,4 +122,25 @@ export class BPItemsComponent extends PageBase {
 			)
 		);
 	}
+
+	onClickImport() {
+		this.importfile.nativeElement.value = '';
+		this.importfile.nativeElement.click();
+	}
+	importFileChange(event) {
+		const formData: FormData = new FormData();
+		formData.append('fileKey', event.target.files[0], event.target.files[0].name);
+		return new Promise((resolve, reject) => {
+			this.pageProvider.commonService
+				.connect('UPLOAD','PROD/ItemInVendor/ImportItemInVendor/' + this.id, formData)
+				.toPromise()
+				.then((data) => {
+					resolve(data);
+				})
+				.catch((err) => {
+					reject(err);
+				});
+		});
+	}
+
 }
