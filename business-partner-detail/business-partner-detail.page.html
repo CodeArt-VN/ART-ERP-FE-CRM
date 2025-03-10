@@ -479,7 +479,17 @@
 									</ion-col>
 									<ion-col size="12" size-sm="6" size-xl="4">
 										<div class="c-control">
-											<label class="c-label" for="IDPriceList">{{'Selling price list' | translate}}</label>
+											<label class="c-label" for="IDPriceList"
+												>{{'Selling price list' | translate}}
+												<ion-icon
+													class="clickable"
+													(click)='nav("/price-list/" + this.formGroup.controls.IDPriceList?.value)'
+													slot="icon-only"
+													name="open-outline"
+													color="primary"
+												></ion-icon>
+											</label>
+
 											<ng-select
 												(change)="saveChange()"
 												class="c-input"
@@ -494,7 +504,16 @@
 										</div>
 
 										<div class="c-control" *ngIf="formGroup.controls.IsVendor.value">
-											<label class="c-label" for="IDPriceListForVendor">{{'Purchase price list' | translate}}</label>
+											<label class="c-label" for="IDPriceListForVendor"
+												>{{'Purchase price list' | translate}}
+												<ion-icon
+													class="clickable"
+													(click)='nav("/price-list/" + this.formGroup.controls.IDPriceListForVendor?.value)'
+													slot="icon-only"
+													name="open-outline"
+													color="primary"
+												></ion-icon>
+											</label>
 											<ng-select
 												(change)="saveChange()"
 												class="c-input"
@@ -782,7 +801,12 @@
 				<div *ngIf="segmentView == 'products'">
 					<div class="ion-padding">
 						<ion-grid fixed>
-							<app-bp-items [bpId]="item.Id" [canEdit]="pageConfig.canEdit" *ngIf="item.Id && !formGroup.controls.IsPersonal.value"></app-bp-items>
+							<app-bp-items
+								[idPriceList]="this.formGroup.controls.IDPriceListForVendor?.value"
+								[bpId]="item.Id"
+								[canEdit]="pageConfig.canEdit"
+								*ngIf="item.Id && !formGroup.controls.IsPersonal.value"
+							></app-bp-items>
 						</ion-grid>
 					</div>
 				</div>
