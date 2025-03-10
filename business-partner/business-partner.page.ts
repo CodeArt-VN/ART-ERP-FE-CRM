@@ -8,6 +8,7 @@ import { lib } from 'src/app/services/static/global-functions';
 import { ApiSetting } from 'src/app/services/static/api-setting';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { AddressService } from 'src/app/services/custom.service';
+import { APIList } from 'src/app/services/static/global-variable';
 
 @Component({
 	selector: 'app-business-partner',
@@ -501,5 +502,23 @@ export class BusinessPartnerPage extends PageBase {
 				this.isShowMergePopup = false;
 				this.refresh();
 			});
+	}
+
+	async export(){
+		if(this.query.IsVendor){
+			APIList.CRM_Contact.getExport =
+				 {
+					method: 'DOWNLOAD',
+					url: function () {
+						return ApiSetting.apiDomain('CRM/Contact/VendorExport/');
+					},
+				};
+		}else{
+			APIList.CRM_Contact.getExport={
+				method: "DOWNLOAD",
+				url: function(){return "CRM/Contact/Export"}  
+			}
+		}
+		super.export();
 	}
 }
