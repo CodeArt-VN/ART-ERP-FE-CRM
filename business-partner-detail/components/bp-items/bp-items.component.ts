@@ -49,7 +49,7 @@ export class BPItemsComponent extends PageBase {
 		this.items.forEach((i) => {
 			i.disabled = true;
 		});
-
+		this.formGroup.controls.Items = this.formBuilder.array([]);
 		this.item = { Id: this.id };
 		super.loadedData();
 		this.setItems();
@@ -131,9 +131,11 @@ export class BPItemsComponent extends PageBase {
 		const formData: FormData = new FormData();
 		formData.append('fileKey', event.target.files[0], event.target.files[0].name);
 		this.env
-		.showLoading('Please wait for a few moments',this.pageProvider.commonService
-			.connect('UPLOAD','PROD/ItemInVendor/ImportItemInVendor/' + this.id, formData).toPromise())
-			.then((resp:any) => {
+			.showLoading(
+				'Please wait for a few moments',
+				this.pageProvider.commonService.connect('UPLOAD', 'PROD/ItemInVendor/ImportItemInVendor/' + this.id, formData).toPromise()
+			)
+			.then((resp: any) => {
 				this.refresh();
 				if (resp.ErrorList && resp.ErrorList.length) {
 					let message = '';
@@ -169,5 +171,4 @@ export class BPItemsComponent extends PageBase {
 				}
 			});
 	}
-
 }
