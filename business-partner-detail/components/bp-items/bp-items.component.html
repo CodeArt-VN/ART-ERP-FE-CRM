@@ -17,7 +17,7 @@
 					<ion-icon slot="start" name="cloud-download"></ion-icon>
 					{{ 'Export product' | translate }}
 				</ion-button>
-				<ion-button fill="clear" size="small" (click) ='nav("/price-list/"+idPriceList,"forward")'>
+				<ion-button fill="clear" size="small" (click)="nav('/price-list/' + idPriceList, 'forward')">
 					<ion-icon slot="start" name="pricetag-outline"></ion-icon>
 					{{ 'Open price list' | translate }}
 				</ion-button>
@@ -52,46 +52,12 @@
 								<div class="col-name cell">
 									{{ c.controls._Item.value.Name }}
 								</div>
-								<!-- <div class="col-money cell">
-									<input formControlName="Price" class="c-input" mask="separator.4" thousandSeparator="," [allowNegativeNumbers]="false" type="tel" />
-								</div> -->
-
-								<!-- <div class="col-name cell">
-										<input class="c-input" (change)="saveContact(c)" formControlName="Name">
-									</div>
-									<div class="col-title cell">
-										<input class="c-input" (change)="saveContact(c)" formControlName="Title">
-									</div> -->
-
-								<!-- <div (click)="nav(pageConfig.pageName+'/'+i.Id,'forward')"><ion-icon name="open-outline"></ion-icon></div> -->
-								<div class="col-checkbox cell" *ngIf="pageConfig.canEdit">
-									<ion-icon color="danger" class="min-btn" name="trash-outline"></ion-icon>
-								</div>
 							</ng-container>
 						</div>
 					</ng-container>
-					<!-- <div *ngIf="pageConfig.canEdit" class="row footer">
-							<div class="cell">
-								<ng-select class="c-input" [readonly]="submitAttempt" (change)="selectContact($event)" [addTag]="addContactLine.bind(this)" appendTo="#selectholder" [items]="contactList$ | async" [typeahead]="contactListInput$" [loading]='contactListLoading' [virtualScroll]="true" placeholder="{{'contact-placeholder' | translate}}">
-									<ng-template ng-option-tmp let-i="item" let-search="searchTerm">
-										<div *ngIf="i">
-											<div><span [ngOptionHighlight]="search">{{i.Name}}</span></div>
-											<small>#<b><span class="important" [ngOptionHighlight]="search">{{i.Id}}</span></b> <span *ngIf="i.Title"> - {{i.Title}}</span> <span *ngIf="i.WorkPhone"> | {{'phone' | translate}}: <b [ngOptionHighlight]="search">{{i.WorkPhone}}</b></span></small>
-										</div>
-									</ng-template>
-									<ng-template ng-tag-tmp let-search="searchTerm">
-										<b>Thêm mới/đổi tên</b>: {{search}}
-									</ng-template>
-								</ng-select>
-							</div>
-							<div class="col-checkbox cell">
-								<ion-icon color="success" class="min-btn" name="add-circle-outline"></ion-icon>
-							</div>
-						</div> -->
 				</section>
 			</div>
 		</ion-col>
 	</ion-row>
 	<input class="hide-all" #importfile type="file" [accept]="AcceptFile" (change)="importFileChange($event)" />
-
 </form>

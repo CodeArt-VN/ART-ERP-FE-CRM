@@ -504,21 +504,30 @@ export class BusinessPartnerPage extends PageBase {
 			});
 	}
 
-	async export(){
-		if(this.query.IsVendor){
-			APIList.CRM_Contact.getExport =
-				 {
-					method: 'DOWNLOAD',
-					url: function () {
-						return ApiSetting.apiDomain('CRM/Contact/VendorExport/');
-					},
-				};
-		}else{
-			APIList.CRM_Contact.getExport={
-				method: "DOWNLOAD",
-				url: function(){return "CRM/Contact/Export"}  
-			}
+	async export() {
+		if (this.pageConfig.pageName == 'vendor') {
+			APIList.CRM_Contact.getExport.url = () => {
+				return ApiSetting.apiDomain('CRM/Contact/VendorExport/');
+			};
+			let apiPath = APIList.CRM_Contact.getExport.url;
+			await super.export();
+			APIList.CRM_Contact.getExport.url = apiPath;
+			return;
 		}
 		super.export();
+	}
+
+	async import(event) {
+		if (this.pageConfig.pageName == 'vendor') {
+			APIList.CRM_Contact.postImport.url = () => {
+				return ApiSetting.apiDomain('CRM/Contact/VendorImport/');
+			};
+			let apiPath = APIList.CRM_Contact.postImport.url;
+			await super.import(event);
+			APIList.CRM_Contact.postImport.url = apiPath;
+			return;
+		}
+		super.import(event);
+		
 	}
 }
