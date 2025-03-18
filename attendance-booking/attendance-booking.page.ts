@@ -24,6 +24,9 @@ export class AttendanceBookingPage extends PageBase {
 		public location: Location
 	) {
 		super();
+		this.pageConfig.ShowFeature = false;
+		this.pageConfig.ShowArchive = false;
+		this.pageConfig.ShowHelp = false;
 	}
 
 	statusList = [];

@@ -23,12 +23,29 @@
 							<form [formGroup]="formGroup">
 								<ion-row class="hr-group">
 									<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
-										<ion-list-header class="ion-no-padding">
-											<ion-label color="primary"
-												>{{'Booking' | translate}}
-												<span *ngIf="item.Id">{{item.Id}}</span>
-											</ion-label>
-										</ion-list-header>
+										<ion-list lines="none">
+											<ion-list-header class="ion-no-padding">
+												<ion-label color="primary">
+													<span *ngIf="formGroup?.controls?.CustomerName?.value">{{formGroup?.controls?.CustomerName?.value}}</span>
+													<span *ngIf="!formGroup?.controls?.CustomerName?.value">{{'Booking' | translate}}</span>
+												</ion-label>
+											</ion-list-header>
+											<ion-item class="ion-no-padding" *ngIf="formGroup?.controls?.Phone?.value">
+												<ion-button slot="start" href="tel:{{formGroup?.controls?.Phone?.value}}" fill="clear" color="primary">
+													<ion-icon slot="start" name="call"></ion-icon>
+													{{formGroup?.controls?.Phone?.value}}
+												</ion-button>
+												<ion-button
+													slot="start"
+													target="_blank"
+													href="https://zalo.me/{{formGroup?.controls?.Phone?.value}}"
+													fill="outline"
+													color="primary"
+												>
+													<ion-icon slot="icon-only" name="zalo"></ion-icon>
+												</ion-button>
+											</ion-item>
+										</ion-list>
 									</ion-col>
 									<ion-col size="12" size-sm size-xl="4">
 										<!-- <div class="c-control" *ngIf="item.Id">
@@ -49,7 +66,7 @@
 										</div>
 										<div class="c-control">
 											<label class="c-label" for="PartyDate"
-												>{{'banquet date' | translate}}
+												>{{'Party date' | translate}}
 												<span
 													*ngIf="!formGroup.controls.PartyDate.valid && !formGroup.controls.PartyDate.pending && (formGroup.controls.PartyDate.dirty || submitAttempt)"
 													ion-text
@@ -184,7 +201,7 @@
                                         </div> -->
 										<div class="c-control">
 											<label class="c-label" for="RealField"
-												>{{'bookings' | translate}}
+												>{{'Real field' | translate}}
 												<span
 													*ngIf="!formGroup.controls.RealField.valid && !formGroup.controls.RealField.pending && (formGroup.controls.RealField.dirty || submitAttempt)"
 													ion-text
