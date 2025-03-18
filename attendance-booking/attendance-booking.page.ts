@@ -85,7 +85,6 @@ export class AttendanceBookingPage extends PageBase {
 			this.numberOfReal += i.RealField;
 			this.numberOfKid += i.Kids;
 			this.numberOfForeigner += i.ForeignerNo;
-			i.PartyDateText = lib.dateFormat(i.PartyDate, 'dd/mm/yy hh:MM');
 			i.StatusText = lib.getAttrib(i.Status, this.statusList, 'Name', '', 'Code');
 			i.StatusColor = lib.getAttrib(i.Status, this.statusList, 'Color', '', 'Code');
 			i.TypeOfPartyText = lib.getAttrib(i.TypeOfParty, this.PartyMenuList, 'Name', '', 'Code');
