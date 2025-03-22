@@ -21,7 +21,7 @@
 		<datatable-column [checkbox]="true" name=""></datatable-column>
 		<datatable-column class="col-date" format="dd/MM/yy hh:mm" name="Party date" property="PartyDate" filterControlType="date"></datatable-column>
 		<!-- <datatable-column class="col-id" name="#" property="Id" [navLink]="pageConfig.pageName" [sticky]="true"></datatable-column> -->
-		<datatable-column class="col-remark bold" name="Customer name" property="CustomerName" [navLink]="pageConfig.pageName" [sticky]="true"></datatable-column>
+		<datatable-column class="col-name bold" name="Customer name" property="CustomerName" [navLink]="pageConfig.pageName" [sticky]="true"></datatable-column>
 		<datatable-column class="col-code phone" name="Telephone" property="Phone">
 			<ng-template let-i="row" datatable-cell-template>
 				<a *ngIf="i.Phone" href="tel:{{i.Phone}}">{{i.Phone}}</a>
