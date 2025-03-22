@@ -77,28 +77,17 @@ export class BusinessPartnerPage extends PageBase {
 			this.sortToggle('Id', true);
 		}
 
-		if (this.pageConfig.pageName == 'vendor') {
-			this.query.IgnoredBranch = true;
-			this.query.IsVendor = true;
-		}
-		if (this.pageConfig.pageName == 'carrier') {
-			this.query.IgnoredBranch = true;
-			this.query.IsCarrier = true;
-		} else if (this.pageConfig.pageName == 'distributor') {
-			this.query.IgnoredBranch = true;
-			this.query.IsDistributor = true;
-		} else if (this.pageConfig.pageName == 'storer') {
-			this.query.IgnoredBranch = true;
-			this.query.IsStorer = true;
-		} else if (this.pageConfig.pageName == 'outlet') {
-			this.query.IsOutlets = true;
-			this.query.IDOwner = this.pageConfig.canViewAllData ? 'all' : this.env.user.StaffID;
-		} else if (this.pageConfig.pageName == 'customer') {
-			this.query.IsCustomer = true;
-			this.query.IDOwner = this.pageConfig.canViewAllData ? 'all' : this.env.user.StaffID;
-		} else if (this.pageConfig.pageName == 'business-partner' || this.pageConfig.pageName == 'contact-mobile') {
-			this.query.IDOwner = this.pageConfig.canViewAllData ? 'all' : this.env.user.StaffID;
-		}
+		const pageTypeMap = {
+			vendor: 'IsVendor',
+			carrier: 'IsCarrier',
+			distributor: 'IsDistributor',
+			storer: 'IsStorer',
+			outlet: 'IsOutlets',
+			customer: 'IsCustomer',
+		};
+		this.query[pageTypeMap[this.pageConfig.pageName]] = true;
+
+		this.query.IDOwner = this.pageConfig.canViewAllData ? 'all' : this.env.user.StaffID;
 
 		let sysConfigQuery = ['ContactUsedApprovalModule'];
 
@@ -528,6 +517,5 @@ export class BusinessPartnerPage extends PageBase {
 			return;
 		}
 		super.import(event);
-		
 	}
 }
