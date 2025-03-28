@@ -1,13 +1,14 @@
 import { Component, ChangeDetectorRef, Input, Output, EventEmitter, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl, FormArray } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { AlertController, LoadingController, NavController } from '@ionic/angular';
+import { AlertController, LoadingController, ModalController, NavController } from '@ionic/angular';
 import { PageBase } from 'src/app/page-base';
 import { EnvService } from 'src/app/services/core/env.service';
 import { PROD_ItemInVendorProvider, WMS_ItemProvider } from 'src/app/services/static/services.service';
 
 import { concat, of, Subject } from 'rxjs';
 import { catchError, distinctUntilChanged, mergeMap, switchMap, tap } from 'rxjs/operators';
+import { ItemPickerPage } from 'src/app/pages/WMS/item-picker/item-picker.page';
 
 @Component({
 	selector: 'app-bp-items',
@@ -33,7 +34,8 @@ export class BPItemsComponent extends PageBase {
 		public navCtrl: NavController,
 		public formBuilder: FormBuilder,
 		public cdr: ChangeDetectorRef,
-		public loadingController: LoadingController
+		public loadingController: LoadingController,
+		public modalController: ModalController
 	) {
 		super();
 		this.formGroup = formBuilder.group({
@@ -72,7 +74,7 @@ export class BPItemsComponent extends PageBase {
 			Id: it.Id,
 			_Item: it._Item,
 			IDParent: it.IDParent,
-
+			Checked: false,
 			Name: it.Name,
 			Price: [],
 		});
@@ -88,17 +90,39 @@ export class BPItemsComponent extends PageBase {
 	}
 
 	removeItem(index) {
-		let groups = <FormArray>this.formGroup.controls.Items;
-		let submitItem = {
-			IDParent: null,
-			Id: groups.controls[index]['controls'].Id.value,
-		};
-		if (submitItem.Id)
-			this.pageProvider.save(submitItem).then((resp) => {
-				this.items = this.items.filter((d) => d.Id != submitItem.Id);
-				groups.removeAt(index);
-				this.env.showMessage('Contacts deleted', 'success');
-			});
+		this.env
+			.showPrompt('Are you sure you want to delete this item?', null, 'Delete Item')
+			.then((_) => {
+				let groups = <FormArray>this.formGroup.controls.Items;
+				let Ids = [];
+				Ids.push({ Id: groups.controls[index]['controls'].Id.value });
+				this.pageProvider.delete(Ids).then((resp) => {
+					groups.removeAt(index);
+					this.env.publishEvent({ Code: this.pageConfig.pageName });
+					this.env.showMessage('Deleted!', 'success');
+				});
+			})
+			.catch((_) => {});
+	}
+
+	deleteSelectedRows() {
+		this.env
+			.showPrompt('Are you sure you want to delete selected items?', null, 'Delete Product')
+			.then((_) => {
+				let groups = <FormArray>this.formGroup.controls.Items;
+				let Ids = [];
+				Ids = groups
+					.getRawValue()
+					.filter((d) => d.Checked)
+					.map((d) => {
+						return { Id: d.Id };
+					});
+				this.pageProvider.delete(Ids).then((resp) => {
+					this.env.publishEvent({ Code: this.pageConfig.pageName });
+					this.env.showMessage('Deleted!', 'success');
+				});
+			})
+			.catch((_) => {});
 	}
 
 	itemList$;
@@ -164,11 +188,39 @@ export class BPItemsComponent extends PageBase {
 			})
 			.catch((err) => {
 				if (err.statusText == 'Conflict') {
-					// var contentDispositionHeader = err.headers.get('Content-Disposition');
-					// var result = contentDispositionHeader.split(';')[1].trim().split('=')[1];
-					// this.downloadContent(result.replace(/"/g, ''),err._body);
 					this.downloadURLContent(err._body);
 				}
 			});
+	}
+
+	async openItemModel() {
+		const modal = await this.modalController.create({
+			component: ItemPickerPage,
+			componentProps: {
+				id: this.id,
+			},
+			cssClass: 'modal90',
+		});
+
+		await modal.present();
+		const { data } = await modal.onWillDismiss();
+
+		if (data && data.length) {
+			let postDTO = {
+				IDVendor: this.id,
+				Items: data,
+			};
+
+			this.env
+				.showLoading('Please wait for a few moments', this.pageProvider.save(postDTO))
+				.then((response: any) => {
+					this.submitAttempt = false;
+					this.env.publishEvent({ Code: this.pageConfig.pageName });
+					this.env.showMessage('Items added successfully', 'success');
+				})
+				.catch((err) => {
+					this.submitAttempt = false;
+				});
+		}
 	}
 }
