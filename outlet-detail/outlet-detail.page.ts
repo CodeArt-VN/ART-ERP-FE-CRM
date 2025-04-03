@@ -3,7 +3,7 @@ import { NavController, LoadingController, AlertController, PopoverController, M
 import { PageBase } from 'src/app/page-base';
 import { ActivatedRoute } from '@angular/router';
 import { EnvService } from 'src/app/services/core/env.service';
-import { CRM_ContactProvider, HRM_StaffProvider } from 'src/app/services/static/services.service';
+import { APPROVAL_RequestProvider, CRM_ContactProvider, HRM_StaffProvider } from 'src/app/services/static/services.service';
 import { FormBuilder, Validators, FormControl, FormArray, FormGroup } from '@angular/forms';
 import { CommonService } from 'src/app/services/core/common.service';
 import { concat, of, Subject } from 'rxjs';
@@ -26,6 +26,7 @@ export class OutletDetailPage extends PageBase {
 	constructor(
 		public pageProvider: CRM_ContactProvider,
 		public staffProvider: HRM_StaffProvider,
+		public requestProvider: APPROVAL_RequestProvider,
 		public popoverCtrl: PopoverController,
 		public env: EnvService,
 		public navCtrl: NavController,
@@ -70,16 +71,7 @@ export class OutletDetailPage extends PageBase {
 			BillingAddress: [''],
 
 			Status: new FormControl({ value: '', disabled: true }),
-			// Address: this.formBuilder.group({
-			//   Id: [''],
-			//   Phone1: ['', Validators.required],
-			//   Contact: ['', Validators.required],
-			//   Province: ['', Validators.required],
-			//   District: ['', Validators.required],
-			//   Ward: ['', Validators.required],
-			//   AddressLine1: ['', Validators.required],
-			//   AddressLine2: [''],
-			// }),
+		
 			Addresses: this.formBuilder.array([]),
 			TaxInfos: this.formBuilder.array([]),
 			DeletedAddressFields: [],
@@ -134,8 +126,16 @@ export class OutletDetailPage extends PageBase {
 			this.patchTaxInfosValue();
 		}
 		this.salesmanSearch();
-
-		super.loadedData(event, ignoredFromGroup);
+		super.loadedData(event);	
+		this.pageConfig.ShowRequestDataCorrection = false;
+		if(this.item?.Id>0 && this.item?.Status == 'Approved'){
+			this.requestProvider.read({Status:'["Unapproved","Pending"]',UDF01 : this.item.Id,Type:'DataCorrection'}).then((result:any)=>{
+				if(result && result.data.length>0){
+					this.pageConfig.ShowRequestDataCorrection = false;
+				}
+				else this.pageConfig.ShowRequestDataCorrection = true;
+			})
+		}
 	}
 
 	patchAddressesValue() {
@@ -224,7 +224,6 @@ export class OutletDetailPage extends PageBase {
 		}
 	}
 	addTaxInfo(taxAddress, markAsDirty = false) {
-		// todo
 		let groups = <FormArray>this.formGroup.controls.TaxInfos;
 		let group = this.formBuilder.group({
 			IDPartner: [this.formGroup.get('Id').value],
@@ -393,7 +392,7 @@ export class OutletDetailPage extends PageBase {
 				},
 				model: {
 					title: 'Outlet',
-					type: 'Outlet',
+					type: 'BusinessPartner',
 					fields:[
 						{
 						type:'Group',
@@ -468,35 +467,6 @@ export class OutletDetailPage extends PageBase {
 									{
 										id: 'Addresses',
 										type: 'addresses-component',
-										disabled: true,
-										// fields:[{
-										//     id: 'Id',
-										//     type: 'number',
-										//     label: 'Id',
-										//     disabled: true,
-										//     cols: { xs: 12 ,  sm: 12 , md: 12 ,  lg: 12 ,  xl: 4 },
-										// }],
-										// groups: [
-										// 	{
-										// 		title: 'ADDRESS LINE',
-										// 		cols: { default: 12, sm: 3 },
-										// 		fields: [
-										// 			{
-										// 				id: 'Id',
-										// 				type: 'number',
-										// 				label: 'Id',
-										// 				disabled: true,
-										// 				cols: { xs: 12, sm: 12, md: 12, lg: 12, xl: 4 },
-										// 			},
-										// 			{
-										// 				id: 'AddressLine1',
-										// 				type: 'text',
-										// 				label: 'AddressLine1',
-										// 				cols: { xs: 12, sm: 12, md: 12, lg: 12, xl: 4 },
-										// 			},
-										// 		],
-										// 	},
-										// ],
 									},
 								],
 							},
@@ -507,7 +477,6 @@ export class OutletDetailPage extends PageBase {
 									{
 										id: 'TaxInfos',
 										type: 'tax-infos-component',
-										disabled: true,
 									}]
 								}
 						],
