@@ -74,13 +74,13 @@
 			</ng-template>
 		</datatable-column>
 
-		<datatable-column class="col-code" name="Banquet type" property="TypeOfParty"></datatable-column>
+		<datatable-column class="col-code" name="Banquet type" property="TypeOfParty" filterControlType="ng-select" [filterDataSource]="PartyMenuList"></datatable-column>
 
 		<datatable-column class="col-remark" name="Remark" property="Remark"></datatable-column>
 		<datatable-column class="col-code" name="DiningCard" property="DiningCard"></datatable-column>
 		<datatable-column class="col-code" name="Count" property="NoRecords"></datatable-column>
-		<datatable-column class="col-code" name="Group" property="CustomerGroup"></datatable-column>
-		<datatable-column class="col-code" name="Customer type" property="CustomerType"></datatable-column>
+		<datatable-column class="col-code" name="Group" property="CustomerGroup" filterControlType="ng-select" [filterDataSource]="AttendanceGroup"></datatable-column>
+		<datatable-column class="col-code" name="Customer type" property="CustomerType" filterControlType="ng-select" [filterDataSource]="AttendanceType"></datatable-column>
 
 		<datatable-column class="col-status" name="Status" property="Status" filterControlType="ng-select-status" [filterDataSource]="statusList">
 			<ng-template let-i="row" datatable-cell-template>

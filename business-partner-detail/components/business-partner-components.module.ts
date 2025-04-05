@@ -16,6 +16,7 @@ import { RouterModule } from '@angular/router';
 import { MapCompsModule } from 'src/app/components/map-comps/map-comps.module';
 import { BpTaxAddressComponent } from './bp-tax-address/bp-tax-address.component';
 import { ItemPickerPage } from 'src/app/pages/WMS/item-picker/item-picker.page';
+import { TaxInfoComponent } from './tax-info/tax-info.component';
 
 @NgModule({
 	imports: [IonicModule, CommonModule, ShareModule, RouterModule, FormsModule, MapCompsModule, ReactiveFormsModule, GoogleMapsModule],
@@ -26,6 +27,7 @@ import { ItemPickerPage } from 'src/app/pages/WMS/item-picker/item-picker.page';
 		BpStorerInfoComponent,
 		BpAddressComponent,
 		BpTaxAddressComponent,
+		TaxInfoComponent,
 		BpMapComponent,
 		BpOutletInfoComponent,
 		BPItemsComponent,
@@ -38,6 +40,7 @@ import { ItemPickerPage } from 'src/app/pages/WMS/item-picker/item-picker.page';
 		BpStorerInfoComponent,
 		BpAddressComponent,
 		BpTaxAddressComponent,
+		TaxInfoComponent,
 		BpMapComponent,
 		BpOutletInfoComponent,
 		BPItemsComponent,
