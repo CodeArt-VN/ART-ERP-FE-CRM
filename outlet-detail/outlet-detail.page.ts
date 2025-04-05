@@ -398,71 +398,78 @@ export class OutletDetailPage extends PageBase {
 						type:'Group',
 						groups: [
 							{
+								title: 'Phone number',
+								cols: { default: 12, xs: 12, sm: 12, md: 12, lg: 12, xl: 3 },
+								fields: [
+									{
+										id: 'WorkPhone',
+										type: 'text',
+										label: 'Work phone',
+										cols: { default: 'auto', xs: 12, sm: 12, md: 12, lg: 12, xl: 12 },
+									},
+								],
+							},
+							{
 								title: 'General information',
-								cols: { default: 12, sm: 3 },
+								cols: { default: 12, xs: 12, sm: 12, md: 12, lg: 12, xl: 3 },
 								fields: [
 									{
 										id: 'Id',
 										type: 'number',
 										label: 'Id',
 										disabled: true,
-										cols: { default: 'auto', xs: 12, sm: 12, md: 12, lg: 4 },
+										cols: { default: 'auto', xs: 12, sm: 12, md: 12, lg: 12,xl:6 },
 									},
 									{
 										id: 'IDBranch',
 										type: 'number',
 										label: 'Branch',
 										disabled: true,
-										cols: { xs: 12, sm: 12, md: 12, lg: 12, xl: 4 },
+										cols: { xs: 12, sm: 12, md: 12, lg: 12, xl: 6 },
 									},
 									{
 										id: 'Name',
 										type: 'text',
 										label: 'Name',
-										cols: { xs: 12, sm: 12, md: 12, lg: 12, xl: 4 },
+										cols: { xs: 12, sm: 12, md: 12, lg: 12, xl: 6 },
 									},
 									{
 										id: 'CompanyName',
 										type: 'text',
 										label: 'CompanyName',
-										cols: { xs: 12, sm: 12, md: 12, lg: 12, xl: 4 },
-									},
-									{
-										id: 'IsPersonal',
-										type: 'checkbox',
-										label: 'Is personal',
-										cols: { xs: 12, sm: 12, md: 12, lg: 12, xl: 4 },
-									},
-									{
-										id: 'WorkPhone',
-										type: 'text',
-										label: 'Work phone',
-										cols: { xs: 12, sm: 12, md: 12, lg: 12, xl: 4 },
+										cols: { xs: 12, sm: 12, md: 12, lg: 12, xl: 6 },
 									},
 									{
 										id: 'OtherPhone',
 										type: 'text',
 										label: 'Other phone',
-										cols: { xs: 12, sm: 12, md: 12, lg: 12, xl: 4 },
+										cols: { xs: 12, sm: 12, md: 12, lg: 12, xl: 6 },
 									},
+									{
+										id: 'IsPersonal',
+										type: 'checkbox',
+										label: 'Is personal',
+										cols: { xs: 12, sm: 12, md: 12, lg: 12, xl: 6 },
+									},
+								
 									{
 										id: 'Website',
 										type: 'text',
 										label: 'Website',
-										cols: { xs: 12, sm: 12, md: 12, lg: 12, xl: 4 },
+										cols: { xs: 12, sm: 12, md: 12, lg: 12, xl: 6 },
 									},
 									{
 										id: 'Email',
 										type: 'email',
 										label: 'Email',
-										cols: { xs: 12, sm: 12, md: 12, lg: 12, xl: 4 },
+										cols: { xs: 12, sm: 12, md: 12, lg: 12, xl: 6 },
 									},
 									//  { id: 'DeletedAddressFields',type:'nonRender'},
 								],
 							},
 							{
 								title: 'Addresses',
-								cols: { default: 12, xs: 3 },
+								cols: { default: 12, xs: 12, sm: 12, md: 12, lg: 12, xl: 3 },
 								fields: [
 									{
 										id: 'Addresses',
@@ -472,7 +479,7 @@ export class OutletDetailPage extends PageBase {
 							},
 							{
 								title: 'Billing address',
-								cols: { default: 12, xs: 3 },
+								cols: { default: 12, xs: 12, sm: 12, md: 12, lg: 12, xl: 3 },
 								fields: [
 									{
 										id: 'TaxInfos',
@@ -485,6 +492,7 @@ export class OutletDetailPage extends PageBase {
 				},
 				// cssClass: 'modal90',
 			},
+			cssClass: 'modal90'
 		});
 
 		await modal.present();
