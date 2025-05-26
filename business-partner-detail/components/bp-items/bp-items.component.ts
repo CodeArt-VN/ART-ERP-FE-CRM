@@ -56,7 +56,7 @@ export class BPItemsComponent extends PageBase {
 		super.loadedData();
 		this.setItems();
 		this.pageConfig.canEdit = this.canEdit;
-		if (!this.canEdit) this.formGroup?.disable();
+		//if (!this.canEdit) this.formGroup?.disable();
 		this.itemList$ = concat(of(this.items), of([]));
 		this.itemSearch();
 	}
