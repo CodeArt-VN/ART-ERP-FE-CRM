@@ -7,7 +7,8 @@
 </ion-header>
 
 <ion-content appScrollbarTheme class="ion-padding">
-	<div id="ng-select-holder" style="position: absolute"></div>
+	<div id="ng-select-header" style="position: absolute; z-index: 30005"></div>
+
 	<div id="selectholder" style="position: relative"></div>
 	<app-page-message [itemsLength]="item? 1: 0" [showSpinner]="pageConfig.showSpinner"></app-page-message>
 
@@ -46,7 +47,7 @@
 									<ng-select
 										class="c-input"
 										disabled
-										appendTo="#ng-select-holder"
+										appendTo="#ng-select-header"
 										#Status
 										labelForId="Status"
 										[items]="statusList"
@@ -489,18 +490,13 @@
 													color="primary"
 												></ion-icon>
 											</label>
-
-											<ng-select
+											<app-input-control
 												(change)="saveChange()"
-												class="c-input"
-												#IDPriceList
-												formControlName="IDPriceList"
-												labelForId="IDPriceList"
-												[items]="priceList"
-												bindLabel="Name"
-												bindValue="Id"
-												placeholder="{{'no price list for reference' | translate}}"
-											></ng-select>
+												[field]="{id:'IDPriceList',
+											 label:'Selling price list',type:'ng-select-async',
+											 dataSource:_PriceListDataSource,bindLabel:'Name',bindValue:'Id',form:formGroup, placeholder:'no price list for reference',
+											 appendTo:'#ng-select-header',clearable:true}"
+											></app-input-control>
 										</div>
 
 										<div class="c-control" *ngIf="formGroup.controls.IsVendor.value">
@@ -514,17 +510,13 @@
 													color="primary"
 												></ion-icon>
 											</label>
-											<ng-select
+											<app-input-control
 												(change)="saveChange()"
-												class="c-input"
-												#IDPriceListForVendor
-												formControlName="IDPriceListForVendor"
-												labelForId="IDPriceListForVendor"
-												[items]="priceList"
-												bindLabel="Name"
-												bindValue="Id"
-												placeholder="{{'no price list for reference' | translate}}"
-											></ng-select>
+												[field]="{id:'IDPriceListForVendor',
+											 label:'Purchase price list',type:'ng-select-async',
+											 dataSource:_PriceListVendorDataSource,bindLabel:'Name',bindValue:'Id',form:formGroup, placeholder:'no price list for reference',
+											 appendTo:'#ng-select-header',clearable:true}"
+											></app-input-control>
 										</div>
 									</ion-col>
 									<ion-col size="12" size-sm="6" size-xl="4"> </ion-col>

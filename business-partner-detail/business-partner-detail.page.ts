@@ -20,7 +20,7 @@ declare var ggMap;
 })
 export class BusinessPartnerDetailPage extends PageBase {
 	avatarURL = 'assets/imgs/avartar-empty.jpg';
-	priceList = [];
+	initPriceList = [];
 	statusList = [];
 	storerList = [];
 	isShowAddAddress = true;
@@ -100,11 +100,26 @@ export class BusinessPartnerDetailPage extends PageBase {
 		});
 		console.log(this.formGroup.controls);
 	}
-
+	_PriceListDataSource = this.buildSelectDataSource((term) => {
+		return this.priceListProvider.search({
+			SortBy: ['Id_desc'],
+			Take: 20,
+			Skip: 0,
+			Term: term,
+		});
+	});
+	_PriceListVendorDataSource = this.buildSelectDataSource((term) => {
+		return this.priceListProvider.search({
+			SortBy: ['Id_desc'],
+			Take: 20,
+			Skip: 0,
+			Term: term,
+		});
+	});
 	preLoadData(event) {
 		this.loadGGMap();
-		Promise.all([this.priceListProvider.read(), this.env.getStatus('BusinessPartner'), this.addressService.getAddressSubdivision()]).then((values: any) => {
-			this.priceList = values[0]['data'];
+		Promise.all([this.priceListProvider.read({ Take: 20 }), this.env.getStatus('BusinessPartner'), this.addressService.getAddressSubdivision()]).then((values: any) => {
+			this.initPriceList = values[0]['data'];
 			this.statusList = values[1];
 			super.preLoadData(event);
 		});
@@ -115,6 +130,27 @@ export class BusinessPartnerDetailPage extends PageBase {
 		this.formGroup.controls['IsPersonal'].markAsDirty();
 
 		super.loadedData(event, ignoredFromGroup);
+		if (this.initPriceList && this.initPriceList.length > 0) {
+			this._PriceListDataSource.selected = [...this.initPriceList];
+			this._PriceListVendorDataSource.selected = [...this.initPriceList];
+		}
+		let ids = [];
+		if (this.item.IDPriceList) ids.push(this.item.IDPriceList);
+		if (this.item.IDPriceListForVendor) ids.push(this.item.IDPriceListForVendor);
+		if (ids.length > 0) {
+			this.priceListProvider.read({ Id: [this.item.IDPriceList, this.item.IDPriceListForVendor] }).then((res: any) => {
+				if (res?.data && res.data.length > 0) {
+					this._PriceListDataSource.selected = [...res.data, ...this._PriceListDataSource.selected];
+					this._PriceListVendorDataSource.selected = [...res.data, ...this._PriceListVendorDataSource.selected];
+				}
+				this._PriceListDataSource.initSearch();
+				this._PriceListVendorDataSource.initSearch();
+			});
+		} else {
+			this._PriceListDataSource.initSearch();
+			this._PriceListVendorDataSource.initSearch();
+		}
+
 		if (this.item && (this.item.IsBranch || this.item.IsStaff)) {
 			this.formGroup.controls.Code.disable();
 			this.formGroup.controls.Name.disable();
