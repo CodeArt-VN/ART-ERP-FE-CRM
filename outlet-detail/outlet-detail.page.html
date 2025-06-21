@@ -211,6 +211,9 @@
 							</ion-col>
 						</ion-row>
 
+						<!-- Thông tin cá nhân -->
+						<app-bp-person-info [bpId]="item.Id" [canEdit]="pageConfig.canEdit" *ngIf="formGroup.controls.IsPersonal.value && item.Id"></app-bp-person-info>
+
 						<!-- Địa chỉ -->
 						<ion-row class="hr-group">
 							<ion-col size="12" size-md="12" size-lg="12" size-xl="3">
@@ -388,9 +391,6 @@
 
 							</ion-col>
 						</ion-row> -->
-
-						<!-- Thông tin cá nhân -->
-						<app-bp-person-info [bpId]="item.Id" [canEdit]="pageConfig.canEdit" *ngIf="formGroup.controls.IsPersonal.value && item.Id"></app-bp-person-info>
 
 						<!-- Tuyến bán -->
 						<ion-row class="hr-group" *ngIf="item?._Routes">

@@ -396,6 +396,9 @@
 									[canEdit]="pageConfig.canEdit"
 									*ngIf="item.Id && formGroup.controls.IsOutlets.value"
 								></app-bp-reference-code>
+								
+								<!-- Thông tin cá nhân -->
+								<app-bp-person-info [bpId]="item.Id" [canEdit]="pageConfig.canEdit" *ngIf="formGroup.controls.IsPersonal.value && item.Id"></app-bp-person-info>
 
 								<!-- Tuyến bán -->
 								<ion-row class="hr-group" *ngIf="item?._Routes">
@@ -558,9 +561,6 @@
                                         </div>
                                     </ion-col>
                                 </ion-row> -->
-
-								<!-- Thông tin cá nhân -->
-								<app-bp-person-info [bpId]="item.Id" [canEdit]="pageConfig.canEdit" *ngIf="formGroup.controls.IsPersonal.value && item.Id"></app-bp-person-info>
 
 								<!-- Đơn hàng -->
 								<ion-row class="hr-group" *ngIf="item?._LastSOs?.length">
