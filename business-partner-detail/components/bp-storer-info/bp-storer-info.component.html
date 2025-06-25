@@ -1,5 +1,6 @@
 <ion-grid fixed>
-	<form [formGroup]="formGroup">
+	<app-page-message [itemsLength]="1" [showSpinner]="pageConfig.showSpinner"></app-page-message>
+	<form [formGroup]="formGroup" *ngIf="!pageConfig.showSpinner">
 		<!-- General -->
 		<ion-row class="hr-group">
 			<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
@@ -8,92 +9,38 @@
 				</ion-list-header>
 			</ion-col>
 			<ion-col size="12" size-sm="6" size-xl="4">
-				<div class="c-control">
-					<label class="c-label" for="IDWarehouse"
-						>{{ 'Warehouse' | translate }}
-						<span
-							*ngIf="!formGroup.controls.IDWarehouse.valid && !formGroup.controls.IDWarehouse.pending && (formGroup.controls.IDWarehouse.dirty || submitAttempt)"
-							ion-text
-							color="danger"
-							>(*)</span
-						>
-					</label>
-					<ng-select
-						class="c-input"
-						(change)="saveChange()"
-						labelForId="IDWarehouse"
-						formControlName="IDWarehouse"
-						[items]="branchList"
-						[virtualScroll]="true"
-						bindLabel="Name"
-						bindValue="Id"
-						placeholder="{{ 'Search...' | translate }}"
-					>
-						<ng-template ng-option-tmp let-i="item" let-search="searchTerm">
-							<div *ngIf="i">
-								<div>
-									<span *ngFor="let l of i.levels">&nbsp;&nbsp;&nbsp;</span>
-									<span [ngOptionHighlight]="search">{{ i.Name }}</span>
-								</div>
-							</div>
-						</ng-template>
-					</ng-select>
-				</div>
+				<app-form-control
+					(change)="loadPutawayAndAllocationStrategy(); saveChange()"
+					[field]="{
+						branchConfig: { showingType: 'Warehouse' },
+						id: 'IDWarehouse',
+						label: 'Warehouse',
+						type: 'ng-select-branch',
+						dataSource: branchList,
+						bindLabel: 'Name',
+						bindValue: 'Id',
+						placeholder: 'Search',
+						form: formGroup,
+					}"
+				>
+				</app-form-control>
 
-				<div class="c-control">
-					<label class="c-label" for="StandardCarrierAlphaCode"
-						>{{ 'StandardCarrierAlphaCode' | translate }}
-						<span
-							*ngIf="
-								!formGroup.controls.StandardCarrierAlphaCode.valid &&
-								!formGroup.controls.StandardCarrierAlphaCode.pending &&
-								(formGroup.controls.StandardCarrierAlphaCode.dirty || submitAttempt)
-							"
-							ion-text
-							color="danger"
-							>(*)</span
-						>
-					</label>
-					<input (change)="saveChange()" class="c-input" id="StandardCarrierAlphaCode" formControlName="StandardCarrierAlphaCode" />
-				</div>
-				<div class="c-control">
-					<label class="c-label" for="CreditLimit"
-						>{{ 'CreditLimit' | translate }}
-						<small>{{ 'Maximum amount of the owner credit limit' | translate }}</small>
-						<span
-							*ngIf="!formGroup.controls.CreditLimit.valid && !formGroup.controls.CreditLimit.pending && (formGroup.controls.CreditLimit.dirty || submitAttempt)"
-							ion-text
-							color="danger"
-							>(*)</span
-						>
-					</label>
-					<input
-						(change)="saveChange()"
-						class="c-input"
-						id="CreditLimit"
-						formControlName="CreditLimit"
-						mask="separator.9"
-						thousandSeparator=","
-						[allowNegativeNumbers]="false"
-						type="tel"
-					/>
-				</div>
+				
 			</ion-col>
 			<ion-col size="12" size-sm="6" size-xl="4">
-				<div class="c-control">
-					<label class="c-label" for="IDCartonGroup"
-						>{{ 'Carton group' | translate }}
-						<span
-							*ngIf="
-								!formGroup.controls.IDCartonGroup.valid && !formGroup.controls.IDCartonGroup.pending && (formGroup.controls.IDCartonGroup.dirty || submitAttempt)
-							"
-							ion-text
-							color="danger"
-							>(*)</span
-						>
-					</label>
-					<input (change)="saveChange()" class="c-input" id="IDCartonGroup" formControlName="IDCartonGroup" />
-				</div>
+				<app-form-control [field]="{ id: 'StandardCarrierAlphaCode', form: formGroup }" (change)="saveChange()"> </app-form-control>
+				<app-form-control [field]="{ id: 'CreditLimit', type: 'number', form: formGroup }" (change)="saveChange()"> </app-form-control>
+				<app-form-control
+					(change)="saveChange()"
+					[field]="{
+						id: 'IDCartonGroup',
+						label: 'Carton group',
+						type: 'ng-select',
+						dataSource: cartonGroupList,
+						form: formGroup,
+					}"
+				>
+				</app-form-control>
 			</ion-col>
 		</ion-row>
 
@@ -231,42 +178,37 @@
 						<ng-option value="LIFO">{{ 'LIFO' | translate }}</ng-option>
 					</ng-select>
 				</div>
-				<div class="c-control">
-					<label class="c-label" for="DefaultStrategy"
-						>{{ 'Default strategy' | translate }}
-						<span
-							*ngIf="
-								!formGroup.controls.DefaultStrategy.valid &&
-								!formGroup.controls.DefaultStrategy.pending &&
-								(formGroup.controls.DefaultStrategy.dirty || submitAttempt)
-							"
-							ion-text
-							color="danger"
-							>(*)</span
-						>
-					</label>
-					<ng-select (change)="saveChange()" class="c-input" formControlName="DefaultStrategy">
-						<ng-option [value]="1">{{ 'Std' | translate }}</ng-option>
-					</ng-select>
-				</div>
-				<div class="c-control">
-					<label class="c-label" for="DefaultPutawayStrategy"
-						>{{ 'Default putaway strategy' | translate }}
-						<span
-							*ngIf="
-								!formGroup.controls.DefaultPutawayStrategy.valid &&
-								!formGroup.controls.DefaultPutawayStrategy.pending &&
-								(formGroup.controls.DefaultPutawayStrategy.dirty || submitAttempt)
-							"
-							ion-text
-							color="danger"
-							>(*)</span
-						>
-					</label>
-					<ng-select (change)="saveChange()" class="c-input" formControlName="DefaultPutawayStrategy">
-						<ng-option [value]="1">{{ 'Std' | translate }}</ng-option>
-					</ng-select>
-				</div>
+
+				<app-form-control
+					*ngIf="!isChangingWarehouse"
+					(change)="saveChange()"
+					[field]="{
+						id: 'DefaultAllocationStrategy',
+						label: 'Allocation strategy',
+						type: 'ng-select',
+						dataSource: allocationStrategyList,
+						bindValue:'Id',
+						form: formGroup,
+					}"
+				>
+				</app-form-control>
+
+				<app-form-control
+					*ngIf="!isChangingWarehouse"
+					(change)="saveChange()"
+					[field]="{
+						id: 'DefaultPutawayStrategy',
+						label: 'Putaway strategy',
+						type: 'ng-select',
+						dataSource: putawayStrategyList,
+						bindValue:'Id',
+						form: formGroup,
+					}"
+				>
+				</app-form-control>
+				
+
+				
 			</ion-col>
 			<ion-col size="12" size-sm="6" size-xl="4">
 				<div class="c-control">

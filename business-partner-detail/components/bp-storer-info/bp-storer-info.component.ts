@@ -4,8 +4,17 @@ import { ActivatedRoute } from '@angular/router';
 import { AlertController, LoadingController, NavController } from '@ionic/angular';
 import { PageBase } from 'src/app/page-base';
 import { EnvService } from 'src/app/services/core/env.service';
-import { BRA_BranchProvider, WMS_LocationProvider, WMS_StorerConfigProvider, WMS_ZoneProvider } from 'src/app/services/static/services.service';
+import {
+	BRA_BranchProvider,
+	WMS_AllocationStrategyProvider,
+	WMS_CartonGroupProvider,
+	WMS_LocationProvider,
+	WMS_PutawayStrategyProvider,
+	WMS_StorerConfigProvider,
+	WMS_ZoneProvider,
+} from 'src/app/services/static/services.service';
 import { lib } from 'src/app/services/static/global-functions';
+import { BRA_Branch, WMS_AllocationStrategy, WMS_CartonGroup, WMS_Location, WMS_PutawayStrategy, WMS_Zone } from 'src/app/models/model-list-interface';
 
 @Component({
 	selector: 'app-bp-storer-info',
@@ -18,12 +27,21 @@ export class BpStorerInfoComponent extends PageBase {
 	@Input() bpId;
 	@Input() bpIdStorer;
 	@Input() segmentIndex;
-	locationList = [];
-	branchList;
+	cartonGroupList: WMS_CartonGroup[] = [];
+	putawayStrategyList: WMS_PutawayStrategy[] = [];
+	allocationStrategyList: WMS_AllocationStrategy[] = [];
+	zoneList: WMS_Zone[] = [];
+	locationList: WMS_Location[] = [];
+	branchList: BRA_Branch[] = [];
+
+
 	constructor(
 		public pageProvider: WMS_StorerConfigProvider,
+		public cartonGroupProvider: WMS_CartonGroupProvider,
 		public zoneProvider: WMS_ZoneProvider,
 		public locationProvider: WMS_LocationProvider,
+		public putawayStrategyProvider: WMS_PutawayStrategyProvider,
+		public allocationStrategyProvider: WMS_AllocationStrategyProvider,
 		public env: EnvService,
 		public route: ActivatedRoute,
 		public alertCtrl: AlertController,
@@ -51,7 +69,7 @@ export class BpStorerInfoComponent extends PageBase {
 			IsAllowMultiZoneRainbowPallet: [''],
 			DefaultItemRotation: ['', Validators.required],
 			DefaultRotation: ['', Validators.required],
-			DefaultStrategy: [''],
+			DefaultAllocationStrategy: [''],
 			DefaultPutawayStrategy: [''],
 			DefaultInboundQCLocation: [''],
 			DefaultOutboundQCLocation: [''],
@@ -76,24 +94,14 @@ export class BpStorerInfoComponent extends PageBase {
 
 	preLoadData(event?: any): void {
 		this.id = this.bpId;
-		this.branchProvider
-			.read({
-				Skip: 0,
-				Take: 5000,
-				Type: 'Warehouse',
-				AllParent: true,
-				Id: this.env.selectedBranchAndChildren,
-			})
-			.then((resp) => {
-				lib.buildFlatTree(resp['data'], this.branchList).then((result: any) => {
-					this.branchList = result;
-					this.branchList.forEach((i) => {
-						i.disabled = true;
-					});
-					this.markNestedNode(this.branchList, this.env.selectedBranch);
-				});
-			});
-		super.preLoadData(event);
+		this.branchList = lib.cloneObject(this.env.branchList);
+		Promise.all([
+			this.cartonGroupProvider.read()
+		]).then((res: any) => {
+			this.cartonGroupList = res[0]['data'];
+			super.preLoadData(event);
+		});
+		
 	}
 
 	loadedData() {
@@ -102,9 +110,36 @@ export class BpStorerInfoComponent extends PageBase {
 			this.formGroup.controls.IDStorer.markAsDirty();
 		}
 
-		super.loadedData();
+		if (this.item?.IDWarehouse) {
+			this.loadPutawayAndAllocationStrategy(this.item.IDWarehouse).then(() => {
+				super.loadedData();
+			});
+		} else {
+			super.loadedData();
+		}
+
 		this.pageConfig.canEdit = this.canEdit;
 		if (!this.canEdit) this.formGroup?.disable();
+	}
+
+	isChangingWarehouse = false;
+	loadPutawayAndAllocationStrategy(selectedWarehouseId = null) {
+		this.isChangingWarehouse = true;
+		if (!selectedWarehouseId) selectedWarehouseId = this.formGroup.controls.IDWarehouse.value;
+
+		return Promise.all([
+			this.putawayStrategyProvider.read({ IDBranch: selectedWarehouseId }),
+			this.allocationStrategyProvider.read({ IDBranch: selectedWarehouseId }),
+			this.locationProvider.read({ IDBranch: selectedWarehouseId }),
+			this.zoneProvider.read({ IDBranch: selectedWarehouseId }),
+		]).then((res:any) => {
+			this.putawayStrategyList = res[0]['data'];
+			this.allocationStrategyList = res[1]['data'];
+			this.locationList = res[2]['data'];
+			this.zoneList = res[3]['data'];
+		}).finally(() => {
+			this.isChangingWarehouse = false;
+		});
 	}
 
 	async saveChange() {
