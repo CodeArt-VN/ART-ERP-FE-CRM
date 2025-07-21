@@ -79,6 +79,25 @@ export class BpTaxAddressComponent extends PageBase {
 		});
 
 		groups.push(group);
+		this.updateIsDefaultBilling();
+	}
+
+	updateIsDefaultBilling() {
+		const groups = this.formGroup.get('TaxAddresses') as FormArray;
+		let indexDefault = groups.controls.findIndex((d) => d.get('IsDefault').value);
+		groups.controls.forEach((d, idx) => {
+			if (indexDefault === -1 || idx == indexDefault) {
+				d.get('IsDefault').enable();
+				
+			}else {
+				d.get('IsDefault').disable();
+			}
+		});
+	}
+
+	savedChange(savedItem = null, form = this.formGroup) {
+		super.savedChange(savedItem, form);
+		this.updateIsDefaultBilling();
 	}
 
 	removeAddress(index) {
