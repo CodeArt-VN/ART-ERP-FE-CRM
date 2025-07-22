@@ -39,6 +39,7 @@ export class BpTaxAddressComponent extends PageBase {
 			TaxAddresses: this.formBuilder.array([]),
 		});
 		this.alwaysReturnProps.push('IDPartner');
+		console.log('bp-tax-address.component.ts');
 	}
 
 	loadedData() {
@@ -79,25 +80,37 @@ export class BpTaxAddressComponent extends PageBase {
 		});
 
 		groups.push(group);
-		this.updateIsDefaultBilling();
 	}
 
-	updateIsDefaultBilling() {
+	changeIsDefault(form){
 		const groups = this.formGroup.get('TaxAddresses') as FormArray;
-		let indexDefault = groups.controls.findIndex((d) => d.get('IsDefault').value);
-		groups.controls.forEach((d, idx) => {
-			if (indexDefault === -1 || idx == indexDefault) {
-				d.get('IsDefault').enable();
+		const current = form.get('IsDefault').value;
+		if(!current) {
+			groups.controls.forEach((d) => {
+				d.get('IsDefault').setValue(false);
+			});
+		}else {
+			groups.controls.forEach((d) => {
+				const isSelected = d === form;
+				d.get('IsDefault').setValue(isSelected);
 				
-			}else {
-				d.get('IsDefault').disable();
-			}
-		});
-	}
+			});
+		}
 
-	savedChange(savedItem = null, form = this.formGroup) {
-		super.savedChange(savedItem, form);
-		this.updateIsDefaultBilling();
+		this.pageProvider.commonService
+			.connect('GET', 'CRM/Contact/ChangeIsDefaultTaxAddresses', {
+				Id: form.get('Id').value, 
+				Value: form.get('IsDefault').value, 
+				IDPartner: this.query.IDPartner,
+			})
+			.toPromise()
+			.then((result: any) => {
+				this.env.showMessage('Cập nhật thành công!', 'success');
+				this.cdr.detectChanges();
+			})
+			.catch((err) => {
+				this.env.showMessage('Cập nhật thất bại!', 'danger');
+			});
 	}
 
 	removeAddress(index) {
