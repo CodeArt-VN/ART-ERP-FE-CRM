@@ -39,7 +39,6 @@ export class BpTaxAddressComponent extends PageBase {
 			TaxAddresses: this.formBuilder.array([]),
 		});
 		this.alwaysReturnProps.push('IDPartner');
-		console.log('bp-tax-address.component.ts');
 	}
 
 	loadedData() {
