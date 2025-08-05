@@ -81,6 +81,37 @@ export class BpTaxAddressComponent extends PageBase {
 		groups.push(group);
 	}
 
+	changeIsDefault(form){
+		const groups = this.formGroup.get('TaxAddresses') as FormArray;
+		const current = form.get('IsDefault').value;
+		if(!current) {
+			groups.controls.forEach((d) => {
+				d.get('IsDefault').setValue(false);
+			});
+		}else {
+			groups.controls.forEach((d) => {
+				const isSelected = d === form;
+				d.get('IsDefault').setValue(isSelected);
+				
+			});
+		}
+
+		this.pageProvider.commonService
+			.connect('GET', 'CRM/Contact/ChangeIsDefaultTaxAddresses', {
+				Id: form.get('Id').value, 
+				Value: form.get('IsDefault').value, 
+				IDPartner: this.query.IDPartner,
+			})
+			.toPromise()
+			.then((result: any) => {
+				this.env.showMessage('Cập nhật thành công!', 'success');
+				this.cdr.detectChanges();
+			})
+			.catch((err) => {
+				this.env.showMessage('Cập nhật thất bại!', 'danger');
+			});
+	}
+
 	removeAddress(index) {
 		this.alertCtrl
 			.create({

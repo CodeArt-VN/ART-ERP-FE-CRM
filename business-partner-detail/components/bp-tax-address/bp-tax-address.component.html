@@ -62,7 +62,7 @@
 								type: 'checkbox',
 								form: add,
 							}"
-							(change)="saveAddress(add)"
+							(change)="changeIsDefault(add)"
 						></app-form-control>
 						<div class="c-control" *ngIf="pageConfig.canEdit">
 							<ion-button (click)="removeAddress(i)" size="small" fill="outline">
