@@ -147,7 +147,7 @@ export class BpTaxAddressComponent extends PageBase {
 	}
 
 	saveAddress(form: FormGroup) {
-		this.saveChange2(form, null);
+		return this.saveChange2(form, null);
 	}
 
 	onChangedTaxCode(event, form) {
