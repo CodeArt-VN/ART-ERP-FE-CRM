@@ -76,9 +76,7 @@ export class LevelPolicyDetailPage extends PageBase {
 	}
 
 	@ViewChild('uploadImage') uploadImage: any;
-	_isAvatar = false;
-	onClickUpload(isAvatar: boolean, id: number) {
-		this._isAvatar = isAvatar;
+	onClickUpload() {
 		this.uploadImage.nativeElement.value = '';
 		this.uploadImage.nativeElement.click();
 	}
@@ -87,7 +85,7 @@ export class LevelPolicyDetailPage extends PageBase {
 		if (event.target.files.length == 0) {
 			return;
 		}
-		let apiDomain = 'CRM/Brand/UploadImage/';
+		let apiDomain = 'CRM/PolLevel/UploadImage/';
 		let apiPath = {
 			method: 'UPLOAD',
 			url: function () {
@@ -99,22 +97,14 @@ export class LevelPolicyDetailPage extends PageBase {
 			if (result != null) {
 				this.env.showMessage('Upload success', 'success');
 				const envImage = result; // environment.posImagesServer +
-				if (this._isAvatar) {
-					this.formGroup.controls.Avatar.setValue(envImage);
-					this.formGroup.controls.Avatar.markAsDirty();
-					this.saveChange();
-				} else {
-					this.formGroup.controls.Logo.setValue(envImage);
-					this.formGroup.controls.Logo.markAsDirty();
-					this.saveChange();
-				}
+				this.formGroup.controls.Image.setValue(envImage);
+				this.formGroup.controls.Image.markAsDirty();
+				this.saveChange();
 			} else {
 				this.env.showMessage('Upload failed', 'success');
 			}
 		});
 	};
 
-	addLine(){
-
-	}
+	addLine() {}
 }
