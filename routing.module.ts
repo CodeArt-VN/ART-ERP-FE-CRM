@@ -56,4 +56,6 @@ export const CRMRoutes: Routes = [
 
      { path: 'reward', loadChildren: () => import('./reward/reward.module').then(m => m.RewardPageModule), canActivate: [AuthGuard] },
     { path: 'reward/:id', loadChildren: () => import('./reward-detail/reward-detail.module').then(m => m.RewardDetailPageModule), canActivate: [AuthGuard] },
+
+      { path: 'crm-config', loadChildren: () => import('../ADMIN/config/config.module').then(m => m.ConfigPageModule), canActivate: [AuthGuard] },
 ];
