@@ -41,8 +41,8 @@ export const CRMRoutes: Routes = [
      { path: 'level-policy', loadChildren: () => import('./level-policy/level-policy.module').then(m => m.LevelPolicyPageModule), canActivate: [AuthGuard] },
     { path: 'level-policy/:id', loadChildren: () => import('./level-policy-detail/level-policy-detail.module').then(m => m.LevelPolicyDetailPageModule), canActivate: [AuthGuard] },
   
-     { path: 'benefit-policy', loadChildren: () => import('./benefit-policy/benefit-policy.module').then(m => m.BenefitPolicyPageModule), canActivate: [AuthGuard] },
-    { path: 'benefit-policy/:id', loadChildren: () => import('./benefit-policy-detail/benefit-policy-detail.module').then(m => m.BenefitPolicyDetailPageModule), canActivate: [AuthGuard] },
+     { path: 'crm-benefit-policy', loadChildren: () => import('./benefit-policy/benefit-policy.module').then(m => m.BenefitPolicyPageModule), canActivate: [AuthGuard] },
+    { path: 'crm-benefit-policy/:id', loadChildren: () => import('./benefit-policy-detail/benefit-policy-detail.module').then(m => m.BenefitPolicyDetailPageModule), canActivate: [AuthGuard] },
 
     { path: 'loyalty-policy', loadChildren: () => import('./loyalty-policy/loyalty-policy.module').then(m => m.LoyaltyPolicyPageModule), canActivate: [AuthGuard] },
     { path: 'loyalty-policy/:id', loadChildren: () => import('./loyalty-policy-detail/loyalty-policy-detail.module').then(m => m.LoyaltyPolicyDetailPageModule), canActivate: [AuthGuard] },
