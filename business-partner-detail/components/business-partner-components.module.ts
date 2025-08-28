@@ -17,6 +17,8 @@ import { MapCompsModule } from 'src/app/components/map-comps/map-comps.module';
 import { BpTaxAddressComponent } from './bp-tax-address/bp-tax-address.component';
 import { ItemPickerPage } from 'src/app/pages/WMS/item-picker/item-picker.page';
 import { TaxInfoComponent } from './tax-info/tax-info.component';
+import { BpMasterCoveragePlanComponent } from './bp-master-coverage-plan/bp-master-coverage-plan.component';
+import { BpRecentOrderComponent } from './bp-recent-order/bp-recent-order.component';
 
 @NgModule({
 	imports: [IonicModule, CommonModule, ShareModule, RouterModule, FormsModule, MapCompsModule, ReactiveFormsModule, GoogleMapsModule],
@@ -32,6 +34,8 @@ import { TaxInfoComponent } from './tax-info/tax-info.component';
 		BpOutletInfoComponent,
 		BPItemsComponent,
 		ItemPickerPage,
+		BpMasterCoveragePlanComponent,
+		BpRecentOrderComponent,
 	],
 	exports: [
 		BpPersonInfoComponent,
@@ -45,6 +49,8 @@ import { TaxInfoComponent } from './tax-info/tax-info.component';
 		BpOutletInfoComponent,
 		BPItemsComponent,
 		ItemPickerPage,
+		BpMasterCoveragePlanComponent,
+		BpRecentOrderComponent,
 	],
 })
 export class BusinessPartnerComponentsModule {}

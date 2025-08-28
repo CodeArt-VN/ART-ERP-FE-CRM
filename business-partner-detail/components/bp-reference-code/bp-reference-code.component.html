@@ -1,35 +1,39 @@
-<form [formGroup]="formGroup">
-	<ion-row class="hr-group">
-		<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
-			<ion-list-header class="ion-no-padding">
-				<ion-label color="primary">{{ 'Reference code' | translate }}</ion-label>
-			</ion-list-header>
-		</ion-col>
-		<ion-col size="12" size-sm size-xl="8">
-			<div class="table-contain">
-				<section class="table">
-					<header class="bold">
-						<div class="col-name cell">
-							{{ 'Vendor' | translate }}
-						</div>
-						<div class="col-code cell">
-							{{ 'Code' | translate }}
-						</div>
-					</header>
-					<ng-container formArrayName="ContactReferences">
-						<div class="row" [ngClass]="{ odd: j % 2 != 0 }" *ngFor="let ref of formGroup.get('ContactReferences')['controls']; let j = index">
-							<ng-container [formGroup]="ref">
+<div class="main-view">
+	<div class="row-full shadow full-screen ion-padding">
+		<form [formGroup]="formGroup">
+			<ion-row class="hr-group">
+				<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
+					<ion-list-header class="ion-no-padding">
+						<ion-label color="primary">{{ 'Reference code' | translate }}</ion-label>
+					</ion-list-header>
+				</ion-col>
+				<ion-col size="12" size-sm size-xl="8">
+					<div class="table-contain">
+						<section class="table">
+							<header class="bold">
 								<div class="col-name cell">
-									{{ ref.controls.VendorName.value }}
+									{{ 'Vendor' | translate }}
 								</div>
 								<div class="col-code cell">
-									<input class="c-input" (change)="changeCode(ref)" formControlName="Code" />
+									{{ 'Code' | translate }}
+								</div>
+							</header>
+							<ng-container formArrayName="ContactReferences">
+								<div class="row" [ngClass]="{ odd: j % 2 != 0 }" *ngFor="let ref of formGroup.get('ContactReferences')['controls']; let j = index">
+									<ng-container [formGroup]="ref">
+										<div class="col-name cell">
+											{{ ref.controls.VendorName.value }}
+										</div>
+										<div class="col-code cell">
+											<input class="c-input" (change)="changeCode(ref)" formControlName="Code" />
+										</div>
+									</ng-container>
 								</div>
 							</ng-container>
-						</div>
-					</ng-container>
-				</section>
-			</div>
-		</ion-col>
-	</ion-row>
-</form>
+						</section>
+					</div>
+				</ion-col>
+			</ion-row>
+		</form>
+	</div>
+</div>

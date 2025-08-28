@@ -1,0 +1,29 @@
+<div class="main-view">
+	<div class="row-full shadow full-screen ion-padding">
+		<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
+			<ion-list-header class="ion-no-padding">
+				<ion-label color="primary">{{ 'Recent order' | translate }}</ion-label>
+			</ion-list-header>
+		</ion-col>
+		<ion-col size="12" size-sm size-xl="8">
+			<div class="table-contain">
+				<app-data-table *ngIf="!pageConfig.showSpinner" class="box-shadow responsive" [rows]="_LastSOs" [(query)]="query" [showSpinner]="pageConfig.showSpinner">
+					<datatable-empty-message [showImg]="false" minHeight="125px"> </datatable-empty-message>
+					<datatable-column class="col-id" name="Sale orders" property="Id">
+						<ng-template let-i="row" datatable-cell-template>
+							<a [href]="'#/' + 'sale-order/' + i.Id" (click)="nav('sale-order/' + i.Id, 'forward')"> 🔗 {{ i.Id }}</a>
+						</ng-template>
+					</datatable-column>
+					<datatable-column class="col-code" name="Daily order" property="OrderDate" format="dd/MM/yy HH:mm"></datatable-column>
+					<datatable-column class="col-code" name="Sales staff" property="FullName"></datatable-column>
+					<datatable-column class="col-code" name="Customers payable" property="TotalAfterTax">
+						<ng-template let-i="row" datatable-cell-template>
+							{{ i.TotalAfterTax | number }}<small>/{{ i.OriginalTotalAfterTax | number }}</small>
+						</ng-template>
+					</datatable-column>
+					<datatable-column class="col-code" name="Vendor code" property="Code"></datatable-column>
+				</app-data-table>
+			</div>
+		</ion-col>
+	</div>
+</div>

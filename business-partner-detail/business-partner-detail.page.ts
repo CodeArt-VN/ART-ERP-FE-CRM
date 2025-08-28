@@ -3,7 +3,14 @@ import { NavController, ModalController, LoadingController, AlertController, Pop
 import { PageBase } from 'src/app/page-base';
 import { ActivatedRoute } from '@angular/router';
 import { EnvService } from 'src/app/services/core/env.service';
-import { CRM_ContactProvider, HRM_StaffProvider, WMS_PriceListProvider } from 'src/app/services/static/services.service';
+import {
+	CRM_ContactProvider,
+	CRM_ContactUDFProvider,
+	HRM_StaffProvider,
+	SYS_ConfigOptionProvider,
+	SYS_ConfigProvider,
+	WMS_PriceListProvider,
+} from 'src/app/services/static/services.service';
 import { FormBuilder, FormGroup, Validators, FormControl, FormArray } from '@angular/forms';
 import { concat, of, Subject } from 'rxjs';
 import { catchError, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
@@ -11,6 +18,9 @@ import { CommonService } from 'src/app/services/core/common.service';
 import { thirdPartyLibs } from 'src/app/services/static/thirdPartyLibs';
 import { AddressService, DynamicScriptLoaderService } from 'src/app/services/custom.service';
 import { DataCorrectionRequestModalPage } from 'src/app/modals/data-correction-request-modal/data-correction-request-modal.page';
+import { SYS_ConfigService } from 'src/app/services/system-config.service';
+import { CRM_ContactService } from 'src/app/services/contact.service';
+import config from 'capacitor.config';
 declare var ggMap;
 @Component({
 	selector: 'app-business-partner-detail',
@@ -19,14 +29,98 @@ declare var ggMap;
 	standalone: false,
 })
 export class BusinessPartnerDetailPage extends PageBase {
+	optionGroup = [
+		{
+			Code: 'bp-management-information',
+			Name: 'Bussiness partner management information',
+			Remark: 'Bussiness partner management information',
+			Icon: 'person-outline',
+		},
+		{
+			Code: 'bp-person-info',
+			Name: 'Bussiness partner person info',
+			Remark: 'Bussiness partner person info',
+			Icon: 'person-outline',
+		},
+		{
+			Code: 'bp-recent-order',
+			Name: 'Bussiness partner recent order',
+			Remark: 'Bussiness partner recent order',
+			Icon: 'person-outline',
+		},
+		{
+			Code: 'bp-outlet-info',
+			Name: 'Bussiness partner outlet info',
+			Remark: 'Bussiness partner outlet info',
+			Icon: 'person-outline',
+		},
+		{
+			Code: 'bp-address',
+			Name: 'Bussiness partner address',
+			Remark: 'Bussiness partner address',
+			Icon: 'person-outline',
+		},
+		{
+			Code: 'bp-reference-code',
+			Name: 'Bussiness partner reference code',
+			Remark: 'Bussiness partner reference code',
+			Icon: 'person-outline',
+		},
+		{
+			Code: 'bp-master-coverage-plan',
+			Name: 'Bussiness partner master coverage plan',
+			Remark: 'Bussiness partner master coverage plan',
+			Icon: 'person-outline',
+		},
+		{
+			Code: 'bp-contact-point',
+			Name: 'Bussiness partner contact point',
+			Remark: 'Bussiness partner contact point',
+			Icon: 'person-outline',
+		},
+		{
+			Code: 'bp-tax-address',
+			Name: 'Bussiness partner invoice information',
+			Remark: 'Bussiness partner invoice information',
+			Icon: 'person-outline',
+		},
+		{
+			Code: 'bp-map',
+			Name: 'Bussiness partner map',
+			Remark: 'Bussiness partner map',
+			Icon: 'person-outline',
+		},
+		{
+			Code: 'bp-product',
+			Name: 'Bussiness partner product',
+			Remark: 'Bussiness partner product',
+			Icon: 'person-outline',
+		},
+		{
+			Code: 'bp-storer-info',
+			Name: 'Bussiness partner storer info',
+			Remark: 'Bussiness partner storer info',
+			Icon: 'person-outline',
+		},
+	];
+	segmentView: any = {
+		Page: 'bp-management-information',
+	};
 	avatarURL = 'assets/imgs/avartar-empty.jpg';
 	initPriceList = [];
 	statusList = [];
 	storerList = [];
 	isShowAddAddress = true;
+	lotableList = [];
+	udfList = [];
+	contactUDFGroup;
+
 	constructor(
-		public pageProvider: CRM_ContactProvider,
+		public pageProvider: CRM_ContactService,
+		public contactUDFProvider: CRM_ContactUDFProvider,
 		public priceListProvider: WMS_PriceListProvider,
+		public sysConfigService: SYS_ConfigService,
+		public sysConfigOptionProvider: SYS_ConfigOptionProvider,
 		public staffProvider: HRM_StaffProvider,
 		public env: EnvService,
 		public navCtrl: NavController,
@@ -43,6 +137,8 @@ export class BusinessPartnerDetailPage extends PageBase {
 	) {
 		super();
 		this.pageConfig.isDetailPage = true;
+		this.pageConfig.isShowFeature = true;
+
 		this.id = this.route.snapshot.paramMap.get('id');
 		this.formGroup = formBuilder.group({
 			IDBranch: new FormControl({ value: null, disabled: false }),
@@ -97,7 +193,28 @@ export class BusinessPartnerDetailPage extends PageBase {
 			IsProvideReferenceCode: [''],
 			Addresses: new FormArray([]),
 			DeletedAddressFields: [],
+			LotableText00: [''],
+			LotableText01: [''],
+			LotableText02: [''],
+			LotableText03: [''],
+			LotableText04: [''],
+			LotableNum00: [''],
+			LotableNum01: [''],
+			LotableNum02: [''],
+			LotableNum03: [''],
+			LotableNum04: [''],
+			LotableNum05: [''],
+			LotableNum06: [''],
+			LotableNum07: [''],
+			LotableNum08: [''],
+			LotableNum09: [''],
+			LotableDate10: [''],
+			LotableDate11: [''],
+			LotableDate12: [''],
+			LotableDate13: [''],
+			LotableDate14: [''],
 		});
+
 		console.log(this.formGroup.controls);
 	}
 	_PriceListDataSource = this.buildSelectDataSource((term) => {
@@ -118,16 +235,69 @@ export class BusinessPartnerDetailPage extends PageBase {
 	});
 	preLoadData(event) {
 		this.loadGGMap();
-		Promise.all([this.priceListProvider.read({ Take: 20 }), this.env.getStatus('BusinessPartner'), this.addressService.getAddressSubdivision()]).then((values: any) => {
+		Promise.all([
+			this.priceListProvider.read({ Take: 20 }),
+			this.env.getStatus('BusinessPartner'),
+			this.addressService.getAddressSubdivision(),
+			this.getConfigOptionCode(),
+		]).then((values: any) => {
 			this.initPriceList = values[0]['data'];
 			this.statusList = values[1];
-			super.preLoadData(event);
+			this.pageProvider.getConfig(null, values[3]).then((config) => {
+				this.lotableList = Object.entries(config)
+					.filter(([key, value]) => key.startsWith('CRMLotable') && value !== null)
+					.map(([key, value]) => {
+						let type = '';
+						if (key.includes('Text')) {
+							type = 'text';
+						} else if (key.includes('Num')) {
+							type = 'number';
+						} else if (key.includes('Date')) {
+							type = 'datetime-local';
+						}
+
+						return { key, code: key.replace(/^CRM/, ''), value, type };
+					});
+
+				this.udfList = Object.entries(config)
+					.filter(([key, value]) => key.startsWith('CRMUDF') && value !== null)
+					.map(([key, value]) => ({
+						key,
+						value,
+						code: key.replace(/^CRM/, ''),
+					}));
+				super.preLoadData(event);
+			});
+		});
+	}
+
+	getConfigOptionCode() {
+		return new Promise((resolve, reject) => {
+			let sysConfigOptionCode = ['CRMContactLotable', 'CRMContactUDF'];
+			this.sysConfigOptionProvider
+				.read({ Code_in: sysConfigOptionCode, AllChildren: true })
+				.then((configOption: any) => {
+					resolve(configOption.data.filter((d) => !configOption.data.some((s) => s.IDParent == d.Id)).map((d) => d.Code));
+				})
+				.catch((err) => reject(err));
 		});
 	}
 
 	loadedData(event?: any, ignoredFromGroup?: boolean): void {
 		this.formGroup.controls['IsPersonal'].setValue(true);
 		this.formGroup.controls['IsPersonal'].markAsDirty();
+		if (this.item?.Id) {
+			this.contactUDFGroup = this.formBuilder.group({
+				Id: this.item?.Id,
+				Name: this.item?.Name,
+				Code: this.item?.Code,
+			});
+			this.udfList.forEach((udf) => {
+				this.contactUDFGroup.addControl(udf.code, new FormControl(this.item?._contactUDF ? this.item._contactUDF[udf.code] : ''));
+			});
+			this.contactUDFGroup.controls.Name.markAsDirty();
+			this.contactUDFGroup.controls.Code.markAsDirty();
+		}
 
 		super.loadedData(event, ignoredFromGroup);
 		if (this.initPriceList && this.initPriceList.length > 0) {
@@ -207,6 +377,10 @@ export class BusinessPartnerDetailPage extends PageBase {
 		this.patchAddressesValue();
 
 		this.salesmanSearch();
+	}
+
+	saveContactUDF() {
+		super.saveChange2(this.contactUDFGroup, this.pageConfig.pageName, this.contactUDFProvider);
 	}
 
 	salesmanList$;
@@ -324,9 +498,30 @@ export class BusinessPartnerDetailPage extends PageBase {
 		this.submitAttempt = false;
 		this.saveChange();
 	}
-	segmentView = 's1';
 	segmentChanged(ev: any) {
-		this.segmentView = ev.detail.value;
+		this.pageConfig.isSubActive = true;
+		this.segmentView.Page = ev;
+	}
+
+	selectedOption = null;
+
+	loadNode(option = null) {
+		this.pageConfig.isSubActive = true;
+		if (!option && this.segmentView) {
+			option = this.optionGroup.find((d) => d.Code == this.segmentView.Page);
+		}
+
+		if (!option) {
+			option = this.optionGroup[0];
+		}
+
+		if (!option) {
+			return;
+		}
+
+		this.selectedOption = option;
+
+		this.segmentView.Page = option.Code;
 	}
 
 	warehouseList = [];
