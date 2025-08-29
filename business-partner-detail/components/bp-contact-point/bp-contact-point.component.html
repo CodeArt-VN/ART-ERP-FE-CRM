@@ -1,5 +1,6 @@
 <div class="main-view">
 	<div class="row-full shadow full-screen ion-padding">
+		<div id="selectholder" style="position: absolute"></div>
 		<ion-grid fixed>
 			<form [formGroup]="formGroup">
 				<ion-row class="hr-group">
@@ -12,20 +13,14 @@
 						<div class="table-contain">
 							<section class="table">
 								<header class="bold" style="padding-right: 0">
+									<div class="col-id cell">
+										{{ 'Id' | translate }}
+									</div>
 									<div class="col-name cell">
 										{{ 'Full name' | translate }}
 									</div>
 									<div class="col-title cell">
 										{{ 'Title' | translate }}
-									</div>
-									<div class="col-phone cell">
-										{{ 'Telephone' | translate }}
-									</div>
-									<div class="col-dob cell">
-										{{ 'Date of birth' | translate }}
-									</div>
-									<div class="col-gender cell">
-										{{ 'Genders' | translate }}
 									</div>
 									<!-- <div class="col-checkbox cell"></div> -->
 									<div class="col-checkbox cell" *ngIf="pageConfig.canEdit"></div>
@@ -33,43 +28,22 @@
 								<ng-container formArrayName="ContactPoints">
 									<div class="row" [ngClass]="{ odd: j % 2 != 0 }" *ngFor="let c of formGroup.get('ContactPoints')['controls']; let j = index">
 										<ng-container [formGroup]="c">
+											<div class="col-id cell" (click)="nav(pageConfig.pageName+'/'+ c.get('Id').value,'forward')"><ion-icon name="open-outline"></ion-icon>
+												<span>{{ c.get('Id').value }}</span>
+											</div>
 											<div class="col-name cell">
 												<input class="c-input" (change)="saveContact(c)" formControlName="Name" />
 											</div>
 											<div class="col-title cell">
 												<input class="c-input" (change)="saveContact(c)" formControlName="Title" />
 											</div>
-											<ng-container [formGroup]="c.controls.PersonInfo">
-												<div class="col-phone cell">
-													<input class="c-input" (change)="saveContact(c)" formControlName="WorkPhone" type="tel" />
-												</div>
-												<div class="col-dob cell">
-													<input class="c-input" (change)="saveContact(c)" formControlName="DateOfBirth" type="date" />
-												</div>
-												<div class="col-gender cell">
-													<select
-														class="c-input c-dropdown"
-														[attr.disabled]="!pageConfig.canEdit ? '' : null"
-														(change)="saveContact(c)"
-														formControlName="Gender"
-													>
-														<option [value]="true">
-															{{ 'Male' | translate }}
-														</option>
-														<option [value]="false">
-															{{ 'Female' | translate }}
-														</option>
-													</select>
-												</div>
-											</ng-container>
 											<!-- <div (click)="nav(pageConfig.pageName+'/'+i.Id,'forward')"><ion-icon name="open-outline"></ion-icon></div> -->
 											<div class="col-checkbox cell" *ngIf="pageConfig.canEdit" (click)="removeContactPoint(j)">
 												<ion-icon color="danger" class="min-btn" name="trash-outline"></ion-icon>
 											</div>
 										</ng-container>
 									</div>
-								</ng-container>
-								<div *ngIf="pageConfig.canEdit" class="row footer">
+									<div *ngIf="pageConfig.canEdit" class="row footer">
 									<div class="cell">
 										<ng-select
 											class="c-input"
@@ -110,6 +84,8 @@
 										<ion-icon color="success" class="min-btn" name="add-circle-outline"></ion-icon>
 									</div>
 								</div>
+								</ng-container>
+								
 							</section>
 						</div>
 					</ion-col>

@@ -3,6 +3,7 @@
 </ion-header>
 
 <ion-content appScrollbarTheme class="left" [ngClass]="{withFeature: pageConfig.isShowFeature}" forceOverscroll="false">
+	<div id="ng-select-header" style="position: absolute"></div>
 	<ion-fab
 		[ngClass]="{withSearch: pageConfig.isShowSearch,'ion-hide-md-down': pageConfig.isSubActive}"
 		class="feature no-print"
@@ -561,7 +562,7 @@
 		</div>
 		<!-- Map -->
 		<div class="main-view" *ngIf=" pageConfig.showSpinner == false &&item.Id&& segmentView.Page == 'bp-map'">
-			<div class="row-full shadow full-screen ion-padding">
+			<div class="row-full shadow full-screen ion-padding" style="height: calc(100vh - 140px);">
 				<app-bp-map [bpId]="item.Id" [canEdit]="pageConfig.canEdit"></app-bp-map>
 			</div>
 		</div>

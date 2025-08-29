@@ -32,75 +32,75 @@ export class BusinessPartnerDetailPage extends PageBase {
 	optionGroup = [
 		{
 			Code: 'bp-management-information',
-			Name: 'Bussiness partner management information',
-			Remark: 'Bussiness partner management information',
-			Icon: 'person-outline',
+			Name: 'Management information',
+			Remark: 'Management information',
+			Icon: 'stats-chart-outline',
 		},
 		{
 			Code: 'bp-person-info',
-			Name: 'Bussiness partner person info',
-			Remark: 'Bussiness partner person info',
+			Name: 'Person info',
+			Remark: 'Person info',
 			Icon: 'person-outline',
 		},
 		{
 			Code: 'bp-recent-order',
-			Name: 'Bussiness partner recent order',
-			Remark: 'Bussiness partner recent order',
-			Icon: 'person-outline',
+			Name: 'Recent order',
+			Remark: 'Recent order',
+			Icon: 'receipt-outline',
 		},
 		{
 			Code: 'bp-outlet-info',
-			Name: 'Bussiness partner outlet info',
-			Remark: 'Bussiness partner outlet info',
-			Icon: 'person-outline',
+			Name: 'Outlet info',
+			Remark: 'Outlet info',
+			Icon: 'business-outline',
 		},
 		{
 			Code: 'bp-address',
 			Name: 'Bussiness partner address',
 			Remark: 'Bussiness partner address',
-			Icon: 'person-outline',
+			Icon: 'home-outline',
 		},
 		{
 			Code: 'bp-reference-code',
-			Name: 'Bussiness partner reference code',
-			Remark: 'Bussiness partner reference code',
-			Icon: 'person-outline',
+			Name: 'Reference code',
+			Remark: 'Reference code',
+			Icon: 'pricetag-outline',
 		},
 		{
 			Code: 'bp-master-coverage-plan',
-			Name: 'Bussiness partner master coverage plan',
-			Remark: 'Bussiness partner master coverage plan',
-			Icon: 'person-outline',
+			Name: 'Master coverage plan',
+			Remark: 'Master coverage plan',
+			Icon: 'layers-outline',
 		},
 		{
 			Code: 'bp-contact-point',
-			Name: 'Bussiness partner contact point',
-			Remark: 'Bussiness partner contact point',
-			Icon: 'person-outline',
+			Name: 'Contact point',
+			Remark: 'Contact point',
+			Icon: 'call-outline',
 		},
 		{
 			Code: 'bp-tax-address',
-			Name: 'Bussiness partner invoice information',
-			Remark: 'Bussiness partner invoice information',
-			Icon: 'person-outline',
+			Name: 'Invoice information',
+			Remark: 'Ivoice information',
+			Icon: 'document-text-outline',
 		},
 		{
 			Code: 'bp-map',
-			Name: 'Bussiness partner map',
-			Remark: 'Bussiness partner map',
-			Icon: 'person-outline',
+			Name: 'Map',
+			Remark: 'Map',
+			Icon: 'map-outline',
 		},
 		{
 			Code: 'bp-product',
-			Name: 'Bussiness partner product',
-			Remark: 'Bussiness partner product',
-			Icon: 'person-outline',
+			Name: 'Product',
+			Remark: 'Product',
+			Icon: 'cube-outline',
 		},
 		{
 			Code: 'bp-storer-info',
-			Name: 'Bussiness partner storer info',
-			Remark: 'Bussiness partner storer info',
-			Icon: 'person-outline',
+			Name: 'Storer info',
+			Remark: 'Storer info',
+			Icon: 'storefront-outline',
 		},
 	];
 	segmentView: any = {
@@ -113,7 +113,7 @@ export class BusinessPartnerDetailPage extends PageBase {
 	isShowAddAddress = true;
 	lotableList = [];
 	udfList = [];
-	contactUDFGroup;
+	contactUDFGroup:any  = this.formBuilder.group({});
 
 	constructor(
 		public pageProvider: CRM_ContactService,
@@ -214,8 +214,6 @@ export class BusinessPartnerDetailPage extends PageBase {
 			LotableDate13: [''],
 			LotableDate14: [''],
 		});
-
-		console.log(this.formGroup.controls);
 	}
 	_PriceListDataSource = this.buildSelectDataSource((term) => {
 		return this.priceListProvider.search({
@@ -284,20 +282,12 @@ export class BusinessPartnerDetailPage extends PageBase {
 	}
 
 	loadedData(event?: any, ignoredFromGroup?: boolean): void {
-		this.formGroup.controls['IsPersonal'].setValue(true);
-		this.formGroup.controls['IsPersonal'].markAsDirty();
-		if (this.item?.Id) {
-			this.contactUDFGroup = this.formBuilder.group({
-				Id: this.item?.Id,
-				Name: this.item?.Name,
-				Code: this.item?.Code,
-			});
-			this.udfList.forEach((udf) => {
-				this.contactUDFGroup.addControl(udf.code, new FormControl(this.item?._contactUDF ? this.item._contactUDF[udf.code] : ''));
-			});
-			this.contactUDFGroup.controls.Name.markAsDirty();
-			this.contactUDFGroup.controls.Code.markAsDirty();
-		}
+		this.contactUDFGroup.addControl('Id', new FormControl(this.item?._contactUDF ? this.item._contactUDF['Id'] : null));
+		this.contactUDFGroup.addControl('Name', new FormControl(this.item?._contactUDF ? this.item._contactUDF['Name'] : null));
+		this.contactUDFGroup.addControl('Code', new FormControl(this.item?._contactUDF ? this.item._contactUDF['Code'] : null));
+		this.udfList.forEach((udf) => {
+			this.contactUDFGroup.addControl(udf.code, new FormControl(this.item?._contactUDF ? this.item._contactUDF[udf.code] : ''));
+		});
 
 		super.loadedData(event, ignoredFromGroup);
 		if (this.initPriceList && this.initPriceList.length > 0) {
@@ -337,6 +327,9 @@ export class BusinessPartnerDetailPage extends PageBase {
 				this.pageConfig.canDelete = false;
 				//this.formGroup.get('IDAddress').disable();
 			}
+		}else {
+			this.formGroup.controls['IsPersonal'].setValue(true);
+			this.formGroup.controls['IsPersonal'].markAsDirty();
 		}
 		if (this.pageConfig.pageName != 'business-partner') {
 			this.formGroup.controls['IsVendor'].disable();
@@ -380,7 +373,31 @@ export class BusinessPartnerDetailPage extends PageBase {
 	}
 
 	saveContactUDF() {
-		super.saveChange2(this.contactUDFGroup, this.pageConfig.pageName, this.contactUDFProvider);
+		if (!this.contactUDFGroup?.get('Id')?.value) {
+			this.contactUDFGroup.get('Id').setValue(this.item?.Id);
+			this.contactUDFGroup.get('Code').setValue(this.item?.Code);
+			this.contactUDFGroup.get('Name').setValue(this.item?.Name);
+			this.contactUDFGroup.get('Id').markAsDirty();
+			this.contactUDFGroup.get('Code').markAsDirty();
+			this.contactUDFGroup.get('Name').markAsDirty();
+		} else {
+			if (this.contactUDFGroup.get('Name').value != this.item?.Name) {
+				this.contactUDFGroup.get('Name').setValue(this.item?.Name);
+				this.contactUDFGroup.get('Name').markAsDirty();
+			}
+			if (this.contactUDFGroup.get('Code').value != this.item?.Code) {
+				this.contactUDFGroup.get('Code').setValue(this.item?.Code);
+				this.contactUDFGroup.get('Code').markAsDirty();
+			}
+		}
+		let submitItem = this.getDirtyValues(this.contactUDFGroup);
+		this.submitAttempt = true;
+		this.contactUDFProvider.save(submitItem).then((res) => {
+			this.contactUDFGroup.markAsPristine();
+			this.cdr.detectChanges();
+			this.submitAttempt = false;
+			this.env.showMessage('Saving completed!', 'success');
+		});
 	}
 
 	salesmanList$;
@@ -459,6 +476,7 @@ export class BusinessPartnerDetailPage extends PageBase {
 		if (this.id == '0') {
 			this.formGroup.controls.Status.setValue('New');
 			this.formGroup.controls.Status.markAsDirty();
+			//this.formGroup.controls.IsPersonal.markAsDirty();
 		}
 		super.saveChange2();
 	}
