@@ -9,7 +9,7 @@ import { CommonService } from 'src/app/services/core/common.service';
 import { concat, of, Subject } from 'rxjs';
 import { catchError, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
 import { thirdPartyLibs } from 'src/app/services/static/thirdPartyLibs';
-import { AddressService, DynamicScriptLoaderService } from 'src/app/services/custom.service';
+import { AddressService, DynamicScriptLoaderService } from 'src/app/services/custom/custom.service';
 import { DataCorrectionRequestModalPage } from 'src/app/modals/data-correction-request-modal/data-correction-request-modal.page';
 declare var ggMap;
 

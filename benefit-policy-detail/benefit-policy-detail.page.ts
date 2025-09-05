@@ -8,7 +8,7 @@ import { CommonService } from 'src/app/services/core/common.service';
 import { CRM_BrandProvider, CRM_PolBenefitProvider, CRM_PolLevelProvider } from 'src/app/services/static/services.service';
 import { ApiSetting } from 'src/app/services/static/api-setting';
 import { environment } from 'src/environments/environment';
-import { DynamicScriptLoaderService } from 'src/app/services/custom.service';
+import { DynamicScriptLoaderService } from 'src/app/services/custom/custom.service';
 import { thirdPartyLibs } from 'src/app/services/static/thirdPartyLibs';
 
 declare var Quill: any;
