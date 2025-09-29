@@ -1,11 +1,11 @@
-import { Component, ChangeDetectorRef, ViewChild, ElementRef, QueryList, ViewChildren, provideExperimentalZonelessChangeDetection } from '@angular/core';
+import { Component, ChangeDetectorRef, ViewChild, ElementRef, QueryList, ViewChildren } from '@angular/core';
 import { NavController, LoadingController, AlertController } from '@ionic/angular';
 import { PageBase } from 'src/app/page-base';
 import { ActivatedRoute } from '@angular/router';
 import { EnvService } from 'src/app/services/core/env.service';
-import { FormBuilder, Validators, FormControl, FormArray } from '@angular/forms';
+import { FormBuilder, Validators, FormControl } from '@angular/forms';
 import { CommonService } from 'src/app/services/core/common.service';
-import { CRM_BrandProvider, CRM_PolLevelProvider, CRM_RewardCategoryProvider, CRM_RewardProvider, PR_ProgramProvider } from 'src/app/services/static/services.service';
+import { CRM_BrandProvider, CRM_RewardCategoryProvider, CRM_RewardProvider, PR_ProgramProvider } from 'src/app/services/static/services.service';
 import { ApiSetting } from 'src/app/services/static/api-setting';
 import { environment } from 'src/environments/environment';
 import { DynamicScriptLoaderService } from 'src/app/services/custom/custom.service';
