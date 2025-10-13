@@ -5,7 +5,7 @@ import { AlertController, LoadingController, NavController } from '@ionic/angula
 import { TranslateService } from '@ngx-translate/core';
 import { PageBase } from 'src/app/page-base';
 import { EnvService } from 'src/app/services/core/env.service';
-import { DynamicScriptLoaderService } from 'src/app/services/custom.service';
+import { DynamicScriptLoaderService } from 'src/app/services/custom/custom.service';
 import { CRM_PartnerTaxInfoProvider } from 'src/app/services/static/services.service';
 
 @Component({

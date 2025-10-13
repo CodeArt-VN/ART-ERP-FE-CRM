@@ -7,7 +7,7 @@ import { Location } from '@angular/common';
 import { lib } from 'src/app/services/static/global-functions';
 import { ApiSetting } from 'src/app/services/static/api-setting';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
-import { AddressService } from 'src/app/services/custom.service';
+import { AddressService } from 'src/app/services/custom/custom.service';
 import { APIList } from 'src/app/services/static/global-variable';
 
 @Component({
