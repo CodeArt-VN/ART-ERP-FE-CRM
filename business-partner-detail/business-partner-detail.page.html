@@ -1,808 +1,599 @@
 <ion-header>
-	<app-toolbar [page]="this" [pageConfig]="pageConfig">
-		<ion-button *ngIf="pageConfig.canRequestDataCorrection" title="{{'Request data correction' | translate}}" color="secondary" (click)="openRequestDataConnectionModal()">
-			{{'Request data correction' | translate}}
-		</ion-button>
-	</app-toolbar>
+	<app-toolbar [page]="this"> </app-toolbar>
 </ion-header>
 
-<ion-content appScrollbarTheme class="ion-padding">
-	<div id="ng-select-header" style="position: absolute; z-index: 30005"></div>
-
-	<div id="selectholder" style="position: relative"></div>
-	<app-page-message [itemsLength]="item? 1: 0" [showSpinner]="pageConfig.showSpinner"></app-page-message>
-
-	<div class="main-view" *ngIf="item && pageConfig.showSpinner==false">
-		<ion-grid fixed>
-			<ion-row>
-				<ion-col class="img-holder" size="12" size-sm="300px">
-					<div class="avatar" ng2FileDrop class="well my-drop-zone">
-						<img [src]="avatarURL" (error)="img.src = 'assets/avartar-empty.jpg'" #img />
+<ion-content appScrollbarTheme class="left" [ngClass]="{withFeature: pageConfig.isShowFeature}" forceOverscroll="false">
+	<div id="ng-select-header" style="position: absolute"></div>
+	<ion-fab
+		[ngClass]="{withSearch: pageConfig.isShowSearch,'ion-hide-md-down': pageConfig.isSubActive}"
+		class="feature no-print"
+		vertical="bottom"
+		horizontal="start"
+		slot="fixed"
+	>
+		<app-page-message [itemsLength]="item?1:0" [showSpinner]="pageConfig.showSpinner"></app-page-message>
+		<div *ngIf="pageConfig.showSpinner==false">
+			<ion-list lines="full">
+				<ion-item class="img-holder">
+					<div
+						style="margin: 0 auto"
+						ng2FileDrop
+						class="avatar well my-drop-zone ion-padding"
+						[ngClass]="{'nv-file-over': hasBaseDropZoneOver}"
+						(fileOver)="fileOverBase($event)"
+						(onFileDrop)="onFileSelected()"
+						[uploader]="uploader"
+					>
+						<img class="ion-margin" [src]="avatarURL" (error)="img.src = 'assets/avartar-empty.jpg'" #img />
 						<div>
-							<ion-button class="change-avatar" *ngIf="item.Id" color="primary" size="small"> {{'Change contact profile picture' | translate}} </ion-button>
+							<ion-button class="change-avatar" *ngIf="item.IsDisabled" color="danger" size="small"> {{'Resigned/ on pause' | translate}} </ion-button>
 						</div>
-						<input style="display: none" #importfile type="file" ng2FileSelect accept="image/*" />
+						<input style="display: none" #importfile type="file" (change)="onFileSelected()" ng2FileSelect accept="image/*" [uploader]="uploader" />
+
+						<ion-label>
+							<h1 class="bold">{{formGroup.get('Name').value}}</h1>
+						</ion-label>
+
+						<ion-label class="ion-text-wrap ion-text-center" style="padding-top: 8px">
+							<ion-chip color="primary" *ngIf="formGroup.get('Code').value">
+								<ion-icon name="barcode-outline"></ion-icon>
+								<ion-label>{{ formGroup.get('Code').value }}</ion-label>
+							</ion-chip>
+
+							<ion-chip color="danger" *ngIf="formGroup.get('WorkPhone').value">
+								<ion-icon name="call-outline"></ion-icon>
+								<ion-label>{{formGroup.get('WorkPhone').value }}</ion-label>
+							</ion-chip>
+						</ion-label>
 					</div>
-				</ion-col>
-				<ion-col size="12" size-sm>
-					<ion-grid>
-						<ion-row>
-							<ion-col size="12" size-md="12" size-lg="12" size-xl="5">
-								<div class="c-control">
-									<label class="c-label" for="Name">{{'Id' | translate}}</label>
-									<input readonly class="c-input" [ngModel]="item.Id" type="text" />
-								</div>
-								<div class="c-control">
-									<label class="c-label" for="Name">{{'Name' | translate}}</label>
-									<input readonly class="c-input" [ngModel]="item.Name" type="text" />
-								</div>
-							</ion-col>
-							<ion-col size="12" size-md="12" size-lg="12" size-xl="5">
-								<div class="c-control">
-									<label class="c-label" for="WorkPhone">{{'Work phone number' | translate}}</label>
-									<input readonly class="c-input" [ngModel]="item.WorkPhone" type="text" />
-								</div>
-								<div class="c-control">
-									<label class="c-label" for="Status">{{'Status' | translate}}</label>
-									<ng-select
-										class="c-input"
-										disabled
-										appendTo="#ng-select-header"
-										#Status
-										labelForId="Status"
-										[items]="statusList"
-										[ngModel]="item.Status"
-										bindLabel="Name"
-										bindValue="Code"
-									>
-										<ng-template ng-label-tmp let-i="item">
-											<b><ion-text [color]="i.Color">{{i.Name}}</ion-text></b>
-										</ng-template>
-										<ng-template ng-option-tmp let-i="item" let-search="searchTerm">
-											<div *ngIf="i">
-												<div>
-													<span *ngFor="let l of i.levels">&nbsp;&nbsp;&nbsp;</span>
-													<ion-text [color]="i.Color" [ngOptionHighlight]="search">{{i.Name}}</ion-text>
-												</div>
-											</div>
-										</ng-template>
-									</ng-select>
-								</div>
-							</ion-col>
-						</ion-row>
-					</ion-grid>
-				</ion-col>
-			</ion-row>
-		</ion-grid>
+				</ion-item>
+			</ion-list>
 
-		<div class="row-full shadow full-screen">
-			<ion-toolbar color="primary">
-				<ion-segment scrollable="true" (ionChange)="segmentChanged($event)" [value]="segmentView">
-					<ion-segment-button value="s1">
-						<ion-label>{{'General information' | translate}}</ion-label>
-					</ion-segment-button>
-					<ion-segment-button value="s2" *ngIf="item.Id && !formGroup.controls.IsPersonal.value">
-						<ion-label>{{'Contact' | translate}}</ion-label>
-					</ion-segment-button>
-					<ion-segment-button value="s3">
-						<ion-label>{{'Classification' | translate}}</ion-label>
-					</ion-segment-button>
+			<ion-list>
+				<ng-container *ngFor="let i of optionGroup">
+					<ion-item [color]="segmentView.Page == i.Code? 'primary': '' " button detail="true" class="clickable" (click)="loadNode(i)">
+						<ion-icon slot="start" aria-hidden="true" [name]="i.Icon"></ion-icon>
+						<ion-label class="ion-text-wrap">
+							<h3>{{i.Name | translate}}</h3>
+							<p>{{i.Remark | translate}}</p>
+						</ion-label>
+					</ion-item>
+				</ng-container>
 
-					<ng-container *ngFor="let c of storerList;let j=index">
-						<ion-segment-button [value]="j" *ngIf="item.Id && formGroup.controls.IsStorer.value">
-							<ion-label *ngIf="c.Name">{{c.Name}}</ion-label>
-						</ion-segment-button>
-					</ng-container>
+				<!-- <ng-container *ngFor="let c of storerList; let j=index">
+					<ion-item button detail="true" class="clickable">
+						<ion-label class="ion-text-wrap">
+							<ion-icon slot="start" aria-hidden="true" name="business-outline"></ion-icon>
+							<h3>{{c.Name | translate}}</h3>
+						</ion-label>
+					</ion-item>
+				</ng-container> -->
+			</ion-list>
+			<div class="ion-padding" style="padding-bottom: 0"></div>
+		</div>
+	</ion-fab>
 
-					<!-- <ion-segment-button value="s4" *ngIf="item.Id && formGroup.controls.IsStorer.value">
-            <ion-label>{{'warehousing' | translate}}</ion-label>
-          </ion-segment-button> -->
-					<ion-segment-button value="invoiceInfor">
-						<ion-label>{{'Invoice information' | translate}}</ion-label>
-					</ion-segment-button>
-					<ion-segment-button value="addresses">
-						<ion-label>{{'Address' | translate}}</ion-label>
-					</ion-segment-button>
-					<ion-segment-button value="map">
-						<ion-label>{{'Map' | translate}}</ion-label>
-					</ion-segment-button>
-					<ion-segment-button value="products" *ngIf="item.Id && formGroup.controls.IsVendor.value">
-						<ion-label>{{'Provided product' | translate}}</ion-label>
-					</ion-segment-button>
-				</ion-segment>
-				<ion-buttons slot="end" *ngIf="item.Id && formGroup.controls.IsStorer.value">
-					<ion-button (click)="addWarehouse()">
-						<ion-icon slot="start" name="add"></ion-icon>
-						{{'Add' | translate}}
-					</ion-button>
-				</ion-buttons>
-			</ion-toolbar>
-			<div>
-				<div *ngIf="segmentView == 's1'">
-					<div class="ion-padding">
-						<ion-grid fixed>
-							<form [formGroup]="formGroup">
-								<!-- Thông tin quản lý -->
-								<ion-row class="hr-group">
-									<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
-										<ion-list-header class="ion-no-padding">
-											<ion-label color="primary">{{'Management information' | translate}}</ion-label>
-										</ion-list-header>
-									</ion-col>
-									<ion-col size="12" size-sm="6" size-xl="4">
-										<div class="c-control" *ngIf="item.Id">
-											<label class="c-label" for="Id">{{'Id' | translate}}</label>
-											<input class="c-input" id="Id" formControlName="Id" type="number" />
-										</div>
-										<div class="c-control">
-											<label class="c-label" for="Code"
-												>{{'Reference code' | translate}}
-												<span
-													*ngIf="!formGroup.controls.Code.valid && !formGroup.controls.Code.pending && (formGroup.controls.Code.dirty || submitAttempt)"
-													ion-text
-													color="danger"
-													>(*)</span
-												>
-											</label>
-											<input (change)="saveChange()" class="c-input" id="Code" formControlName="Code" type="text" />
-										</div>
-										<div class="c-control">
-											<label class="c-label" for="Name"
-												>{{'Name' | translate}}
-												<span
-													*ngIf="!formGroup.controls.Name.valid && !formGroup.controls.Name.pending && (formGroup.controls.Name.dirty || submitAttempt)"
-													ion-text
-													color="danger"
-													>(*)</span
-												>
-											</label>
-											<input (change)="saveChange()" class="c-input" id="Name" formControlName="Name" type="text" />
-										</div>
-									</ion-col>
-									<ion-col size="12" size-sm="6" size-xl="4">
-										<div class="c-control">
-											<label class="c-label" for="WorkPhone"
-												>{{'Work phone number' | translate}}
-												<span
-													*ngIf="!formGroup.controls.WorkPhone.valid && !formGroup.controls.WorkPhone.pending && (formGroup.controls.WorkPhone.dirty || submitAttempt)"
-													ion-text
-													color="danger"
-													>(*)</span
-												>
-											</label>
-											<input (change)="saveChange()" class="c-input" formControlName="WorkPhone" type="text" />
-										</div>
-										<div class="c-control">
-											<label class="c-label" for="OtherPhone"
-												>{{'Telephone number (other)' | translate}}
-												<span
-													*ngIf="!formGroup.controls.OtherPhone.valid && !formGroup.controls.OtherPhone.pending && (formGroup.controls.OtherPhone.dirty || submitAttempt)"
-													ion-text
-													color="danger"
-													>(*)</span
-												>
-											</label>
-											<input (change)="saveChange()" class="c-input" formControlName="OtherPhone" type="text" />
-										</div>
-										<div class="c-control">
-											<label class="c-label" for="IDOwner"
-												>{{'Person in charge' | translate}}
-												<span
-													*ngIf="!formGroup.controls.IDOwner.valid && !formGroup.controls.IDOwner.pending && (formGroup.controls.IDOwner.dirty || submitAttempt)"
-													ion-text
-													color="danger"
-													>(*)</span
-												>
-											</label>
-											<ng-select
-												(change)="saveChange()"
-												class="c-input"
-												#IDOwner
-												formControlName="IDOwner"
-												labelForId="IDOwner"
-												[items]="salesmanList$ | async"
-												[typeahead]="salesmanListInput$"
-												[loading]="salesmanListLoading"
-												[virtualScroll]="true"
-												bindLabel="FullName"
-												bindValue="Id"
-												placeholder="{{'Search for name, code or phone number' | translate}}"
+	<div class="safe-max-width">
+		<!-- component -->
+
+		<!-- Quản lý thông tin -->
+		<ng-container *ngIf="pageConfig.showSpinner == false && segmentView.Page == 'bp-management-information'">
+			<div class="main-view">
+				<div class="row-full shadow full-screen ion-padding">
+					<ion-grid fixed>
+						<form [formGroup]="formGroup">
+							<!-- Thông tin quản lý -->
+							<ion-row class="hr-group">
+								<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
+									<ion-list-header class="ion-no-padding">
+										<ion-label color="primary">{{'Management information' | translate}}</ion-label>
+									</ion-list-header>
+								</ion-col>
+								<ion-col size="12" size-sm="6" size-xl="4">
+									<div class="c-control" *ngIf="item.Id">
+										<label class="c-label" for="Id">{{'Id' | translate}}</label>
+										<input class="c-input" id="Id" formControlName="Id" type="number" />
+									</div>
+									<div class="c-control">
+										<label class="c-label" for="Code"
+											>{{'Reference code' | translate}}
+											<span
+												*ngIf="!formGroup.controls.Code.valid && !formGroup.controls.Code.pending && (formGroup.controls.Code.dirty || submitAttempt)"
+												ion-text
+												color="danger"
+												>(*)</span
 											>
-												<ng-template ng-option-tmp let-i="item" let-search="searchTerm">
-													<div *ngIf="i">
-														<div>
-															<span [ngOptionHighlight]="search">{{i.FullName}}</span>
-														</div>
-														<small
-															>#<b><span class="important" [ngOptionHighlight]="search">{{i.Id}} - {{i.Code}}</span></b>
-															<span *ngIf="i.Phone">
-																| {{'Telephone' | translate}}:
-																<b [ngOptionHighlight]="search">{{i.Phone}}</b></span
-															></small
-														>
+										</label>
+										<input (change)="saveChange()" class="c-input" id="Code" formControlName="Code" type="text" />
+									</div>
+									<div class="c-control">
+										<label class="c-label" for="Name"
+											>{{'Name' | translate}}
+											<span
+												*ngIf="!formGroup.controls.Name.valid && !formGroup.controls.Name.pending && (formGroup.controls.Name.dirty || submitAttempt)"
+												ion-text
+												color="danger"
+												>(*)</span
+											>
+										</label>
+										<input (change)="saveChange()" class="c-input" id="Name" formControlName="Name" type="text" />
+									</div>
+								</ion-col>
+								<ion-col size="12" size-sm="6" size-xl="4">
+									<div class="c-control">
+										<label class="c-label" for="WorkPhone"
+											>{{'Work phone number' | translate}}
+											<span
+												*ngIf="!formGroup.controls.WorkPhone.valid && !formGroup.controls.WorkPhone.pending && (formGroup.controls.WorkPhone.dirty || submitAttempt)"
+												ion-text
+												color="danger"
+												>(*)</span
+											>
+										</label>
+										<input (change)="saveChange()" class="c-input" formControlName="WorkPhone" type="text" />
+									</div>
+									<div class="c-control">
+										<label class="c-label" for="OtherPhone"
+											>{{'Telephone number (other)' | translate}}
+											<span
+												*ngIf="!formGroup.controls.OtherPhone.valid && !formGroup.controls.OtherPhone.pending && (formGroup.controls.OtherPhone.dirty || submitAttempt)"
+												ion-text
+												color="danger"
+												>(*)</span
+											>
+										</label>
+										<input (change)="saveChange()" class="c-input" formControlName="OtherPhone" type="text" />
+									</div>
+									<div class="c-control">
+										<label class="c-label" for="IDOwner"
+											>{{'Person in charge' | translate}}
+											<span
+												*ngIf="!formGroup.controls.IDOwner.valid && !formGroup.controls.IDOwner.pending && (formGroup.controls.IDOwner.dirty || submitAttempt)"
+												ion-text
+												color="danger"
+												>(*)</span
+											>
+										</label>
+										<ng-select
+											(change)="saveChange()"
+											class="c-input"
+											#IDOwner
+											formControlName="IDOwner"
+											labelForId="IDOwner"
+											[items]="salesmanList$ | async"
+											[typeahead]="salesmanListInput$"
+											[loading]="salesmanListLoading"
+											[virtualScroll]="true"
+											bindLabel="FullName"
+											bindValue="Id"
+											placeholder="{{'Search for name, code or phone number' | translate}}"
+										>
+											<ng-template ng-option-tmp let-i="item" let-search="searchTerm">
+												<div *ngIf="i">
+													<div>
+														<span [ngOptionHighlight]="search">{{i.FullName}}</span>
 													</div>
-												</ng-template>
-											</ng-select>
-										</div>
-									</ion-col>
-									<ion-col size="12" size-sm="6" size-xl="4" offset-xl="3">
-										<div class="c-control">
-											<span class="no-warp">
-												<input (change)="changeType('IsVendor')" class="c-checkbox" id="IsVendor" formControlName="IsVendor" type="checkbox" />
-												<label class="c-label checkbox" for="IsVendor"
-													>{{'Vendor' | translate}}
-													<span
-														*ngIf="!formGroup.controls.IsVendor.valid && !formGroup.controls.IsVendor.pending && (formGroup.controls.IsVendor.dirty || submitAttempt)"
-														ion-text
-														color="danger"
-														>(*)</span
+													<small
+														>#<b><span class="important" [ngOptionHighlight]="search">{{i.Id}} - {{i.Code}}</span></b>
+														<span *ngIf="i.Phone">
+															| {{'Telephone' | translate}}:
+															<b [ngOptionHighlight]="search">{{i.Phone}}</b></span
+														></small
 													>
-												</label> </span
-											><br />
-
-											<span class="no-warp">
-												<input
-													(change)="changeType('IsDistributor')"
-													class="c-checkbox"
-													id="IsDistributor"
-													formControlName="IsDistributor"
-													type="checkbox"
-												/>
-												<label class="c-label checkbox" for="IsDistributor"
-													>{{'Distributor' | translate}}
-													<span
-														*ngIf="!formGroup.controls.IsDistributor.valid && !formGroup.controls.IsDistributor.pending && (formGroup.controls.IsDistributor.dirty || submitAttempt)"
-														ion-text
-														color="danger"
-														>(*)</span
-													>
-												</label> </span
-											><br />
-											<span class="no-warp">
-												<input (change)="changeType('IsStorer')" class="c-checkbox" id="IsStorer" formControlName="IsStorer" type="checkbox" />
-												<label class="c-label checkbox" for="IsStorer"
-													>{{'Warehouse storage customer' | translate}}
-													<span
-														*ngIf="!formGroup.controls.IsStorer.valid && !formGroup.controls.IsStorer.pending && (formGroup.controls.IsStorer.dirty || submitAttempt)"
-														ion-text
-														color="danger"
-														>(*)</span
-													>
-												</label> </span
-											><br />
-											<span class="no-warp">
-												<input (change)="changeType('IsCarrier')" class="c-checkbox" id="IsCarrier" formControlName="IsCarrier" type="checkbox" />
-												<label class="c-label checkbox" for="IsCarrier"
-													>{{'Carrier' | translate}}
-													<span
-														*ngIf="!formGroup.controls.IsCarrier.valid && !formGroup.controls.IsCarrier.pending && (formGroup.controls.IsCarrier.dirty || submitAttempt)"
-														ion-text
-														color="danger"
-														>(*)</span
-													>
-												</label> </span
-											><br />
-											<span class="no-warp">
-												<input (change)="changeType('IsOutlets')" class="c-checkbox" id="IsOutlets" formControlName="IsOutlets" type="checkbox" />
-												<label class="c-label checkbox" for="IsOutlets"
-													>{{'Outlets' | translate}}
-													<span
-														*ngIf="!formGroup.controls.IsOutlets.valid && !formGroup.controls.IsOutlets.pending && (formGroup.controls.IsOutlets.dirty || submitAttempt)"
-														ion-text
-														color="danger"
-														>(*)</span
-													>
-												</label> </span
-											><br />
-											<span class="no-warp">
-												<input (change)="changeType('IsCustomer')" class="c-checkbox" id="IsCustomer" formControlName="IsCustomer" type="checkbox" />
-												<label class="c-label checkbox" for="IsCustomer"
-													>{{'Customer' | translate}}
-													<span
-														*ngIf="!formGroup.controls.IsCustomer.valid && !formGroup.controls.IsCustomer.pending && (formGroup.controls.IsCustomer.dirty || submitAttempt)"
-														ion-text
-														color="danger"
-														>(*)</span
-													>
-												</label> </span
-											><br />
-											<span class="no-warp">
-												<input
-													(change)="changeType('IsProvideReferenceCode')"
-													class="c-checkbox"
-													id="IsProvideReferenceCode"
-													formControlName="IsProvideReferenceCode"
-													type="checkbox"
-												/>
-												<label class="c-label checkbox" for="IsProvideReferenceCode"
-													>{{'Có khách hàng riêng' | translate}}
-													<span
-														*ngIf="!formGroup.controls.IsProvideReferenceCode.valid && !formGroup.controls.IsProvideReferenceCode.pending && (formGroup.controls.IsProvideReferenceCode.dirty || submitAttempt)"
-														ion-text
-														color="danger"
-														>(*)</span
-													>
-												</label>
-											</span>
-										</div>
-									</ion-col>
-									<ion-col size="12" size-sm="6" size-xl="4">
-										<div class="c-control">
-											<span class="no-warp">
-												<input (change)="saveChange()" id="IsPersonal1" type="radio" [value]="true" formControlName="IsPersonal" class="c-checkbox" />
-												<label class="c-label radio" for="IsPersonal1">
-													<span>{{'Individual' | translate}}</span>
-												</label>
-											</span>
-											<span class="no-warp">
-												<input (change)="saveChange()" id="IsPersonal2" type="radio" [value]="false" formControlName="IsPersonal" class="c-checkbox" />
-												<label class="c-label radio" for="IsPersonal2">
-													<span>{{'Organization' | translate}}</span>
-													<span
-														*ngIf="!formGroup.controls.IsPersonal.valid && !formGroup.controls.IsPersonal.pending && (formGroup.controls.IsPersonal.dirty || submitAttempt)"
-														ion-text
-														color="danger"
-														>(*)</span
-													>
-												</label>
-											</span>
-										</div>
-										<div class="c-control">
-											<span class="no-warp" *ngIf="formGroup.controls.IsPersonal.value">
-												<input (change)="saveChange()" class="c-checkbox" id="IsStaff" formControlName="IsStaff" type="checkbox" />
-												<label class="c-label checkbox" for="IsStaff"
-													>{{'Staff' | translate}}
-													<span
-														*ngIf="!formGroup.controls.IsStaff.valid && !formGroup.controls.IsStaff.pending && (formGroup.controls.IsStaff.dirty || submitAttempt)"
-														ion-text
-														color="danger"
-														>(*)</span
-													>
-												</label>
-											</span>
-											<span class="no-warp" *ngIf="!formGroup.controls.IsPersonal.value">
-												<input (change)="saveChange()" class="c-checkbox" id="IsBranch" formControlName="IsBranch" type="checkbox" />
-												<label class="c-label checkbox" for="IsBranch"
-													>{{'Internal unit' | translate}}
-													<span
-														*ngIf="!formGroup.controls.IsBranch.valid && !formGroup.controls.IsBranch.pending && (formGroup.controls.IsBranch.dirty || submitAttempt)"
-														ion-text
-														color="danger"
-														>(*)</span
-													>
-												</label>
-											</span>
-										</div>
-										<div class="c-control">
-											<span class="no-warp">
-												<input (change)="saveChange()" class="c-checkbox" id="IsDisabled" formControlName="IsDisabled" type="checkbox" />
-												<label class="c-label checkbox" for="IsDisabled"
-													>{{'Pause' | translate}}
-													<span
-														*ngIf="!formGroup.controls.IsDisabled.valid && !formGroup.controls.IsDisabled.pending && (formGroup.controls.IsDisabled.dirty || submitAttempt)"
-														ion-text
-														color="danger"
-														>(*)</span
-													>
-												</label>
-											</span>
-										</div>
-									</ion-col>
-								</ion-row>
-
-								<!-- Mã tham chiếu -->
-								<app-bp-reference-code
-									[bpId]="item.Id"
-									[canEdit]="pageConfig.canEdit"
-									*ngIf="item.Id && formGroup.controls.IsOutlets.value"
-								></app-bp-reference-code>
-								
-								<!-- Thông tin cá nhân -->
-								<app-bp-person-info [bpId]="item.Id" [canEdit]="pageConfig.canEdit" *ngIf="formGroup.controls.IsPersonal.value && item.Id"></app-bp-person-info>
-
-								<!-- Tuyến bán -->
-								<ion-row class="hr-group" *ngIf="item?._Routes">
-									<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
-										<ion-list-header class="ion-no-padding">
-											<ion-label color="primary">{{'Master coverage plan' | translate}}</ion-label>
-										</ion-list-header>
-									</ion-col>
-									<ion-col size="12" size-sm size-xl="8">
-										<div class="table-contain">
-											<section class="table">
-												<header class="bold">
-													<div class="col-name cell">{{'Route name' | translate}}</div>
-
-													<div class="col-checkbox cell">{{'W1' | translate}}</div>
-													<div class="col-checkbox cell">{{'W2' | translate}}</div>
-													<div class="col-checkbox cell">{{'W3' | translate}}</div>
-													<div class="col-checkbox cell">{{'W4' | translate}}</div>
-
-													<div class="col-checkbox cell">{{'Mon' | translate}}</div>
-													<div class="col-checkbox cell">{{'Tue' | translate}}</div>
-													<div class="col-checkbox cell">{{'Wed' | translate}}</div>
-													<div class="col-checkbox cell">{{'Thu' | translate}}</div>
-													<div class="col-checkbox cell">{{'Fri' | translate}}</div>
-													<div class="col-checkbox cell">{{'Sat' | translate}}</div>
-													<div class="col-checkbox cell">{{'Sun' | translate}}</div>
-												</header>
-											</section>
-											<section class="table table-scroll">
-												<div class="row" [ngClass]="{odd: j % 2 != 0 }" *ngFor="let i of item._Routes; let j = index;">
-													<div class="col-name cell">
-														<small><a [href]="'#/'+'mcp/'+i.Id" (click)="nav('mcp/'+i.Id,'forward')"> 🔗 {{i.Id}}</a></small>
-														{{i.Name}}
-													</div>
-
-													<div class="col-checkbox cell week">
-														<input [disabled]="true" class="c-checkbox" [checked]="i.Week1" type="checkbox" />
-													</div>
-													<div class="col-checkbox cell week">
-														<input [disabled]="true" class="c-checkbox" [checked]="i.Week2" type="checkbox" />
-													</div>
-													<div class="col-checkbox cell week">
-														<input [disabled]="true" class="c-checkbox" [checked]="i.Week3" type="checkbox" />
-													</div>
-													<div class="col-checkbox cell week">
-														<input [disabled]="true" class="c-checkbox" [checked]="i.Week4" type="checkbox" />
-													</div>
-
-													<div class="col-checkbox cell">
-														<input [disabled]="true" class="c-checkbox" [checked]="i.Monday" type="checkbox" />
-													</div>
-													<div class="col-checkbox cell">
-														<input [disabled]="true" class="c-checkbox" [checked]="i.Tuesday" type="checkbox" />
-													</div>
-													<div class="col-checkbox cell">
-														<input [disabled]="true" class="c-checkbox" [checked]="i.Wednesday" type="checkbox" />
-													</div>
-													<div class="col-checkbox cell">
-														<input [disabled]="true" class="c-checkbox" [checked]="i.Thursday" type="checkbox" />
-													</div>
-													<div class="col-checkbox cell">
-														<input [disabled]="true" class="c-checkbox" [checked]="i.Friday" type="checkbox" />
-													</div>
-													<div class="col-checkbox cell">
-														<input [disabled]="true" class="c-checkbox" [checked]="i.Saturday" type="checkbox" />
-													</div>
-													<div class="col-checkbox cell">
-														<input [disabled]="true" class="c-checkbox" [checked]="i.Sunday" type="checkbox" />
-													</div>
 												</div>
-											</section>
-										</div>
-									</ion-col>
-								</ion-row>
+											</ng-template>
+										</ng-select>
+									</div>
+								</ion-col>
+								<ion-col size="12" size-sm="6" size-xl="4" offset-xl="3">
+									<div class="c-control">
+										<span class="no-warp">
+											<input (change)="changeType('IsVendor')" class="c-checkbox" id="IsVendor" formControlName="IsVendor" type="checkbox" />
+											<label class="c-label checkbox" for="IsVendor"
+												>{{'Vendor' | translate}}
+												<span
+													*ngIf="!formGroup.controls.IsVendor.valid && !formGroup.controls.IsVendor.pending && (formGroup.controls.IsVendor.dirty || submitAttempt)"
+													ion-text
+													color="danger"
+													>(*)</span
+												>
+											</label> </span
+										><br />
 
-								<!-- Bảng giá -->
-								<ion-row class="hr-group">
-									<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
-										<ion-list-header class="ion-no-padding">
-											<ion-label color="primary">{{'Price list' | translate}}</ion-label>
-										</ion-list-header>
-									</ion-col>
-									<ion-col size="12" size-sm="6" size-xl="4">
-										<div class="c-control">
-											<label class="c-label" for="IDPriceList"
-												>{{'Selling price list' | translate}}
-												<ion-icon
-													class="clickable"
-													(click)='nav("/price-list/" + this.formGroup.controls.IDPriceList?.value)'
-													slot="icon-only"
-													name="open-outline"
-													color="primary"
-												></ion-icon>
+										<span class="no-warp">
+											<input (change)="changeType('IsDistributor')" class="c-checkbox" id="IsDistributor" formControlName="IsDistributor" type="checkbox" />
+											<label class="c-label checkbox" for="IsDistributor"
+												>{{'Distributor' | translate}}
+												<span
+													*ngIf="!formGroup.controls.IsDistributor.valid && !formGroup.controls.IsDistributor.pending && (formGroup.controls.IsDistributor.dirty || submitAttempt)"
+													ion-text
+													color="danger"
+													>(*)</span
+												>
+											</label> </span
+										><br />
+										<span class="no-warp">
+											<input (change)="changeType('IsStorer')" class="c-checkbox" id="IsStorer" formControlName="IsStorer" type="checkbox" />
+											<label class="c-label checkbox" for="IsStorer"
+												>{{'Warehouse storage customer' | translate}}
+												<span
+													*ngIf="!formGroup.controls.IsStorer.valid && !formGroup.controls.IsStorer.pending && (formGroup.controls.IsStorer.dirty || submitAttempt)"
+													ion-text
+													color="danger"
+													>(*)</span
+												>
+											</label> </span
+										><br />
+										<span class="no-warp">
+											<input (change)="changeType('IsCarrier')" class="c-checkbox" id="IsCarrier" formControlName="IsCarrier" type="checkbox" />
+											<label class="c-label checkbox" for="IsCarrier"
+												>{{'Carrier' | translate}}
+												<span
+													*ngIf="!formGroup.controls.IsCarrier.valid && !formGroup.controls.IsCarrier.pending && (formGroup.controls.IsCarrier.dirty || submitAttempt)"
+													ion-text
+													color="danger"
+													>(*)</span
+												>
+											</label> </span
+										><br />
+										<span class="no-warp">
+											<input (change)="changeType('IsOutlets')" class="c-checkbox" id="IsOutlets" formControlName="IsOutlets" type="checkbox" />
+											<label class="c-label checkbox" for="IsOutlets"
+												>{{'Outlets' | translate}}
+												<span
+													*ngIf="!formGroup.controls.IsOutlets.valid && !formGroup.controls.IsOutlets.pending && (formGroup.controls.IsOutlets.dirty || submitAttempt)"
+													ion-text
+													color="danger"
+													>(*)</span
+												>
+											</label> </span
+										><br />
+										<span class="no-warp">
+											<input (change)="changeType('IsCustomer')" class="c-checkbox" id="IsCustomer" formControlName="IsCustomer" type="checkbox" />
+											<label class="c-label checkbox" for="IsCustomer"
+												>{{'Customer' | translate}}
+												<span
+													*ngIf="!formGroup.controls.IsCustomer.valid && !formGroup.controls.IsCustomer.pending && (formGroup.controls.IsCustomer.dirty || submitAttempt)"
+													ion-text
+													color="danger"
+													>(*)</span
+												>
+											</label> </span
+										><br />
+										<span class="no-warp">
+											<input
+												(change)="changeType('IsProvideReferenceCode')"
+												class="c-checkbox"
+												id="IsProvideReferenceCode"
+												formControlName="IsProvideReferenceCode"
+												type="checkbox"
+											/>
+											<label class="c-label checkbox" for="IsProvideReferenceCode"
+												>{{'Có khách hàng riêng' | translate}}
+												<span
+													*ngIf="!formGroup.controls.IsProvideReferenceCode.valid && !formGroup.controls.IsProvideReferenceCode.pending && (formGroup.controls.IsProvideReferenceCode.dirty || submitAttempt)"
+													ion-text
+													color="danger"
+													>(*)</span
+												>
 											</label>
-											<app-input-control
-												(change)="saveChange()"
-												[field]="{id:'IDPriceList',
+										</span>
+									</div>
+								</ion-col>
+								<ion-col size="12" size-sm="6" size-xl="4">
+									<div class="c-control">
+										<span class="no-warp">
+											<input (change)="saveChange()" id="IsPersonal1" type="radio" [value]="true" formControlName="IsPersonal" class="c-checkbox" />
+											<label class="c-label radio" for="IsPersonal1">
+												<span>{{'Individual' | translate}}</span>
+											</label>
+										</span>
+										<span class="no-warp">
+											<input (change)="saveChange()" id="IsPersonal2" type="radio" [value]="false" formControlName="IsPersonal" class="c-checkbox" />
+											<label class="c-label radio" for="IsPersonal2">
+												<span>{{'Organization' | translate}}</span>
+												<span
+													*ngIf="!formGroup.controls.IsPersonal.valid && !formGroup.controls.IsPersonal.pending && (formGroup.controls.IsPersonal.dirty || submitAttempt)"
+													ion-text
+													color="danger"
+													>(*)</span
+												>
+											</label>
+										</span>
+									</div>
+									<div class="c-control">
+										<span class="no-warp" *ngIf="formGroup.controls.IsPersonal.value">
+											<input (change)="saveChange()" class="c-checkbox" id="IsStaff" formControlName="IsStaff" type="checkbox" />
+											<label class="c-label checkbox" for="IsStaff"
+												>{{'Staff' | translate}}
+												<span
+													*ngIf="!formGroup.controls.IsStaff.valid && !formGroup.controls.IsStaff.pending && (formGroup.controls.IsStaff.dirty || submitAttempt)"
+													ion-text
+													color="danger"
+													>(*)</span
+												>
+											</label>
+										</span>
+										<span class="no-warp" *ngIf="!formGroup.controls.IsPersonal.value">
+											<input (change)="saveChange()" class="c-checkbox" id="IsBranch" formControlName="IsBranch" type="checkbox" />
+											<label class="c-label checkbox" for="IsBranch"
+												>{{'Internal unit' | translate}}
+												<span
+													*ngIf="!formGroup.controls.IsBranch.valid && !formGroup.controls.IsBranch.pending && (formGroup.controls.IsBranch.dirty || submitAttempt)"
+													ion-text
+													color="danger"
+													>(*)</span
+												>
+											</label>
+										</span>
+									</div>
+									<div class="c-control">
+										<span class="no-warp">
+											<input (change)="saveChange()" class="c-checkbox" id="IsDisabled" formControlName="IsDisabled" type="checkbox" />
+											<label class="c-label checkbox" for="IsDisabled"
+												>{{'Pause' | translate}}
+												<span
+													*ngIf="!formGroup.controls.IsDisabled.valid && !formGroup.controls.IsDisabled.pending && (formGroup.controls.IsDisabled.dirty || submitAttempt)"
+													ion-text
+													color="danger"
+													>(*)</span
+												>
+											</label>
+										</span>
+									</div>
+								</ion-col>
+							</ion-row>
+
+							<!-- Bảng giá -->
+							<ion-row class="hr-group">
+								<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
+									<ion-list-header class="ion-no-padding">
+										<ion-label color="primary">{{'Price list' | translate}}</ion-label>
+									</ion-list-header>
+								</ion-col>
+								<ion-col size="12" size-sm="6" size-xl="4">
+									<div class="c-control">
+										<label class="c-label" for="IDPriceList"
+											>{{'Selling price list' | translate}}
+											<ion-icon
+												class="clickable"
+												(click)='nav("/price-list/" + this.formGroup.controls.IDPriceList?.value)'
+												slot="icon-only"
+												name="open-outline"
+												color="primary"
+											></ion-icon>
+										</label>
+										<app-input-control
+											(change)="saveChange()"
+											[field]="{id:'IDPriceList',
 											 label:'Selling price list',type:'ng-select-async',
 											 dataSource:_PriceListDataSource,bindLabel:'Name',bindValue:'Id',form:formGroup, placeholder:'no price list for reference',
 											 appendTo:'#ng-select-header',clearable:true}"
-											></app-input-control>
-										</div>
+										></app-input-control>
+									</div>
 
-										<div class="c-control" *ngIf="formGroup.controls.IsVendor.value">
-											<label class="c-label" for="IDPriceListForVendor"
-												>{{'Purchase price list' | translate}}
-												<ion-icon
-													class="clickable"
-													(click)='nav("/price-list/" + this.formGroup.controls.IDPriceListForVendor?.value)'
-													slot="icon-only"
-													name="open-outline"
-													color="primary"
-												></ion-icon>
-											</label>
-											<app-input-control
-												(change)="saveChange()"
-												[field]="{id:'IDPriceListForVendor',
+									<div class="c-control" *ngIf="formGroup.controls.IsVendor.value">
+										<label class="c-label" for="IDPriceListForVendor"
+											>{{'Purchase price list' | translate}}
+											<ion-icon
+												class="clickable"
+												(click)='nav("/price-list/" + this.formGroup.controls.IDPriceListForVendor?.value)'
+												slot="icon-only"
+												name="open-outline"
+												color="primary"
+											></ion-icon>
+										</label>
+										<app-input-control
+											(change)="saveChange()"
+											[field]="{id:'IDPriceListForVendor',
 											 label:'Purchase price list',type:'ng-select-async',
 											 dataSource:_PriceListVendorDataSource,bindLabel:'Name',bindValue:'Id',form:formGroup, placeholder:'no price list for reference',
 											 appendTo:'#ng-select-header',clearable:true}"
-											></app-input-control>
-										</div>
-									</ion-col>
-									<ion-col size="12" size-sm="6" size-xl="4"> </ion-col>
-								</ion-row>
-
-								<!-- Thông tin hóa đơn -->
-								<!-- <ion-row class="hr-group">
-                                    <ion-col size="12" size-sm="12" size-md="12" size-xl="3">
-                                        <ion-list-header class="ion-no-padding">
-                                            <ion-label color="primary">{{'Invoice information' | translate}}</ion-label>
-                                        </ion-list-header>
-                                    </ion-col>
-                                    <ion-col size="12" size-sm="6" size-xl="4">
-                                        <div class="c-control">
-                                            <label class="c-label" for="CompanyName">{{'Company / organization name' | translate}}
-                                                <span *ngIf="!formGroup.controls.CompanyName.valid && !formGroup.controls.CompanyName.pending && (formGroup.controls.CompanyName.dirty || submitAttempt)" ion-text color="danger">(*)</span>
-                                            </label>
-                                            <input (change)="saveChange()" class="c-input" id="CompanyName" formControlName="CompanyName" type="text">
-                                        </div>
-                                        <div class="c-control">
-                                            <label class="c-label" for="TaxCode">{{'Tax code' | translate}}
-                                                <span *ngIf="!formGroup.controls.TaxCode.valid && !formGroup.controls.TaxCode.pending && (formGroup.controls.TaxCode.dirty || submitAttempt)" ion-text color="danger">(*)</span>
-                                            </label>
-                                            <input (change)="saveChange()" class="c-input" id="TaxCode" formControlName="TaxCode" type="text">
-                                        </div>
-                                        <div class="c-control">
-                                            <label class="c-label" for="Email">{{'Email address' | translate}}
-                                                <span *ngIf="!formGroup.controls.Email.valid && !formGroup.controls.Email.pending && (formGroup.controls.Email.dirty || submitAttempt)" ion-text color="danger">(*)</span>
-                                            </label>
-                                            <input (change)="saveChange()" class="c-input" id="Email" formControlName="Email" type="text">
-                                        </div>
-                                    </ion-col>
-                                    <ion-col size="12" size-sm="6" size-xl="4">
-                                        <div class="c-control">
-                                            <label class="c-label" for="BillingAddress">{{'Invoice address' | translate}}
-                                                <span *ngIf="!formGroup.controls.BillingAddress.valid && !formGroup.controls.BillingAddress.pending && (formGroup.controls.BillingAddress.dirty || submitAttempt)" ion-text color="danger">(*)</span>
-                                            </label>
-                                            <textarea (change)="saveChange()" rows="3" class="c-input" id="BillingAddress" formControlName="BillingAddress" type="textarea"></textarea>
-                                        </div>
-                                    </ion-col>
-                                </ion-row> -->
-
-								<!-- Đơn hàng -->
-								<ion-row class="hr-group" *ngIf="item?._LastSOs?.length">
-									<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
-										<ion-list-header class="ion-no-padding">
-											<ion-label color="primary">{{'Đơn hàng gần đây' | translate}}</ion-label>
-										</ion-list-header>
-									</ion-col>
-									<ion-col size="12" size-sm size-xl="8">
-										<div class="table-contain">
-											<section class="table">
-												<header class="bold">
-													<div class="col-id cell">{{'Sale orders' | translate}}</div>
-													<!-- <div class="col-status cell">{{'Status' | translate}}</div> -->
-													<div class="col-code cell">{{'Daily order' | translate}}</div>
-													<div class="col-code cell">{{'Sales staff' | translate}}</div>
-
-													<div class="col-code cell money">{{'Customers payable' | translate}}</div>
-													<div class="col-code cell">{{'Vendor code' | translate}}</div>
-												</header>
-											</section>
-											<section class="table table-scroll">
-												<div class="row" [ngClass]="{odd: j % 2 != 0 }" *ngFor="let i of item._LastSOs; let j = index;">
-													<div class="col-id cell">
-														<a [href]="'#/'+'sale-order/'+i.Id" (click)="nav('sale-order/'+i.Id,'forward')"> 🔗 {{i.Id}}</a>
-													</div>
-													<!-- <div class="col-status cell"></div> -->
-													<div class="col-code cell">{{i.OrderDate | date: 'dd/MM/yy HH:mm'}}</div>
-													<div class="col-code cell">{{i.FullName}}</div>
-													<!-- <div class="col-code cell money">{{i.OriginalTotalAfterTax | number}}</div> -->
-													<div class="col-code cell money">{{i.TotalAfterTax | number}}<small>/{{i.OriginalTotalAfterTax | number}}</small></div>
-													<div class="col-code cell">{{i.Code}}</div>
-												</div>
-											</section>
-										</div>
-									</ion-col>
-								</ion-row>
-
-								<!-- Other information -->
-								<ion-row class="hr-group" *ngIf="item.Id">
-									<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
-										<ion-list-header class="ion-no-padding">
-											<ion-label color="primary">{{'Other information' | translate}}</ion-label>
-										</ion-list-header>
-									</ion-col>
-									<ion-col size="12" size-sm size-xl="4">
-										<app-form-control [field]="{id:'CreatedBy', type : 'text', label: 'Created by', form : formGroup }"></app-form-control>
-										<app-form-control [field]="{id:'CreatedDate', type : 'span-datetime', label: 'Created date', form : formGroup }"></app-form-control>
-										<app-form-control [field]="{id:'ModifiedBy', type : 'text', label: 'Last modified by', form : formGroup }"></app-form-control>
-										<app-form-control [field]="{id:'ModifiedDate', type : 'span-datetime', label: 'Last modified date', form : formGroup }"></app-form-control>
-									</ion-col>
-									<ion-col size="12" size-sm size-xl="4">
-										<app-form-control
-											[field]="{id:'IDBranch', type : 'branch-breadcrumbs', label: 'Branch', form : formGroup, dataSource:env.branchList }"
-										></app-form-control>
-										<app-form-control [field]="{id:'Remark', type : 'textarea', label: 'Remark', form : formGroup }" (change)="saveChange()"></app-form-control>
-									</ion-col>
-								</ion-row>
-							</form>
-						</ion-grid>
-					</div>
-				</div>
-				<!-- Người liên hệ -->
-				<div *ngIf="segmentView == 's2'">
-					<div class="ion-padding">
-						<app-bp-contact-point [bpId]="item.Id" [canEdit]="pageConfig.canEdit" *ngIf="item.Id && !formGroup.controls.IsPersonal.value"></app-bp-contact-point>
-					</div>
-				</div>
-				<!-- Phân loại -->
-				<div *ngIf="segmentView == 's3'">
-					<div class="ion-padding">
-						<!-- Phân loại business partner -->
-						<ion-grid fixed>
-							<!-- Phân loại outlets -->
-							<app-bp-outlet-info [bpId]="item.Id" [canEdit]="pageConfig.canEdit" *ngIf="item.Id && formGroup.controls.IsOutlets.value"></app-bp-outlet-info>
-							<form [formGroup]="formGroup">
-								<ion-row class="hr-group" *ngIf="item.Id && formGroup.controls.IsOutlets.value">
-									<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
-										<ion-list-header class="ion-no-padding">
-											<ion-label color="primary">{{'Other' | translate}}</ion-label>
-										</ion-list-header>
-									</ion-col>
-									<ion-col size="12" size-sm="6" size-xl="4">
-										<div class="c-control">
-											<label class="c-label" for="NumberOfEmployees"
-												>{{'Scale (staff)' | translate}}
-												<span
-													*ngIf="!formGroup.controls.NumberOfEmployees.valid && !formGroup.controls.NumberOfEmployees.pending && (formGroup.controls.NumberOfEmployees.dirty || submitAttempt)"
-													ion-text
-													color="danger"
-													>(*)</span
-												>
-											</label>
-											<input (change)="saveChange()" class="c-input" id="NumberOfEmployees" formControlName="NumberOfEmployees" type="number" />
-										</div>
-										<div class="c-control">
-											<label class="c-label" for="AnnualRevenue"
-												>{{'Scale (revenue)' | translate}}
-												<span
-													*ngIf="!formGroup.controls.AnnualRevenue.valid && !formGroup.controls.AnnualRevenue.pending && (formGroup.controls.AnnualRevenue.dirty || submitAttempt)"
-													ion-text
-													color="danger"
-													>(*)</span
-												>
-											</label>
-											<input (change)="saveChange()" class="c-input" id="AnnualRevenue" formControlName="AnnualRevenue" type="number" />
-										</div>
-									</ion-col>
-									<ion-col size="12" size-sm="6" size-xl="4">
-										<div class="c-control">
-											<label class="c-label" for="Website"
-												>{{'Website' | translate}}
-												<span
-													*ngIf="!formGroup.controls.Website.valid && !formGroup.controls.Website.pending && (formGroup.controls.Website.dirty || submitAttempt)"
-													ion-text
-													color="danger"
-													>(*)</span
-												>
-											</label>
-											<input (change)="saveChange()" class="c-input" id="Website" formControlName="Website" type="text" />
-										</div>
-
-										<div class="c-control">
-											<label class="c-label" for="BankName"
-												>{{'Bank name' | translate}}
-												<span
-													*ngIf="!formGroup.controls.BankName.valid && !formGroup.controls.BankName.pending && (formGroup.controls.BankName.dirty || submitAttempt)"
-													ion-text
-													color="danger"
-													>(*)</span
-												>
-											</label>
-											<input (change)="saveChange()" class="c-input" id="BankName" formControlName="BankName" type="number" />
-										</div>
-
-										<div class="c-control">
-											<label class="c-label" for="BankAccount"
-												>{{'Bank account number' | translate}}
-												<span
-													*ngIf="!formGroup.controls.BankAccount.valid && !formGroup.controls.BankAccount.pending && (formGroup.controls.BankAccount.dirty || submitAttempt)"
-													ion-text
-													color="danger"
-													>(*)</span
-												>
-											</label>
-											<input (change)="saveChange()" class="c-input" id="BankAccount" formControlName="BankAccount" type="number" />
-										</div>
-									</ion-col>
-								</ion-row>
-							</form>
-						</ion-grid>
-					</div>
-				</div>
-				<!-- storer-info -->
-
-				<ng-container *ngFor="let c of storerList; let j=index">
-					<div *ngIf="segmentView == j">
-						<div class="ion-padding">
-							<app-bp-storer-info
-								[canEdit]="pageConfig.canEdit"
-								[bpId]="c.Id"
-								[bpIdStorer]="item.Id"
-								[segmentIndex]="j"
-								*ngIf="item.Id"
-								(changeSegmentName)="changeSegmentName($event)"
-							></app-bp-storer-info>
-						</div>
-					</div>
-				</ng-container>
-
-				<!-- 
-          <ion-segment-button [value]="'warehouse'+j+1" *ngIf="item.Id && formGroup.controls.IsStorer.value" >
-            <ion-label *ngIf="c.name">{{c.name}}</ion-label>
-          </ion-segment-button>
-        </ng-container> -->
-
-				<!-- Hóa đơn -->
-				<div *ngIf="segmentView == 'invoiceInfor'">
-					<div class="ion-padding">
-						<app-bp-tax-address [bpId]="item.Id" [canEdit]="pageConfig.canEdit" *ngIf="item.Id"></app-bp-tax-address>
-					</div>
-				</div>
-				<!-- Địa chỉ -->
-				<div *ngIf="segmentView == 'addresses'">
-					<div class="ion-padding">
-						<ion-grid fixed>
-							<ion-row class="hr-group border">
-								<ion-col size="12" size-md="12" size-lg="12" size-xl="3">
-									<ion-list lines="none">
-										<ion-list-header class="ion-no-padding">
-											<ion-label color="primary"> {{ 'Address' | translate }} </ion-label>
-										</ion-list-header>
-									</ion-list>
+										></app-input-control>
+									</div>
 								</ion-col>
-								<ion-col size="12" size-sm size-xl="8" class="ion-no-padding" *ngIf="formGroup.get('Addresses').value.length > 0">
-									<app-address
-										*ngFor="let address of formGroup.get('Addresses')['controls']"
-										[address]="address.value"
-										[canEdit]="pageConfig.canEdit"
-										[mapLoading]="env.isMapLoaded"
-										(onChange)="changeAddress($event)"
-										(onDelete)="removeAddress($event)"
-									></app-address>
+								<ion-col size="12" size-sm="6" size-xl="4"> </ion-col>
+							</ion-row>
+
+							<!-- Lotable -->
+
+							<ion-row class="hr-group" *ngIf="lotableList.length > 0">
+								<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
+									<ion-list-header class="ion-no-padding">
+										<ion-label color="primary">{{'Lotable' | translate}}</ion-label>
+									</ion-list-header>
 								</ion-col>
-								<ion-col size="12" size-xl="4" *ngIf="formGroup.get('Addresses').value.length == 0 && pageConfig.canEdit && isShowAddAddress">
-									<ion-button (click)="addAddress({})"> {{ 'Add address' | translate }} </ion-button>
+								<ion-col size="12" size-sm size-xl="4">
+									<div *ngFor="let item of lotableList; let i = index">
+										<ng-container *ngIf="i % 2 === 0">
+											<app-form-control
+												[field]="{id:item.code, type : item.type, label: item.value, form : formGroup }"
+												(change)="saveChange()"
+											></app-form-control>
+										</ng-container>
+									</div>
+								</ion-col>
+								<ion-col size="12" size-sm size-xl="4">
+									<div *ngFor="let item of lotableList; let i = index">
+										<ng-container *ngIf="i % 2 !== 0">
+											<app-form-control
+												[field]="{id:item.code, type : item.type, label: item.value, form : formGroup }"
+												(change)="saveChange()"
+											></app-form-control>
+										</ng-container>
+									</div>
 								</ion-col>
 							</ion-row>
-							<ion-row class="hr-group border" *ngIf="formGroup.get('Addresses').value.length > 0 && pageConfig.canEdit && isShowAddAddress">
-								<ion-col size="0" size-md="0" size-lg="0" size-xl="3"></ion-col>
-								<ion-col size="12" size-xl="4">
-									<ion-button (click)="addAddress({})"> {{ 'Add address' | translate }} </ion-button>
+
+							<!-- UDF -->
+
+							<ion-row class="hr-group" *ngIf="item?.Id && udfList.length > 0 && !pageConfig.showSpinner">
+								<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
+									<ion-list-header class="ion-no-padding">
+										<ion-label color="primary">{{'User define field' | translate}}</ion-label>
+									</ion-list-header>
+								</ion-col>
+								<ion-col size="12" size-sm size-xl="4">
+									<div *ngFor="let item of udfList; let i = index">
+										<ng-container *ngIf="i % 2 === 0">
+											<app-form-control
+												[field]="{id:item.code, type : 'text', label: item.value, form : contactUDFGroup }"
+												(change)="saveContactUDF()"
+											></app-form-control>
+										</ng-container>
+									</div>
+								</ion-col>
+								<ion-col size="12" size-sm size-xl="4">
+									<div *ngFor="let item of udfList; let i = index">
+										<ng-container *ngIf="i % 2 !== 0">
+											<app-form-control
+												[field]="{id:item.code, type : 'text', label: item.value, form : contactUDFGroup }"
+												(change)="saveContactUDF()"
+											></app-form-control>
+										</ng-container>
+									</div>
 								</ion-col>
 							</ion-row>
-						</ion-grid>
-					</div>
 
-					<!-- <app-bp-address
-              [bpId]="item.Id"
-              [canEdit]="pageConfig.canEdit"
-              [canEdit]="pageConfig.canEdit"
-              *ngIf="item.Id"
-            ></app-bp-address> -->
-				</div>
-				<!-- map -->
-				<div *ngIf="segmentView == 'map'" style="height: calc(100vh - 140px)">
-					<app-bp-map [bpId]="item.Id" [canEdit]="pageConfig.canEdit" *ngIf="item.Id"></app-bp-map>
-				</div>
-				<!-- Sản phẩm -->
-				<div *ngIf="segmentView == 'products'">
-					<div class="ion-padding">
-						<ion-grid fixed>
-							<app-bp-items
-								[idPriceList]="this.formGroup.controls.IDPriceListForVendor?.value"
-								[bpId]="item.Id"
-								[canEdit]="pageConfig.canEdit"
-								*ngIf="item.Id && !formGroup.controls.IsPersonal.value"
-							></app-bp-items>
-						</ion-grid>
-					</div>
+							<!-- Other information -->
+							<ion-row class="hr-group" *ngIf="item.Id">
+								<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
+									<ion-list-header class="ion-no-padding">
+										<ion-label color="primary">{{'Other information' | translate}}</ion-label>
+									</ion-list-header>
+								</ion-col>
+								<ion-col size="12" size-sm size-xl="4">
+									<app-form-control [field]="{id:'CreatedBy', type : 'text', label: 'Created by', form : formGroup }"></app-form-control>
+									<app-form-control [field]="{id:'CreatedDate', type : 'span-datetime', label: 'Created date', form : formGroup }"></app-form-control>
+									<app-form-control [field]="{id:'ModifiedBy', type : 'text', label: 'Last modified by', form : formGroup }"></app-form-control>
+									<app-form-control [field]="{id:'ModifiedDate', type : 'span-datetime', label: 'Last modified date', form : formGroup }"></app-form-control>
+								</ion-col>
+								<ion-col size="12" size-sm size-xl="4">
+									<app-form-control
+										[field]="{id:'IDBranch', type : 'branch-breadcrumbs', label: 'Branch', form : formGroup, dataSource:env.branchList }"
+									></app-form-control>
+									<app-form-control [field]="{id:'Remark', type : 'textarea', label: 'Remark', form : formGroup }" (change)="saveChange()"></app-form-control>
+								</ion-col>
+							</ion-row>
+						</form>
+					</ion-grid>
 				</div>
 			</div>
+		</ng-container>
+		<!-- Đơn hàng -->
+
+		<app-bp-recent-order
+			[_LastSOs]="item?._LastSOs"
+			[canEdit]="pageConfig.canEdit"
+			*ngIf="pageConfig.showSpinner == false && segmentView.Page == 'bp-recent-order' &&item.Id"
+		></app-bp-recent-order>
+
+		<!-- Địa chỉ -->
+		<ng-container *ngIf="pageConfig.showSpinner == false && segmentView.Page == 'bp-address'">
+			<div class="main-view">
+				<div class="row-full shadow full-screen ion-padding">
+					<ion-grid fixed>
+						<ion-row class="hr-group border">
+							<ion-col size="12" size-md="12" size-lg="12" size-xl="3">
+								<ion-list lines="none">
+									<ion-list-header class="ion-no-padding">
+										<ion-label color="primary"> {{ 'Address' | translate }} </ion-label>
+									</ion-list-header>
+								</ion-list>
+							</ion-col>
+							<ion-col size="12" size-sm size-xl="8" class="ion-no-padding" *ngIf="formGroup.get('Addresses').value.length > 0">
+								<app-address
+									*ngFor="let address of formGroup.get('Addresses')['controls']"
+									[address]="address.value"
+									[canEdit]="pageConfig.canEdit"
+									[mapLoading]="env.isMapLoaded"
+									(onChange)="changeAddress($event)"
+									(onDelete)="removeAddress($event)"
+								></app-address>
+							</ion-col>
+							<ion-col size="12" size-xl="4" *ngIf="formGroup.get('Addresses').value.length == 0 && pageConfig.canEdit && isShowAddAddress">
+								<ion-button (click)="addAddress({})"> {{ 'Add address' | translate }} </ion-button>
+							</ion-col>
+						</ion-row>
+						<ion-row class="hr-group border" *ngIf="formGroup.get('Addresses').value.length > 0 && pageConfig.canEdit && isShowAddAddress">
+							<ion-col size="0" size-md="0" size-lg="0" size-xl="3"></ion-col>
+							<ion-col size="12" size-xl="4">
+								<ion-button (click)="addAddress({})"> {{ 'Add address' | translate }} </ion-button>
+							</ion-col>
+						</ion-row>
+					</ion-grid>
+				</div>
+			</div>
+		</ng-container>
+
+		<app-bp-reference-code
+			[bpId]="item.Id"
+			[canEdit]="pageConfig.canEdit"
+			*ngIf="pageConfig.showSpinner == false && item.Id && formGroup.controls.IsOutlets.value && segmentView.Page == 'bp-reference-code'"
+		></app-bp-reference-code>
+
+		<!-- Thông tin cá nhân -->
+		<app-bp-person-info
+			[bpId]="item.Id"
+			[canEdit]="pageConfig.canEdit"
+			*ngIf=" pageConfig.showSpinner == false && formGroup.controls.IsPersonal.value && item.Id && segmentView.Page == 'bp-person-info'"
+		></app-bp-person-info>
+
+		<!-- Tuyến bán -->
+		<app-master-coverage-plan
+			[canEdit]="pageConfig.canEdit"
+			*ngIf=" pageConfig.showSpinner == false&& item?._Routes && segmentView.Page == 'bp-master-coverage-plan'"
+			[_routes]="item._Routes"
+		>
+		</app-master-coverage-plan>
+
+		<!-- Người liên hệ -->
+		<app-bp-contact-point
+			[bpId]="item.Id"
+			[canEdit]="pageConfig.canEdit"
+			*ngIf="pageConfig.showSpinner == false && item.Id && !formGroup.controls.IsPersonal.value && segmentView.Page == 'bp-contact-point'"
+		></app-bp-contact-point>
+
+		<!-- Hóa đơn -->
+		<div class="main-view" *ngIf="pageConfig.showSpinner == false && item.Id && segmentView.Page == 'bp-tax-address'">
+			<div class="row-full shadow full-screen ion-padding">
+				<app-bp-tax-address [bpId]="item.Id" [canEdit]="pageConfig.canEdit"></app-bp-tax-address>
+			</div>
 		</div>
+		<!-- Map -->
+		<div class="main-view" *ngIf=" pageConfig.showSpinner == false &&item.Id&& segmentView.Page == 'bp-map'">
+			<div class="row-full shadow full-screen ion-padding" style="height: calc(100vh - 140px);">
+				<app-bp-map [bpId]="item.Id" [canEdit]="pageConfig.canEdit"></app-bp-map>
+			</div>
+		</div>
+		<!-- Product -->
+		<app-bp-items
+			[idPriceList]="this.formGroup.controls.IDPriceListForVendor?.value"
+			[bpId]="item.Id"
+			[canEdit]="pageConfig.canEdit"
+			*ngIf=" pageConfig.showSpinner == false && item.Id && !formGroup.controls.IsPersonal.value && segmentView.Page == 'bp-product'"
+		></app-bp-items>
+
+		<!-- Outlet info -->
+		<div class="main-view" *ngIf=" pageConfig.showSpinner == false &&item.Id && formGroup.controls.IsOutlets.value && segmentView.Page == 'bp-outlet-info'">
+			<div class="row-full shadow full-screen ion-padding">
+				<app-bp-outlet-info [bpId]="item.Id" [canEdit]="pageConfig.canEdit"></app-bp-outlet-info>
+			</div>
+		</div>
+
+		<ng-container *ngIf="pageConfig.showSpinner == false &&item.Id && segmentView.Page == 'bp-storer-info'">
+			<ng-container *ngFor="let c of storerList; let j=index">
+				<app-bp-storer-info
+					[canEdit]="pageConfig.canEdit"
+					[bpId]="c.Id"
+					[bpIdStorer]="item.Id"
+					[segmentIndex]="j"
+					(changeSegmentName)="changeSegmentName($event)"
+				></app-bp-storer-info>
+			</ng-container>
+		</ng-container>
 	</div>
+
+	<app-page-message [itemsLength]="item? 1: 0" [showSpinner]="pageConfig.showSpinner"></app-page-message>
+	<div class="ion-padding"></div>
 </ion-content>

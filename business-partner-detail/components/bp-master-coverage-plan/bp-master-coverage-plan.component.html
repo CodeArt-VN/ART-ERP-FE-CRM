@@ -1,0 +1,37 @@
+<div class="main-view">
+	<div class="row-full shadow full-screen ion-padding">
+		
+		<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
+			<ion-list-header class="ion-no-padding">
+				<ion-label color="primary">{{ 'Master coverage plan' | translate }}</ion-label>
+			</ion-list-header>
+		</ion-col>
+		<ion-col size="12" size-sm size-xl="8">
+			<div class="table-contain">
+				<app-data-table *ngIf="!pageConfig.showSpinner" class="box-shadow responsive" [rows]="_routes" [(query)]="query" [showSpinner]="pageConfig.showSpinner">
+					<datatable-empty-message [showImg]="false" minHeight="125px"> </datatable-empty-message>
+					<datatable-column class="col-name" name="Route name" property="Name">
+						<ng-template let-i="row" datatable-cell-template>
+							<small
+								><a [href]="'#/' + 'mcp/' + i.Id" (click)="nav('mcp/' + i.Id, 'forward')"> 🔗 {{ i.Id }}</a></small
+							>
+							{{ i.Name }}
+						</ng-template>
+					</datatable-column>
+					<datatable-column class="col-checkbox" name="W1" property="Week1"></datatable-column>
+					<datatable-column class="col-checkbox" name="W2" property="Week2"></datatable-column>
+					<datatable-column class="col-checkbox" name="W3" property="Week3"></datatable-column>
+					<datatable-column class="col-checkbox" name="W4" property="Week4"></datatable-column>
+
+					<datatable-column class="col-checkbox" name="Mon" property="Monday"></datatable-column>
+					<datatable-column class="col-checkbox" name="Tue" property="Tuesday"></datatable-column>
+					<datatable-column class="col-checkbox" name="Wed" property="Wednesday"></datatable-column>
+					<datatable-column class="col-checkbox" name="Thu" property="Thursday"></datatable-column>
+					<datatable-column class="col-checkbox" name="Fri" property="Friday"></datatable-column>
+					<datatable-column class="col-checkbox" name="Sat" property="Saturday"></datatable-column>
+					<datatable-column class="col-checkbox" name="Sun" property="Sunday"></datatable-column>
+				</app-data-table>
+			</div>
+		</ion-col>
+	</div>
+</div>

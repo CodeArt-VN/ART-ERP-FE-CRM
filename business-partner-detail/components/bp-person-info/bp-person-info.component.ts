@@ -16,8 +16,9 @@ import { CRM_PersonInfoProvider } from 'src/app/services/static/services.service
 })
 export class BpPersonInfoComponent extends PageBase {
 	@Input() canEdit;
+	_bpId;
 	@Input() set bpId(value) {
-		this.id = value;
+		this._bpId = value;
 	}
 
 	minDateOfBirth;
@@ -67,7 +68,10 @@ export class BpPersonInfoComponent extends PageBase {
 			Remark: [''],
 		});
 	}
-
+	preLoadData(event?: any): void {
+		this.id = this._bpId;
+		super.preLoadData(event);
+	}
 	loadedData() {
 		if (!this.item) {
 			this.item = { Id: this.id };
