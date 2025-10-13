@@ -20,9 +20,9 @@ export class BPItemsComponent extends PageBase {
 	@ViewChild('importfile') importfile: any;
 	@Input() canEdit;
 	@Input() idPriceList;
+	_bpId;
 	@Input() set bpId(value) {
-		this.id = value;
-		this.query.IDVendor = this.id;
+		this._bpId = value;
 	}
 	AcceptFile = '.xlsx';
 	constructor(
@@ -45,6 +45,12 @@ export class BPItemsComponent extends PageBase {
 		this.query.IgnoredBranch = true;
 		this.query.IsPersonal = true;
 		this.pageConfig.isForceCreate = true;
+	}
+
+	preLoadData(event?: any): void {
+		this.id = this._bpId;
+		this.query.IDVendor = this.id;
+		super.preLoadData(event);
 	}
 
 	loadedData() {

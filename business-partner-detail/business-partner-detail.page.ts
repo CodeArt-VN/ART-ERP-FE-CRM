@@ -4,11 +4,9 @@ import { PageBase } from 'src/app/page-base';
 import { ActivatedRoute } from '@angular/router';
 import { EnvService } from 'src/app/services/core/env.service';
 import {
-	CRM_ContactProvider,
 	CRM_ContactUDFProvider,
 	HRM_StaffProvider,
 	SYS_ConfigOptionProvider,
-	SYS_ConfigProvider,
 	WMS_PriceListProvider,
 } from 'src/app/services/static/services.service';
 import { FormBuilder, FormGroup, Validators, FormControl, FormArray } from '@angular/forms';
@@ -18,9 +16,7 @@ import { CommonService } from 'src/app/services/core/common.service';
 import { thirdPartyLibs } from 'src/app/services/static/thirdPartyLibs';
 import { AddressService, DynamicScriptLoaderService } from 'src/app/services/custom/custom.service';
 import { DataCorrectionRequestModalPage } from 'src/app/modals/data-correction-request-modal/data-correction-request-modal.page';
-import { SYS_ConfigService } from 'src/app/services/system-config.service';
 import { CRM_ContactService } from 'src/app/services/contact.service';
-import config from 'capacitor.config';
 declare var ggMap;
 @Component({
 	selector: 'app-business-partner-detail',
@@ -119,7 +115,6 @@ export class BusinessPartnerDetailPage extends PageBase {
 		public pageProvider: CRM_ContactService,
 		public contactUDFProvider: CRM_ContactUDFProvider,
 		public priceListProvider: WMS_PriceListProvider,
-		public sysConfigService: SYS_ConfigService,
 		public sysConfigOptionProvider: SYS_ConfigOptionProvider,
 		public staffProvider: HRM_StaffProvider,
 		public env: EnvService,
@@ -568,6 +563,7 @@ export class BusinessPartnerDetailPage extends PageBase {
 		let groups = <FormArray>this.formGroup.controls.Addresses;
 		let idsBeforeSaving = new Set(groups.controls.map((g) => g.get('Id').value));
 		this.item = savedItem;
+		this.formGroup?.patchValue(this.item);
 		if (this.item.Addresses?.length > 0) {
 			let newIds = new Set(this.item.Addresses.map((i) => i.Id));
 			const diff = [...newIds].filter((item) => !idsBeforeSaving.has(item));
