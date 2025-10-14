@@ -42,3 +42,23 @@ ion-list {
 		}
 	}
 }
+@media screen and (max-width: calc(1164px + 0px)) {
+	::ng-deep {
+		app-data-table.responsive .row {
+			min-height: 110px;
+		}
+		.row {
+		.col-icon {
+			order: 0 !important;
+			top: auto !important;
+			bottom: 16px;
+			opacity: 0.35;
+			.min-btn {
+				width: 3rem !important;
+				height: 3rem !important;
+			}
+		}
+		
+	}
+	}
+}
