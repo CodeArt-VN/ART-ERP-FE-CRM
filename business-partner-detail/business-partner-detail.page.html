@@ -72,7 +72,13 @@
 			<div class="ion-padding" style="padding-bottom: 0"></div>
 		</div>
 	</ion-fab>
-
+	<app-page-title
+		class="ion-padding safe-max-width"
+		[icon]="selectedOption.Icon"
+		color="primary"
+		[title]="selectedOption.Name"
+		[remark]="selectedOption.Remark"
+	></app-page-title>
 	<div class="safe-max-width">
 		<!-- component -->
 
