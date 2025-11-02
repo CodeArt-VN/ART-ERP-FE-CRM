@@ -516,7 +516,7 @@ export class BusinessPartnerDetailPage extends PageBase {
 		this.segmentView.Page = ev;
 	}
 
-	selectedOption = null;
+	selectedOption = this.optionGroup[0];
 
 	loadNode(option = null) {
 		this.pageConfig.isSubActive = true;
