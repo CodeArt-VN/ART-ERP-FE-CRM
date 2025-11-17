@@ -58,4 +58,8 @@ export const CRMRoutes: Routes = [
     { path: 'reward/:id', loadChildren: () => import('./reward-detail/reward-detail.module').then(m => m.RewardDetailPageModule), canActivate: [AuthGuard] },
 
       { path: 'crm-config', loadChildren: () => import('../ADMIN/config/config.module').then(m => m.ConfigPageModule), canActivate: [AuthGuard] },
+
+    { path: 'member-card', loadChildren: () => import('./member-card/member-card.module').then(m => m.MemberCardPageModule), canActivate: [AuthGuard] },
+    { path: 'member-card/:id', loadChildren: () => import('./member-card-detail/member-card-detail.module').then(m => m.MemberCardDetailPageModule), canActivate: [AuthGuard] },
+
 ];
