@@ -60,8 +60,13 @@ export class MemberCardDetailPage extends PageBase {
 	}
 
 	preLoadData(event?: any): void {
-		Promise.all([this.env.getStatus('StandardApprovalStatus')]).then((values: any) => {
+		Promise.all([
+			this.env.getStatus('StandardApprovalStatus'), 
+			this.env.getType('MemberCardType'),
+			this.env.getType('MemberCardSubType')]).then((values: any) => {
 			this.statusList = values[0];
+			this.typeList = values[1];
+			this.subTypeList = values[2];
 			super.preLoadData(event);
 		});
 	}
