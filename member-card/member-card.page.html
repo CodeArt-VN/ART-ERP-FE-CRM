@@ -1,0 +1,50 @@
+<ion-header>
+	<app-toolbar [page]="this"></app-toolbar>
+</ion-header>
+
+<ion-content appScrollbarTheme class="left scrollx" [ngClass]="{withFeature: pageConfig.isShowFeature}" forceOverscroll="false">
+	<ion-refresher [disabled]="!pageConfig.refresher" slot="fixed" (ionRefresh)="refresh($event)">
+		<ion-refresher-content></ion-refresher-content>
+	</ion-refresher>
+
+	<app-page-title class="ion-padding safe-max-width" [pageConfig]="pageConfig"></app-page-title>
+
+	<div class="safe-max-width">
+		<app-data-table
+			class="box-shadow responsive"
+			[rows]="items"
+			[trackBy]="'Id'"
+			[(selectedRows)]="selectedItems"
+			[showSpinner]="pageConfig.showSpinner"
+			[showFilter]="pageConfig.isShowSearch"
+			[(query)]="query"
+			(dataInfinite)="loadData($event)"
+			(filter)="onDatatableFilter($event)"
+			(sort)="onSort($event)"
+			(selectedRowsChange)="showCommandBySelectedRows($event)"
+		>
+			<datatable-column [checkbox]="true" name=""></datatable-column>
+			<datatable-column class="col-id" name="#" property="Id" [navLink]="pageConfig.pageName"></datatable-column>
+			<datatable-column class="col-code" name="Code" property="Code"></datatable-column>
+			<datatable-column class="col-name" name="Member" property="_Member">
+				<ng-template let-i="row" datatable-cell-template>
+					<div (click)="nav('business-partner/'+i._Member.Id,'forward')">
+						<span class="bold">{{i._Member?.Name}}</span>
+						<small *ngIf="i.Code" class="no-warp"> {{i._Member?.Code}}</small>
+					</div>
+				</ng-template>
+			</datatable-column>
+			<datatable-column class="col-number bold" format="1.0-0" name="Quota" property="Quota"></datatable-column>
+			<datatable-column class="col-status" name="Status" property="Status" filterControlType="ng-select" [filterDataSource]="statusList">
+				<ng-template let-i="row" datatable-cell-template>
+					<ion-badge [color]="i._Status?.Color" [title]="i._Status?.Name"> {{i._Status?.Name | translate}} </ion-badge>
+				</ng-template>
+			</datatable-column>
+		</app-data-table>
+	</div>
+
+	<div class="ion-padding"></div>
+	<ion-infinite-scroll color="primary" threshold="30%" (ionInfinite)="loadData($event)" [disabled]="!pageConfig.infiniteScroll || pageConfig.isEndOfData">
+		<ion-infinite-scroll-content loadingSpinner="dots"></ion-infinite-scroll-content>
+	</ion-infinite-scroll>
+</ion-content>
