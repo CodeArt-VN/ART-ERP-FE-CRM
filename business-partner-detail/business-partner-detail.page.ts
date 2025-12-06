@@ -3,12 +3,7 @@ import { NavController, ModalController, LoadingController, AlertController, Pop
 import { PageBase } from 'src/app/page-base';
 import { ActivatedRoute } from '@angular/router';
 import { EnvService } from 'src/app/services/core/env.service';
-import {
-	CRM_ContactUDFProvider,
-	HRM_StaffProvider,
-	SYS_ConfigOptionProvider,
-	WMS_PriceListProvider,
-} from 'src/app/services/static/services.service';
+import { CRM_ContactUDFProvider, HRM_StaffProvider, SYS_ConfigOptionProvider, WMS_PriceListProvider } from 'src/app/services/static/services.service';
 import { FormBuilder, FormGroup, Validators, FormControl, FormArray } from '@angular/forms';
 import { concat, of, Subject } from 'rxjs';
 import { catchError, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
@@ -31,6 +26,18 @@ export class BusinessPartnerDetailPage extends PageBase {
 			Name: 'Management information',
 			Remark: 'Management information',
 			Icon: 'stats-chart-outline',
+		},
+		{
+			Code: 'lotable',
+			Name: 'Lotable',
+			Remark: 'Lotable',
+			Icon: 'cube-outline',
+		},
+		{
+			Code: 'udf',
+			Name: 'User define field',
+			Remark: 'User define field',
+			Icon: 'build-outline',
 		},
 		{
 			Code: 'bp-person-info',
@@ -101,7 +108,7 @@ export class BusinessPartnerDetailPage extends PageBase {
 			Name: 'Storer info',
 			Remark: 'Storer info',
 			Icon: 'storefront-outline',
-			Condition : (item) => item.IsStorer,
+			Condition: (item) => item.IsStorer,
 		},
 	];
 	segmentView: any = {
@@ -114,7 +121,7 @@ export class BusinessPartnerDetailPage extends PageBase {
 	isShowAddAddress = true;
 	lotableList = [];
 	udfList = [];
-	contactUDFGroup:any  = this.formBuilder.group({});
+	contactUDFGroup: any = this.formBuilder.group({});
 
 	constructor(
 		public pageProvider: CRM_ContactService,
@@ -237,35 +244,10 @@ export class BusinessPartnerDetailPage extends PageBase {
 			this.priceListProvider.read({ Take: 20 }),
 			this.env.getStatus('BusinessPartner'),
 			this.addressService.getAddressSubdivision(),
-			this.getConfigOptionCode(),
 		]).then((values: any) => {
 			this.initPriceList = values[0]['data'];
 			this.statusList = values[1];
-			this.pageProvider.getConfig(null, values[3]).then((config) => {
-				this.lotableList = Object.entries(config)
-					.filter(([key, value]) => key.startsWith('CRMLotable') && value !== null)
-					.map(([key, value]) => {
-						let type = '';
-						if (key.includes('Text')) {
-							type = 'text';
-						} else if (key.includes('Num')) {
-							type = 'number';
-						} else if (key.includes('Date')) {
-							type = 'datetime-local';
-						}
-
-						return { key, code: key.replace(/^CRM/, ''), value, type };
-					});
-
-				this.udfList = Object.entries(config)
-					.filter(([key, value]) => key.startsWith('CRMUDF') && value !== null)
-					.map(([key, value]) => ({
-						key,
-						value,
-						code: key.replace(/^CRM/, ''),
-					}));
-				super.preLoadData(event);
-			});
+			super.preLoadData(event);
 		});
 	}
 
@@ -285,10 +267,7 @@ export class BusinessPartnerDetailPage extends PageBase {
 		this.contactUDFGroup.addControl('Id', new FormControl(this.item?._contactUDF ? this.item._contactUDF['Id'] : null));
 		this.contactUDFGroup.addControl('Name', new FormControl(this.item?._contactUDF ? this.item._contactUDF['Name'] : null));
 		this.contactUDFGroup.addControl('Code', new FormControl(this.item?._contactUDF ? this.item._contactUDF['Code'] : null));
-		this.udfList.forEach((udf) => {
-			this.contactUDFGroup.addControl(udf.code, new FormControl(this.item?._contactUDF ? this.item._contactUDF[udf.code] : ''));
-		});
-
+		
 		super.loadedData(event, ignoredFromGroup);
 		if (this.initPriceList && this.initPriceList.length > 0) {
 			this._PriceListDataSource.selected = [...this.initPriceList];
@@ -327,7 +306,7 @@ export class BusinessPartnerDetailPage extends PageBase {
 				this.pageConfig.canDelete = false;
 				//this.formGroup.get('IDAddress').disable();
 			}
-		}else {
+		} else {
 			this.formGroup.controls['IsPersonal'].setValue(true);
 			this.formGroup.controls['IsPersonal'].markAsDirty();
 		}
@@ -536,10 +515,48 @@ export class BusinessPartnerDetailPage extends PageBase {
 		if (!option) {
 			return;
 		}
-
 		this.selectedOption = option;
-
 		this.segmentView.Page = option.Code;
+		if (option.Code === 'lotable' || option.Code === 'udf') {
+			this.env
+				.showLoading(
+					'Please wait for a few moments',
+					this.getConfigOptionCode()
+						.then((optionCode: any) => this.pageProvider.getConfig(null, optionCode))
+						.then((config: any) => {
+							if (option.Code === 'lotable') {
+								this.lotableList = Object.entries(config)
+									.filter(([key, value]) => key.startsWith('CRMLotable') && value !== null)
+									.map(([key, value]) => {
+										let type = '';
+										if (key.includes('Text')) {
+											type = 'text';
+										} else if (key.includes('Num')) {
+											type = 'number';
+										} else if (key.includes('Date')) {
+											type = 'datetime-local';
+										}
+										return { key, code: key.replace(/^CRM/, ''), value, type };
+									});
+							} else {
+								this.udfList = Object.entries(config)
+									.filter(([key, value]) => key.startsWith('CRMUDF') && value !== null)
+									.map(([key, value]) => {
+										const code = key.replace(/^CRM/, '');
+										this.contactUDFGroup.addControl(
+											code,
+											new FormControl(this.item?._contactUDF?.[code] ?? '')
+										);
+
+										return { key, value, code };
+									});
+							}
+						})
+				)
+				.catch((err) => {
+					this.env.showMessage('Cannot load data', 'danger');
+				});
+		}
 	}
 
 	warehouseList = [];

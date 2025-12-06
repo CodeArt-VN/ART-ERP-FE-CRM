@@ -403,9 +403,40 @@
 								<ion-col size="12" size-sm="6" size-xl="4"> </ion-col>
 							</ion-row>
 
-							<!-- Lotable -->
+							<!-- Other information -->
+							<ion-row class="hr-group" *ngIf="item.Id">
+								<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
+									<ion-list-header class="ion-no-padding">
+										<ion-label color="primary">{{'Other information' | translate}}</ion-label>
+									</ion-list-header>
+								</ion-col>
+								<ion-col size="12" size-sm size-xl="4">
+									<app-form-control [field]="{id:'CreatedBy', type : 'text', label: 'Created by', form : formGroup }"></app-form-control>
+									<app-form-control [field]="{id:'CreatedDate', type : 'span-datetime', label: 'Created date', form : formGroup }"></app-form-control>
+									<app-form-control [field]="{id:'ModifiedBy', type : 'text', label: 'Last modified by', form : formGroup }"></app-form-control>
+									<app-form-control [field]="{id:'ModifiedDate', type : 'span-datetime', label: 'Last modified date', form : formGroup }"></app-form-control>
+								</ion-col>
+								<ion-col size="12" size-sm size-xl="4">
+									<app-form-control
+										[field]="{id:'IDBranch', type : 'branch-breadcrumbs', label: 'Branch', form : formGroup, dataSource:env.branchList }"
+									></app-form-control>
+									<app-form-control [field]="{id:'Remark', type : 'textarea', label: 'Remark', form : formGroup }" (change)="saveChange()"></app-form-control>
+								</ion-col>
+							</ion-row>
+						</form>
+					</ion-grid>
+				</div>
+			</div>
+		</ng-container>
 
-							<ion-row class="hr-group" *ngIf="lotableList.length > 0">
+		<!-- Lotable information -->
+		<ng-container *ngIf="pageConfig.showSpinner == false && segmentView.Page == 'lotable' && lotableList.length > 0">
+			<div class="main-view">
+				<div class="row-full shadow full-screen ion-padding">
+					<ion-grid fixed>
+						<form [formGroup]="formGroup">
+							<!-- Lotable -->
+							<ion-row class="hr-group">
 								<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
 									<ion-list-header class="ion-no-padding">
 										<ion-label color="primary">{{'Lotable' | translate}}</ion-label>
@@ -433,9 +464,21 @@
 								</ion-col>
 							</ion-row>
 
-							<!-- UDF -->
+						
+						</form>
+					</ion-grid>
+				</div>
+			</div>
+		</ng-container>
 
-							<ion-row class="hr-group" *ngIf="item?.Id && udfList.length > 0 && !pageConfig.showSpinner">
+		<!-- UDF information -->
+		<ng-container *ngIf="pageConfig.showSpinner == false && segmentView.Page == 'udf' && item?.Id && udfList.length > 0 ">
+			<div class="main-view">
+				<div class="row-full shadow full-screen ion-padding">
+					<ion-grid fixed>
+						<form [formGroup]="formGroup">
+							<!-- UDF -->
+							<ion-row class="hr-group">
 								<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
 									<ion-list-header class="ion-no-padding">
 										<ion-label color="primary">{{'User define field' | translate}}</ion-label>
@@ -463,26 +506,6 @@
 								</ion-col>
 							</ion-row>
 
-							<!-- Other information -->
-							<ion-row class="hr-group" *ngIf="item.Id">
-								<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
-									<ion-list-header class="ion-no-padding">
-										<ion-label color="primary">{{'Other information' | translate}}</ion-label>
-									</ion-list-header>
-								</ion-col>
-								<ion-col size="12" size-sm size-xl="4">
-									<app-form-control [field]="{id:'CreatedBy', type : 'text', label: 'Created by', form : formGroup }"></app-form-control>
-									<app-form-control [field]="{id:'CreatedDate', type : 'span-datetime', label: 'Created date', form : formGroup }"></app-form-control>
-									<app-form-control [field]="{id:'ModifiedBy', type : 'text', label: 'Last modified by', form : formGroup }"></app-form-control>
-									<app-form-control [field]="{id:'ModifiedDate', type : 'span-datetime', label: 'Last modified date', form : formGroup }"></app-form-control>
-								</ion-col>
-								<ion-col size="12" size-sm size-xl="4">
-									<app-form-control
-										[field]="{id:'IDBranch', type : 'branch-breadcrumbs', label: 'Branch', form : formGroup, dataSource:env.branchList }"
-									></app-form-control>
-									<app-form-control [field]="{id:'Remark', type : 'textarea', label: 'Remark', form : formGroup }" (change)="saveChange()"></app-form-control>
-								</ion-col>
-							</ion-row>
 						</form>
 					</ion-grid>
 				</div>
