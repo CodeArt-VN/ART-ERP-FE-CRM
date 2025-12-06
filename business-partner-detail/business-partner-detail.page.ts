@@ -37,6 +37,7 @@ export class BusinessPartnerDetailPage extends PageBase {
 			Name: 'Person info',
 			Remark: 'Person info',
 			Icon: 'person-outline',
+			Condition: (item) => item.IsPersonal,
 		},
 		{
 			Code: 'bp-recent-order',
@@ -49,6 +50,7 @@ export class BusinessPartnerDetailPage extends PageBase {
 			Name: 'Outlet info',
 			Remark: 'Outlet info',
 			Icon: 'business-outline',
+			Condition: (item) => item.IsOutlets,
 		},
 		{
 			Code: 'bp-address',
@@ -73,6 +75,7 @@ export class BusinessPartnerDetailPage extends PageBase {
 			Name: 'Contact point',
 			Remark: 'Contact point',
 			Icon: 'call-outline',
+			Condition: (item) => !item.IsPersonal,
 		},
 		{
 			Code: 'bp-tax-address',
@@ -91,12 +94,14 @@ export class BusinessPartnerDetailPage extends PageBase {
 			Name: 'Product',
 			Remark: 'Product',
 			Icon: 'cube-outline',
+			Condition: (item) => !item.IsPersonal,
 		},
 		{
 			Code: 'bp-storer-info',
 			Name: 'Storer info',
 			Remark: 'Storer info',
 			Icon: 'storefront-outline',
+			Condition : (item) => item.IsStorer,
 		},
 	];
 	segmentView: any = {

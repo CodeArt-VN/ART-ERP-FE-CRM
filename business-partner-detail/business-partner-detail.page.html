@@ -51,6 +51,7 @@
 
 			<ion-list>
 				<ng-container *ngFor="let i of optionGroup">
+					@if(i.Condition == null || i.Condition(item)) {
 					<ion-item [color]="segmentView.Page == i.Code? 'primary': '' " button detail="true" class="clickable" (click)="loadNode(i)">
 						<ion-icon slot="start" aria-hidden="true" [name]="i.Icon"></ion-icon>
 						<ion-label class="ion-text-wrap">
@@ -58,6 +59,7 @@
 							<p>{{i.Remark | translate}}</p>
 						</ion-label>
 					</ion-item>
+					}
 				</ng-container>
 
 				<!-- <ng-container *ngFor="let c of storerList; let j=index">
@@ -568,7 +570,7 @@
 		</div>
 		<!-- Map -->
 		<div class="main-view" *ngIf=" pageConfig.showSpinner == false &&item.Id&& segmentView.Page == 'bp-map'">
-			<div class="row-full shadow full-screen ion-padding" style="height: calc(100vh - 140px);">
+			<div class="row-full shadow full-screen ion-padding" style="height: calc(100vh - 140px)">
 				<app-bp-map [bpId]="item.Id" [canEdit]="pageConfig.canEdit"></app-bp-map>
 			</div>
 		</div>
