@@ -2,11 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component, Input } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { AlertController, LoadingController, NavController } from '@ionic/angular';
+import { AlertController, LoadingController, ModalController, NavController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
 import { PageBase } from 'src/app/page-base';
 import { EnvService } from 'src/app/services/core/env.service';
 import { CRM_PartnerTaxInfoProvider } from 'src/app/services/static/services.service';
+import { BpTaxAddressModal } from '../../bp-tax-address-modal/bp-tax-address-modal.component';
 
 @Component({
 	selector: 'app-bp-tax-address',
@@ -23,6 +24,7 @@ export class BpTaxAddressComponent extends PageBase {
 
 	constructor(
 		public pageProvider: CRM_PartnerTaxInfoProvider,
+		public modalController: ModalController,
 		public env: EnvService,
 		public route: ActivatedRoute,
 		public alertCtrl: AlertController,
@@ -55,15 +57,11 @@ export class BpTaxAddressComponent extends PageBase {
 			this.items.forEach((c) => {
 				this.addAddress(c);
 			});
-		} else {
-			this.addAddress({ IDPartner: this.query.IDPartner, Id: 0 });
 		}
 	}
 
 	addAddress(address) {
 		let groups = <FormArray>this.formGroup.controls.TaxAddresses;
-		let lat: number = +address.Lat;
-		let long: number = +address.Long;
 
 		let group = this.formBuilder.group({
 			IDPartner: this.query.IDPartner,
@@ -75,31 +73,30 @@ export class BpTaxAddressComponent extends PageBase {
 			BillingAddress: [address.BillingAddress, Validators.required],
 			IsDefault: address.IsDefault,
 			Remark: address.Remark,
+			IdentityCardNumber: address.IdentityCardNumber,
 			Sort: address.Sort,
 		});
 
 		groups.push(group);
 	}
 
-	changeIsDefault(form){
+	changeIsDefault(value) {
 		const groups = this.formGroup.get('TaxAddresses') as FormArray;
-		const current = form.get('IsDefault').value;
-		if(!current) {
-			groups.controls.forEach((d) => {
-				d.get('IsDefault').setValue(false);
-			});
-		}else {
-			groups.controls.forEach((d) => {
-				const isSelected = d === form;
-				d.get('IsDefault').setValue(isSelected);
-				
-			});
-		}
+		const selectedId = value.Id;
+		const selectedValue = !value.IsDefault;
+
+		this.items.forEach(item => {
+			item.IsDefault = (item.Id === selectedId) ? selectedValue : false;
+		});
+		groups.controls.forEach(ctrl => {
+			const isSelected = ctrl.get('Id').value === selectedId;
+			ctrl.get('IsDefault').setValue(isSelected ? selectedValue : false);
+		});
 
 		this.pageProvider.commonService
 			.connect('GET', 'CRM/Contact/ChangeIsDefaultTaxAddresses', {
-				Id: form.get('Id').value, 
-				Value: form.get('IsDefault').value, 
+				Id: selectedId,
+				Value: selectedValue,
 				IDPartner: this.query.IDPartner,
 			})
 			.toPromise()
@@ -112,7 +109,7 @@ export class BpTaxAddressComponent extends PageBase {
 			});
 	}
 
-	removeAddress(index) {
+	removeLine(index) {
 		this.alertCtrl
 			.create({
 				header: 'Xóa thông tin xuất hóa đơn',
@@ -146,34 +143,60 @@ export class BpTaxAddressComponent extends PageBase {
 			});
 	}
 
-	saveAddress(form: FormGroup) {
-		return this.saveChange2(form, null);
+	removeSelectedLine() {
+		const groups = this.formGroup.get('TaxAddresses') as FormArray;
+
+		if (this.selectedItems.length === 0) return;
+
+		this.alertCtrl.create({
+			header: 'Xóa thông tin xuất hóa đơn',
+			message: 'Bạn có chắc muốn xóa các thông tin được chọn?',
+			buttons: [
+				{ text: 'Không', role: 'cancel' },
+				{
+					text: 'Đồng ý xóa',
+					cssClass: 'danger-btn',
+					handler: () => {
+						const Ids = this.selectedItems.map(item => ({ Id: item.Id }));
+
+						this.pageProvider.delete(Ids).then(() => {
+							this.items = this.items.filter(i => !Ids.some(x => x.Id === i.Id));
+
+							Ids.forEach(({ Id }) => {
+								const idx = groups.controls.findIndex(c => c.get('Id').value === Id);
+								if (idx >= 0) groups.removeAt(idx);
+							});
+
+							this.env.showMessage('Đã xóa thành công!', 'success');
+						});
+					}
+				}
+			]
+		}).then(alert => alert.present());
 	}
 
-	onChangedTaxCode(event, form) {
-		//'{"MaSoThue":"0314643146","TenChinhThuc":"CÔNG TY TNHH CÔNG NGHỆ CODE ART","DiaChiGiaoDichChinh":"53/44/21, Bùi Xương Trạch, Phường Long Trường, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, Việt Nam","DiaChiGiaoDichPhu":"","TrangThaiHoatDong":"NNT Đang hoạt động (đã được cấp GCN ĐKT)","SoDienThoai":"","ChuDoanhNghiep":"","LastUpdate":"2022-02-15T00:00:00"}'
-		console.log(event.target.value);
 
-		let value = event.target.value;
-		if (value.length > 9) {
-			this.pageProvider.commonService
-				.connect('GET', 'CRM/Contact/SearchUnitInforByTaxCode', {
-					TaxCode: value,
-				})
-				.toPromise()
-				.then((result: any) => {
-					if (result.TenChinhThuc) {
-						form.controls.CompanyName.setValue(result.TenChinhThuc);
-						form.controls.CompanyName.markAsDirty();
+	async showModal(i) {
+		const modal = await this.modalController.create({
+			component: BpTaxAddressModal,
+			componentProps: {
+				id: i.Id,
+				item: i,
+				TaxAddressList: this.items,
+				IDPartner: this.query.IDPartner,
+			},
+			cssClass: 'my-custom-class',
+		});
+		
+		await modal.present();
+		const { data } = await modal.onWillDismiss();
+		this.preLoadData();
+		
+	}
 
-						form.controls.BillingAddress.setValue(result.DiaChiGiaoDichChinh);
-						form.controls.BillingAddress.markAsDirty();
-						this.saveAddress(form);
-					}
-				})
-				.catch((err) => {
-					this.env.showMessage('Mã số thuế không hợp lệ!', 'danger');
-				});
-		}
+	add() {
+		this.showModal({
+			Id: 0,
+		});
 	}
 }

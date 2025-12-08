@@ -7,6 +7,7 @@ import { ShareModule } from 'src/app/share.module';
 import { BusinessPartnerDetailPage } from './business-partner-detail.page';
 import { BusinessPartnerComponentsModule } from './components/business-partner-components.module';
 import { MapCompsModule } from 'src/app/components/map-comps/map-comps.module';
+import { BpTaxAddressModal } from './bp-tax-address-modal/bp-tax-address-modal.component';
 
 const routes: Routes = [
 	{
@@ -17,6 +18,6 @@ const routes: Routes = [
 
 @NgModule({
 	imports: [CommonModule, FormsModule, IonicModule, ReactiveFormsModule, BusinessPartnerComponentsModule, MapCompsModule, ShareModule, RouterModule.forChild(routes)],
-	declarations: [BusinessPartnerDetailPage],
+	declarations: [BusinessPartnerDetailPage, BpTaxAddressModal],
 })
 export class ContactDetailPageModule {}

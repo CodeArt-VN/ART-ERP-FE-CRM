@@ -586,11 +586,8 @@
 		></app-bp-contact-point>
 
 		<!-- Hóa đơn -->
-		<div class="main-view" *ngIf="pageConfig.showSpinner == false && item.Id && segmentView.Page == 'bp-tax-address'">
-			<div class="row-full shadow full-screen ion-padding">
-				<app-bp-tax-address [bpId]="item.Id" [canEdit]="pageConfig.canEdit"></app-bp-tax-address>
-			</div>
-		</div>
+		<app-bp-tax-address  *ngIf="pageConfig.showSpinner == false && item.Id && segmentView.Page == 'bp-tax-address'" [bpId]="item.Id" [canEdit]="pageConfig.canEdit"></app-bp-tax-address>
+		
 		<!-- Map -->
 		<div class="main-view" *ngIf=" pageConfig.showSpinner == false &&item.Id&& segmentView.Page == 'bp-map'">
 			<div class="row-full shadow full-screen ion-padding" style="height: calc(100vh - 140px)">
