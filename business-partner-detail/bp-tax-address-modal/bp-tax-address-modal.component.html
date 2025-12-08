@@ -1,6 +1,5 @@
 <ion-header>
     <ion-toolbar>
-        <ion-title>{{item.Name}}</ion-title>
         <ion-buttons slot="primary">
 			<ion-button title="{{'Delete' | translate}}" *ngIf="this.item.Id && pageConfig.canDelete" (click)="delete()">
 				<ion-icon color="danger" slot="icon-only" name="trash-outline"></ion-icon>
@@ -41,16 +40,6 @@
 							form: formGroup,
 						}"
 						(change)="onChangedTaxCode($event, formGroup)"
-					></app-form-control>
-					<app-form-control
-						*ngIf="!hasTaxCode"
-						[field]="{
-							id: 'Name',
-							label: 'Name',
-							type: 'text',
-							form: formGroup
-						}"
-						(change)="saveAddress(formGroup)"
 					></app-form-control>
 					<app-form-control
 						*ngIf="!hasTaxCode"

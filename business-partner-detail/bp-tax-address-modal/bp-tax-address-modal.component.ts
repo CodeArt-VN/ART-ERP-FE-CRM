@@ -38,7 +38,6 @@ export class BpTaxAddressModal extends PageBase {
 			IDPartner: [''],
 			Id: [''],
 			Code: [''],
-			Name: [''],
 			CompanyName:  ['', Validators.required],
 			TaxCode:  ['', Validators.required],
 			WorkPhone: [''],
@@ -58,10 +57,8 @@ export class BpTaxAddressModal extends PageBase {
 
 	loadedData() {
 		this.item.IDPartner = this.IDPartner;
-		if(this.item.IdentityCardNumber == '' || this.item.IdentityCardNumber == null){
+		if(!this.item.TaxCode == null || this.item.TaxCode == undefined){
 			this.hasTaxCode = true;
-			this.formGroup.get('Name')?.clearValidators();
-			this.formGroup.get('Name')?.updateValueAndValidity();
 			this.formGroup.get('IdentityCardNumber')?.clearValidators();
 			this.formGroup.get('IdentityCardNumber')?.updateValueAndValidity();
 		} 
@@ -112,9 +109,6 @@ export class BpTaxAddressModal extends PageBase {
 			this.formGroup.get('TaxCode').setValue('');
             this.formGroup.get('TaxCode').markAsDirty();
 			this.formGroup.get('TaxCode')?.setValidators([Validators.required]);
-			this.formGroup.get('Name')?.clearValidators();	
-			this.formGroup.get('Name')?.setValue('');
-			this.formGroup.get('Name')?.markAsDirty();
 			this.formGroup.get('IdentityCardNumber')?.clearValidators();	
 			this.formGroup.get('IdentityCardNumber')?.setValue('');
 			this.formGroup.get('IdentityCardNumber')?.markAsDirty();
@@ -123,9 +117,6 @@ export class BpTaxAddressModal extends PageBase {
 			this.formGroup.get('TaxCode')?.clearValidators();
 			this.formGroup.get('TaxCode')?.setValue('');
 			this.formGroup.get('TaxCode')?.markAsDirty();
-
-			this.formGroup.get('Name')?.setValidators([Validators.required]);
-			this.formGroup.get('Name')?.markAsDirty();
 			this.formGroup.get('IdentityCardNumber')?.setValidators([Validators.required]);
 			this.formGroup.get('IdentityCardNumber')?.setValue('');
     		this.formGroup.get('IdentityCardNumber')?.markAsDirty();
@@ -139,7 +130,6 @@ export class BpTaxAddressModal extends PageBase {
 		this.formGroup.get('BillingAddress')?.setValue('');
 		this.formGroup.get('BillingAddress')?.markAsDirty();
 		this.formGroup.get('TaxCode')?.updateValueAndValidity();
-		this.formGroup.get('Name')?.updateValueAndValidity();
 		this.formGroup.get('IdentityCardNumber')?.updateValueAndValidity();
 
     }
