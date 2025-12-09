@@ -1,0 +1,99 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="primary">
+			<ion-button title="{{'Delete' | translate}}" *ngIf="this.item.Id && pageConfig.canDelete" (click)="delete()">
+				<ion-icon color="danger" slot="icon-only" name="trash-outline"></ion-icon>
+			</ion-button>
+            <ion-button title="{{'Close' | translate}}" color="secondary" (click)="closeModal()">
+                <ion-icon slot="icon-only" name="close"></ion-icon>
+            </ion-button>
+		
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-content appScrollbarTheme class="ion-padding" fullscreen>
+    <form [formGroup]="formGroup">
+        <ion-grid fixed>
+			<ion-row>
+				<ion-col>
+					<div class="c-control">
+						<span class="no-warp">
+							<input (change)="onChangedHasCode(true)" id="HaveTaxCode" type="radio" [checked]="hasTaxCode" class="c-checkbox" />
+							<label class="c-label radio" for="HaveTaxCode">
+								<span>{{'Have a tax code' | translate}}</span>
+							</label>
+						</span>
+						<span class="no-warp">
+							<input (change)="onChangedHasCode(false)" id="NoTaxCode" type="radio" [checked]="!hasTaxCode" class="c-checkbox" />
+							<label class="c-label radio" for="NoTaxCode">
+								<span>{{'No tax code' | translate}}</span>
+								
+							</label>
+						</span>
+					</div>
+					<app-form-control
+					*ngIf="hasTaxCode"
+						[field]="{
+							id: 'TaxCode',
+							label: 'Tax code',
+							type: 'text',
+							form: formGroup,
+						}"
+						(change)="onChangedTaxCode($event, formGroup)"
+					></app-form-control>
+					<app-form-control
+						*ngIf="!hasTaxCode"
+						[field]="{
+							id: 'IdentityCardNumber',
+							label: 'IdentityCardNumber',
+							type: 'text',
+							form: formGroup
+						}"
+						(change)="saveAddress(formGroup)"
+					></app-form-control>
+					<app-form-control
+						[field]="{
+							id: 'CompanyName',
+							label: hasTaxCode ? 'Company / organization name' : 'Personal name',
+							type: 'text',
+							form: formGroup,
+						}"
+						(change)="saveAddress(formGroup)"
+					></app-form-control>
+					<app-form-control [field]="{ id: 'Email', type: 'text', form: formGroup }" (change)="saveAddress(formGroup)"></app-form-control>
+				</ion-col>
+			</ion-row>
+			<ion-row>
+				<ion-col>
+					<app-form-control
+							[field]="{
+								id: 'WorkPhone',
+								label: 'Phone number',
+								type: 'text',
+								form: formGroup,
+							}"
+							(change)="saveAddress(formGroup)"
+						></app-form-control>
+						<app-form-control
+							[field]="{
+								id: 'BillingAddress',
+								label: 'Address',
+								type: 'textarea',
+								form: formGroup,
+							}"
+							(change)="saveAddress(formGroup)"
+						></app-form-control>
+					<app-form-control
+						[field]="{
+							id: 'IsDefault',
+							label: 'Default billing information',
+							type: 'checkbox',
+							form: formGroup,
+						}"
+						(change)="changeIsDefault(formGroup)"
+					></app-form-control>
+				</ion-col>
+			</ion-row>
+		</ion-grid>
+    </form>
+</ion-content>

@@ -1,86 +1,78 @@
 <app-page-message [itemsLength]="1" [showSpinner]="pageConfig.showSpinner"></app-page-message>
 
-<ion-grid fixed *ngIf="pageConfig.showSpinner == false">
-	<form [formGroup]="formGroup">
-		<ng-container formArrayName="TaxAddresses">
-			<ion-row class="hr-group border" *ngFor="let add of formGroup.get('TaxAddresses')['controls']; let i = index">
-				<ng-container [formGroup]="add">
-					<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
-						<ion-list-header class="ion-no-padding">
-							<ion-label color="primary"
-								>{{ 'Billing address' | translate }}
-								<span *ngIf="i > 0">{{ i + 1 }}</span>
-							</ion-label>
-						</ion-list-header>
-					</ion-col>
-					<ion-col size="12" size-sm size-xl="4">
-						<app-form-control
-							[field]="{
-								id: 'TaxCode',
-								label: 'Tax code',
-								type: 'text',
-								form: add,
-							}"
-							(change)="onChangedTaxCode($event, add)"
-						></app-form-control>
-						<app-form-control
-							[field]="{
-								id: 'CompanyName',
-								label: 'Company / organization name',
-								type: 'text',
-								form: add,
-							}"
-							(change)="saveAddress(add)"
-						></app-form-control>
-						<app-form-control [field]="{ id: 'Email', type: 'text', form: add }" (change)="saveAddress(add)"></app-form-control>
-					</ion-col>
-					<ion-col size="12" size-sm size-xl="4">
-						<app-form-control
-							[field]="{
-								id: 'WorkPhone',
-								label: 'Phone number',
-								type: 'text',
-								form: add,
-							}"
-							(change)="saveAddress(add)"
-						></app-form-control>
-						<app-form-control
-							[field]="{
-								id: 'BillingAddress',
-								label: 'Invoice address',
-								type: 'textarea',
-								form: add,
-							}"
-							(change)="saveAddress(add)"
-						></app-form-control>
-					</ion-col>
-					<ion-col size="12" size-sm="12" size-xl="8" offset-xl="3">
-						<app-form-control
-							[field]="{
-								id: 'IsDefault',
-								label: 'Default billing information',
-								type: 'checkbox',
-								form: add,
-							}"
-							(change)="changeIsDefault(add)"
-						></app-form-control>
-						<div class="c-control" *ngIf="pageConfig.canEdit">
-							<ion-button (click)="removeAddress(i)" size="small" fill="outline">
-								<ion-icon slot="start" name="trash"></ion-icon>
-								{{ 'Delete' | translate }}
+<div class="main-view">
+	<div class="row-full shadow full-screen ion-padding">
+		<form [formGroup]="formGroup">
+			<div class="table-contain">
+				<app-data-table *ngIf="!pageConfig.showSpinner"
+					class="" [rows]="items"
+					[(query)]="query" 
+					[(selectedRows)]="selectedItems"
+					[showSpinner]="pageConfig.showSpinner">
+					<datatable-empty-message subMessage="Please click add new to start..."
+						[showImg]="false" minHeight="125px">
+						<ng-template datatable-empty-message-template>
+							<ion-button (click)="add()"
+								size="small" fill="outline" *ngIf="pageConfig.canEdit">
+								<ion-icon slot="start" name="add-outline"></ion-icon>
+								{{ 'Add billing address' | translate }}
 							</ion-button>
-						</div>
-					</ion-col>
-				</ng-container>
-			</ion-row>
-
-			<ion-row class="hr-group border" *ngIf="pageConfig.canEdit">
-				<ion-col size="12" size-sm size-xl="4" offset-xl="3">
-					<ion-button (click)="addAddress({ Id: 0 })">
-						{{ 'Add billing information' | translate }}
+						</ng-template>
+					</datatable-empty-message>
+					<datatable-column [checkbox]="true" name=""></datatable-column>
+					<datatable-column class="col-id" name="#" property="Id">
+						<ng-template let-i="row" datatable-cell-template>
+							<span (click)="showModal(i)">{{i?.Id}}</span>
+						</ng-template>
+					</datatable-column>
+					<datatable-column class="col-name" name="Tax code" property="TaxCode">
+					</datatable-column>
+					<datatable-column class="col-code" name="Email" property="Email">
+					</datatable-column>
+					<datatable-column class="col-code" name="Work phone" property="WorkPhone">
+					</datatable-column>
+					<datatable-column class="col-name" name="Billing address" property="BillingAddress">
+					</datatable-column>
+					<datatable-column class="col-name" name="Identity card number" property="IdentityCardNumber">
+					</datatable-column>
+					
+					<datatable-column class="col-custom" name="Is default" property="Id"
+						*ngIf="pageConfig.canEdit">
+						<ng-template let-i="row" datatable-cell-template>
+							<div class="col-checkbox cell" style="display: flex;justify-content: center;" >
+								<input class="c-checkbox" [checked]="i.IsDefault" type="checkbox" (change)="changeIsDefault(i)" />
+							</div>
+						</ng-template>
+					</datatable-column>
+					<datatable-column *ngIf="pageConfig.canEdit" class="col-icon" name="" property="Id">
+					<ng-template datatable-header-template>
+						<ion-button
+							*ngIf="pageConfig.canEdit && selectedItems.length > 0"
+							(click)="removeSelectedLine()"
+							size="small"
+							title="{{'Edit' | translate}}"
+							fill="clear"
+						>
+							<ion-icon color="danger" class="min-btn clickable" slot="icon-only" name="trash-outline"></ion-icon>
+						</ion-button>
+					</ng-template>
+					<ng-template let-i="row" let-idx="idx" datatable-cell-template>
+						<ion-icon color="danger" class="min-btn clickable" slot="icon-only" name="trash-outline" (click)="removeLine(idx)"></ion-icon>
+					</ng-template>
+				</datatable-column>
+				</app-data-table>
+				
+				<div class="ion-padding"
+					*ngIf="pageConfig.canEdit && items?.length > 0">
+					<ion-button fill="clear" size="small"
+						(click)="add()">
+						<ion-icon slot="start" name="add-circle-outline"></ion-icon>
+						{{ 'Add billing address' | translate }}
 					</ion-button>
-				</ion-col>
-			</ion-row>
-		</ng-container>
-	</form>
-</ion-grid>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+
