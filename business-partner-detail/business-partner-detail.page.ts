@@ -352,6 +352,7 @@ export class BusinessPartnerDetailPage extends PageBase {
 	}
 
 	saveContactUDF() {
+		if(this.submitAttempt) return;
 		if (!this.contactUDFGroup?.get('Id')?.value) {
 			this.contactUDFGroup.get('Id').setValue(this.item?.Id);
 			this.contactUDFGroup.get('Code').setValue(this.item?.Code);
@@ -376,6 +377,9 @@ export class BusinessPartnerDetailPage extends PageBase {
 			this.cdr.detectChanges();
 			this.submitAttempt = false;
 			this.env.showMessage('Saving completed!', 'success');
+		}).catch((err) => {
+			this.submitAttempt = false;
+			this.env.showMessage('Saving failed!', 'danger');
 		});
 	}
 
