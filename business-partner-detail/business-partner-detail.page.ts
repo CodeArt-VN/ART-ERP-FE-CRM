@@ -240,26 +240,10 @@ export class BusinessPartnerDetailPage extends PageBase {
 	});
 	preLoadData(event) {
 		this.loadGGMap();
-		Promise.all([
-			this.priceListProvider.read({ Take: 20 }),
-			this.env.getStatus('BusinessPartner'),
-			this.addressService.getAddressSubdivision(),
-		]).then((values: any) => {
+		Promise.all([this.priceListProvider.read({ Take: 20 }), this.env.getStatus('BusinessPartner'), this.addressService.getAddressSubdivision()]).then((values: any) => {
 			this.initPriceList = values[0]['data'];
 			this.statusList = values[1];
 			super.preLoadData(event);
-		});
-	}
-
-	getConfigOptionCode() {
-		return new Promise((resolve, reject) => {
-			let sysConfigOptionCode = ['CRMContactLotable', 'CRMContactUDF'];
-			this.sysConfigOptionProvider
-				.read({ Code_in: sysConfigOptionCode, AllChildren: true })
-				.then((configOption: any) => {
-					resolve(configOption.data.filter((d) => !configOption.data.some((s) => s.IDParent == d.Id)).map((d) => d.Code));
-				})
-				.catch((err) => reject(err));
 		});
 	}
 
@@ -267,7 +251,7 @@ export class BusinessPartnerDetailPage extends PageBase {
 		this.contactUDFGroup.addControl('Id', new FormControl(this.item?._contactUDF ? this.item._contactUDF['Id'] : null));
 		this.contactUDFGroup.addControl('Name', new FormControl(this.item?._contactUDF ? this.item._contactUDF['Name'] : null));
 		this.contactUDFGroup.addControl('Code', new FormControl(this.item?._contactUDF ? this.item._contactUDF['Code'] : null));
-		
+
 		super.loadedData(event, ignoredFromGroup);
 		if (this.initPriceList && this.initPriceList.length > 0) {
 			this._PriceListDataSource.selected = [...this.initPriceList];
@@ -352,7 +336,7 @@ export class BusinessPartnerDetailPage extends PageBase {
 	}
 
 	saveContactUDF() {
-		if(this.submitAttempt) return;
+		if (this.submitAttempt) return;
 		if (!this.contactUDFGroup?.get('Id')?.value) {
 			this.contactUDFGroup.get('Id').setValue(this.item?.Id);
 			this.contactUDFGroup.get('Code').setValue(this.item?.Code);
@@ -372,15 +356,18 @@ export class BusinessPartnerDetailPage extends PageBase {
 		}
 		let submitItem = this.getDirtyValues(this.contactUDFGroup);
 		this.submitAttempt = true;
-		this.contactUDFProvider.save(submitItem).then((res) => {
-			this.contactUDFGroup.markAsPristine();
-			this.cdr.detectChanges();
-			this.submitAttempt = false;
-			this.env.showMessage('Saving completed!', 'success');
-		}).catch((err) => {
-			this.submitAttempt = false;
-			this.env.showMessage('Saving failed!', 'danger');
-		});
+		this.contactUDFProvider
+			.save(submitItem)
+			.then((res) => {
+				this.contactUDFGroup.markAsPristine();
+				this.cdr.detectChanges();
+				this.submitAttempt = false;
+				this.env.showMessage('Saving completed!', 'success');
+			})
+			.catch((err) => {
+				this.submitAttempt = false;
+				this.env.showMessage('Saving failed!', 'danger');
+			});
 	}
 
 	salesmanList$;
@@ -525,36 +512,46 @@ export class BusinessPartnerDetailPage extends PageBase {
 			this.env
 				.showLoading(
 					'Please wait for a few moments',
-					this.getConfigOptionCode()
+					this.pageProvider
+						.getConfigOptionCode(['CRMContactLotable'])
 						.then((optionCode: any) => this.pageProvider.getConfig(null, optionCode))
 						.then((config: any) => {
-							if (option.Code === 'lotable') {
-								this.lotableList = Object.entries(config)
-									.filter(([key, value]) => key.startsWith('CRMLotable') && value !== null)
-									.map(([key, value]) => {
-										let type = '';
-										if (key.includes('Text')) {
-											type = 'text';
-										} else if (key.includes('Num')) {
-											type = 'number';
-										} else if (key.includes('Date')) {
-											type = 'datetime-local';
-										}
-										return { key, code: key.replace(/^CRM/, ''), value, type };
-									});
-							} else {
-								this.udfList = Object.entries(config)
-									.filter(([key, value]) => key.startsWith('CRMUDF') && value !== null)
-									.map(([key, value]) => {
-										const code = key.replace(/^CRM/, '');
-										this.contactUDFGroup.addControl(
-											code,
-											new FormControl(this.item?._contactUDF?.[code] ?? '')
-										);
+							this.lotableList = Object.entries(config)
+								.filter(([key, value]) => key.startsWith('CRMLotable') && value !== null)
+								.map(([key, value]) => {
+									let type = '';
+									if (key.includes('Text')) {
+										type = 'text';
+									} else if (key.includes('Num')) {
+										type = 'number';
+									} else if (key.includes('Date')) {
+										type = 'datetime-local';
+									}
+									return { key, code: key.replace(/^CRM/, ''), value, type };
+								});
+						})
+				)
+				.catch((err) => {
+					this.env.showMessage('Cannot load data', 'danger');
+				});
+		}
+		if (option.Code == 'udf') {
+			this.env
+				.showLoading(
+					'Please wait for a few moments',
+					this.pageProvider
+						.getConfigOptionCode(['CRMContactUDF'])
+						.then((optionCode: any) => Promise.all([this.pageProvider.getConfig(null, optionCode), this.contactUDFProvider.getAnItem(this.id)]))
+						.then((values: any) => {
+							this.udfList = Object.entries(values[0])
+								.filter(([key, value]) => key.startsWith('CRMUDF') && value !== null)
+								.map(([key, value]) => {
+									let _contactUDF = values[1];
+									const code = key.replace(/^CRM/, '');
+									this.contactUDFGroup.addControl(code, new FormControl(_contactUDF?.[code] ?? ''));
 
-										return { key, value, code };
-									});
-							}
+									return { key, value, code };
+								});
 						})
 				)
 				.catch((err) => {
