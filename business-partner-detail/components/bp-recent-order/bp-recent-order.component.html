@@ -2,7 +2,7 @@
 	<div class="row-full shadow full-screen ion-padding">
 		<ion-col size="12" size-sm size-xl="8">
 			<div class="table-contain">
-				<app-data-table *ngIf="!pageConfig.showSpinner" class="box-shadow responsive" [rows]="_LastSOs" [(query)]="query" [showSpinner]="pageConfig.showSpinner">
+				<app-data-table class="box-shadow responsive" [rows]="items" [(query)]="query" [showSpinner]="pageConfig.showSpinner">
 					<datatable-empty-message [showImg]="false" minHeight="125px"> </datatable-empty-message>
 					<datatable-column class="col-id" name="Sale orders" property="Id">
 						<ng-template let-i="row" datatable-cell-template>
@@ -10,7 +10,7 @@
 						</ng-template>
 					</datatable-column>
 					<datatable-column class="col-code" name="Daily order" property="OrderDate" format="dd/MM/yy HH:mm"></datatable-column>
-					<datatable-column class="col-code" name="Sales staff" property="FullName"></datatable-column>
+					<datatable-column class="col-code" name="Sales staff" property="_Saleman.FullName"></datatable-column>
 					<datatable-column class="col-code" name="Customers payable" property="TotalAfterTax">
 						<ng-template let-i="row" datatable-cell-template>
 							{{ i.TotalAfterTax | number }}<small>/{{ i.OriginalTotalAfterTax | number }}</small>

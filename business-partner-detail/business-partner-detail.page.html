@@ -514,7 +514,7 @@
 		<!-- Đơn hàng -->
 
 		<app-bp-recent-order
-			[_LastSOs]="item?._LastSOs"
+			[_idBP]="item.Id"
 			[canEdit]="pageConfig.canEdit"
 			*ngIf="pageConfig.showSpinner == false && segmentView.Page == 'bp-recent-order' &&item.Id"
 		></app-bp-recent-order>

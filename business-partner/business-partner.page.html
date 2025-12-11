@@ -48,7 +48,7 @@
 	</ion-fab>
 
 
-	<div class="safe-max-width" *ngIf="items.length && pageConfig.showSpinner==false">
+	<div class="safe-max-width" *ngIf="pageConfig.showSpinner==false">
 		<app-data-table class="box-shadow responsive" [rows]="items" [trackBy]="'Id'" [(selectedRows)]="selectedItems"
 			[showSpinner]="pageConfig.showSpinner" [showFilter]="pageConfig.isShowSearch" [(query)]="query"
 			(dataInfinite)="loadData($event)" (filter)="onDatatableFilter($event)" (sort)="onSort($event)"

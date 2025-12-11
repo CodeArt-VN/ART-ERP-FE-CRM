@@ -6,7 +6,7 @@ import { AlertController, LoadingController, NavController } from '@ionic/angula
 import { TranslateService } from '@ngx-translate/core';
 import { PageBase } from 'src/app/page-base';
 import { EnvService } from 'src/app/services/core/env.service';
-import { CRM_PartnerTaxInfoProvider } from 'src/app/services/static/services.service';
+import { CRM_PartnerTaxInfoProvider, SALE_OrderProvider } from 'src/app/services/static/services.service';
 
 @Component({
 	selector: 'app-bp-recent-order',
@@ -17,10 +17,10 @@ import { CRM_PartnerTaxInfoProvider } from 'src/app/services/static/services.ser
 export class BpRecentOrderComponent extends PageBase {
 	@Input() canEdit;
 
-	@Input() _LastSOs;
+	@Input() _idBP;
 
 	constructor(
-		public pageProvider: CRM_PartnerTaxInfoProvider,
+		public pageProvider: SALE_OrderProvider,
 		public env: EnvService,
 		public route: ActivatedRoute,
 		public alertCtrl: AlertController,
@@ -32,14 +32,19 @@ export class BpRecentOrderComponent extends PageBase {
 		public translate: TranslateService
 	) {
 		super();
-
 	}
 	preLoadData(event?: any): void {
-		this.loadedData();
+		super.preLoadData();
+	}
+
+	loadData(event?: any, forceReload?: boolean): void {
+		this.query.IDContact = this._idBP;
+		this.query.Take = 5;
+		this.query.SortBy = 'Id_desc';
+		super.loadData();
 	}
 
 	loadedData() {
 		this.pageConfig.showSpinner = false;
 	}
-
 }
