@@ -1,9 +1,9 @@
-import { Component, ChangeDetectorRef, ViewChild } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { NavController, ModalController, LoadingController, AlertController, PopoverController } from '@ionic/angular';
 import { PageBase } from 'src/app/page-base';
 import { ActivatedRoute } from '@angular/router';
 import { EnvService } from 'src/app/services/core/env.service';
-import { CRM_ContactUDFProvider, HRM_StaffProvider, SYS_ConfigOptionProvider, WMS_PriceListProvider } from 'src/app/services/static/services.service';
+import { CRM_ContactProvider, CRM_ContactUDFProvider, HRM_StaffProvider, SYS_ConfigOptionProvider, WMS_PriceListProvider } from 'src/app/services/static/services.service';
 import { FormBuilder, FormGroup, Validators, FormControl, FormArray } from '@angular/forms';
 import { concat, of, Subject } from 'rxjs';
 import { catchError, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
@@ -11,7 +11,8 @@ import { CommonService } from 'src/app/services/core/common.service';
 import { thirdPartyLibs } from 'src/app/services/static/thirdPartyLibs';
 import { AddressService, DynamicScriptLoaderService } from 'src/app/services/custom/custom.service';
 import { DataCorrectionRequestModalPage } from 'src/app/modals/data-correction-request-modal/data-correction-request-modal.page';
-import { CRM_ContactService } from 'src/app/services/contact.service';
+import { SYS_ConfigService } from 'src/app/services/custom/system-config.service';
+
 declare var ggMap;
 @Component({
 	selector: 'app-business-partner-detail',
@@ -20,6 +21,132 @@ declare var ggMap;
 	standalone: false,
 })
 export class BusinessPartnerDetailPage extends PageBase {
+	keysCRMUDFConfig = [
+		'CRMUDF1',
+		'CRMUDF2',
+		'CRMUDF3',
+		'CRMUDF4',
+		'CRMUDF5',
+		'CRMUDF6',
+		'CRMUDF7',
+		'CRMUDF8',
+		'CRMUDF9',
+		'CRMUDF10',
+		'CRMUDF11',
+		'CRMUDF12',
+		'CRMUDF13',
+		'CRMUDF14',
+		'CRMUDF15',
+		'CRMUDF16',
+		'CRMUDF17',
+		'CRMUDF18',
+		'CRMUDF19',
+		'CRMUDF20',
+		'CRMUDF21',
+		'CRMUDF22',
+		'CRMUDF23',
+		'CRMUDF24',
+		'CRMUDF25',
+		'CRMUDF26',
+		'CRMUDF27',
+		'CRMUDF28',
+		'CRMUDF29',
+		'CRMUDF30',
+		'CRMUDF31',
+		'CRMUDF32',
+		'CRMUDF33',
+		'CRMUDF34',
+		'CRMUDF35',
+		'CRMUDF36',
+		'CRMUDF37',
+		'CRMUDF38',
+		'CRMUDF39',
+		'CRMUDF40',
+		'CRMUDF41',
+		'CRMUDF42',
+		'CRMUDF43',
+		'CRMUDF44',
+		'CRMUDF45',
+		'CRMUDF46',
+		'CRMUDF47',
+		'CRMUDF48',
+		'CRMUDF49',
+		'CRMUDF50',
+		'CRMUDF51',
+		'CRMUDF52',
+		'CRMUDF53',
+		'CRMUDF54',
+		'CRMUDF55',
+		'CRMUDF56',
+		'CRMUDF57',
+		'CRMUDF58',
+		'CRMUDF59',
+		'CRMUDF60',
+		'CRMUDF61',
+		'CRMUDF62',
+		'CRMUDF63',
+		'CRMUDF64',
+		'CRMUDF65',
+		'CRMUDF66',
+		'CRMUDF67',
+		'CRMUDF68',
+		'CRMUDF69',
+		'CRMUDF70',
+		'CRMUDF71',
+		'CRMUDF72',
+		'CRMUDF73',
+		'CRMUDF74',
+		'CRMUDF75',
+		'CRMUDF76',
+		'CRMUDF77',
+		'CRMUDF78',
+		'CRMUDF79',
+		'CRMUDF80',
+		'CRMUDF81',
+		'CRMUDF82',
+		'CRMUDF83',
+		'CRMUDF84',
+		'CRMUDF85',
+		'CRMUDF86',
+		'CRMUDF87',
+		'CRMUDF88',
+		'CRMUDF89',
+		'CRMUDF90',
+		'CRMUDF91',
+		'CRMUDF92',
+		'CRMUDF93',
+		'CRMUDF94',
+		'CRMUDF95',
+		'CRMUDF96',
+		'CRMUDF97',
+		'CRMUDF98',
+		'CRMUDF99',
+		'CRMUDF100',
+	];
+	
+	keysCRMLotableConfig = [
+		'CRMLotableDate10',
+		'CRMLotableDate11',
+		'CRMLotableDate12',
+		'CRMLotableDate13',
+		'CRMLotableDate14',
+		'CRMLotableNum00',
+		'CRMLotableNum01',
+		'CRMLotableNum02',
+		'CRMLotableNum03',
+		'CRMLotableNum04',
+		'CRMLotableNum05',
+		'CRMLotableNum06',
+		'CRMLotableNum07',
+		'CRMLotableNum08',
+		'CRMLotableNum09',
+		'CRMLotableText00',
+		'CRMLotableText01',
+		'CRMLotableText02',
+		'CRMLotableText03',
+		'CRMLotableText04'
+	]
+	
 	optionGroup = [
 		{
 			Code: 'bp-management-information',
@@ -124,7 +251,8 @@ export class BusinessPartnerDetailPage extends PageBase {
 	contactUDFGroup: any = this.formBuilder.group({});
 
 	constructor(
-		public pageProvider: CRM_ContactService,
+		public pageProvider: CRM_ContactProvider,
+		public sysConfigService: SYS_ConfigService,
 		public contactUDFProvider: CRM_ContactUDFProvider,
 		public priceListProvider: WMS_PriceListProvider,
 		public sysConfigOptionProvider: SYS_ConfigOptionProvider,
@@ -508,28 +636,25 @@ export class BusinessPartnerDetailPage extends PageBase {
 		}
 		this.selectedOption = option;
 		this.segmentView.Page = option.Code;
-		if (option.Code === 'lotable' || option.Code === 'udf') {
+		if (option.Code === 'lotable') {
 			this.env
 				.showLoading(
 					'Please wait for a few moments',
-					this.pageProvider
-						.getConfigOptionCode(['CRMContactLotable'])
-						.then((optionCode: any) => this.pageProvider.getConfig(null, optionCode))
-						.then((config: any) => {
-							this.lotableList = Object.entries(config)
-								.filter(([key, value]) => key.startsWith('CRMLotable') && value !== null)
-								.map(([key, value]) => {
-									let type = '';
-									if (key.includes('Text')) {
-										type = 'text';
-									} else if (key.includes('Num')) {
-										type = 'number';
-									} else if (key.includes('Date')) {
-										type = 'datetime-local';
-									}
-									return { key, code: key.replace(/^CRM/, ''), value, type };
-								});
-						})
+					this.sysConfigService.getConfig(this.env.selectedBranch, this.keysCRMLotableConfig).then((config: any) => {
+						this.lotableList = Object.entries(config)
+							.filter(([key, value]) => key.startsWith('CRMLotable') && value !== null)
+							.map(([key, value]) => {
+								let type = '';
+								if (key.includes('Text')) {
+									type = 'text';
+								} else if (key.includes('Num')) {
+									type = 'number';
+								} else if (key.includes('Date')) {
+									type = 'datetime-local';
+								}
+								return { key, code: key.replace(/^CRM/, ''), value, type };
+							});
+					})
 				)
 				.catch((err) => {
 					this.env.showMessage('Cannot load data', 'danger');
@@ -539,20 +664,17 @@ export class BusinessPartnerDetailPage extends PageBase {
 			this.env
 				.showLoading(
 					'Please wait for a few moments',
-					this.pageProvider
-						.getConfigOptionCode(['CRMContactUDF'])
-						.then((optionCode: any) => Promise.all([this.pageProvider.getConfig(null, optionCode), this.contactUDFProvider.getAnItem(this.id)]))
-						.then((values: any) => {
-							this.udfList = Object.entries(values[0])
-								.filter(([key, value]) => key.startsWith('CRMUDF') && value !== null)
-								.map(([key, value]) => {
-									let _contactUDF = values[1];
-									const code = key.replace(/^CRM/, '');
-									this.contactUDFGroup.addControl(code, new FormControl(_contactUDF?.[code] ?? ''));
+					this.sysConfigService.getConfig(this.env.selectedBranch, this.keysCRMUDFConfig).then((values: any) => {
+						this.udfList = Object.entries(values)
+							.filter(([key, value]) => key.startsWith('CRMUDF') && value !== null)
+							.map(([key, value]) => {
+								let _contactUDF = values[1];
+								const code = key.replace(/^CRM/, '');
+								this.contactUDFGroup.addControl(code, new FormControl(_contactUDF?.[code] ?? ''));
 
-									return { key, value, code };
-								});
-						})
+								return { key, value, code };
+							});
+					})
 				)
 				.catch((err) => {
 					this.env.showMessage('Cannot load data', 'danger');
