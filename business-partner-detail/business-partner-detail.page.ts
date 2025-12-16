@@ -13,7 +13,8 @@ import { AddressService, DynamicScriptLoaderService } from 'src/app/services/cus
 import { DataCorrectionRequestModalPage } from 'src/app/modals/data-correction-request-modal/data-correction-request-modal.page';
 import { CRM_ContactService } from 'src/app/services/contact.service';
 import { SYS_ConfigService } from 'src/app/services/custom/system-config.service';
-import { CRMContactLotable, CRMUDFConfig } from '../../POS/_services/interface.model';
+import { CRMUDFConfig, CRMContactLotable } from 'src/app/models/model-list-interface';
+
 declare var ggMap;
 @Component({
 	selector: 'app-business-partner-detail',
