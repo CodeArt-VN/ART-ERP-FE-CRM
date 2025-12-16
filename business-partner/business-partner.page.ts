@@ -2,13 +2,14 @@ import { Component, Renderer2 } from '@angular/core';
 import { NavController, ModalController, AlertController, LoadingController, PopoverController } from '@ionic/angular';
 import { EnvService } from 'src/app/services/core/env.service';
 import { PageBase } from 'src/app/page-base';
-import { BRA_BranchProvider, CRM_ContactProvider, SYS_ConfigProvider } from 'src/app/services/static/services.service';
+import { BRA_BranchProvider, CRM_ContactProvider } from 'src/app/services/static/services.service';
 import { Location } from '@angular/common';
 import { lib } from 'src/app/services/static/global-functions';
 import { ApiSetting } from 'src/app/services/static/api-setting';
-import { FormBuilder, FormControl, Validators } from '@angular/forms';
+import { FormBuilder } from '@angular/forms';
 import { AddressService } from 'src/app/services/custom/custom.service';
 import { APIList } from 'src/app/services/static/global-variable';
+import { SYS_ConfigService } from 'src/app/services/custom/system-config.service';
 
 @Component({
 	selector: 'app-business-partner',
@@ -57,7 +58,7 @@ export class BusinessPartnerPage extends PageBase {
 		public pageProvider: CRM_ContactProvider,
 		public branchProvider: BRA_BranchProvider,
 		public modalController: ModalController,
-		public sysConfigProvider: SYS_ConfigProvider,
+		public sysConfigService: SYS_ConfigService,
 		public popoverCtrl: PopoverController,
 		public alertCtrl: AlertController,
 		public loadingController: LoadingController,
@@ -89,12 +90,10 @@ export class BusinessPartnerPage extends PageBase {
 
 		this.query.IDOwner = this.pageConfig.canViewAllData ? 'all' : this.env.user.StaffID;
 
-		let sysConfigQuery = ['ContactUsedApprovalModule'];
-
 		Promise.all([
 			this.branchProvider.read(),
 			this.env.getStatus('BusinessPartner'),
-			this.sysConfigProvider.read({ Code_in: sysConfigQuery, IDBranch: this.env.selectedBranch }),
+			this.sysConfigService.getConfig(this.env.selectedBranch, ['ContactUsedApprovalModule']),
 			this.addressService.getAddressSubdivision(),
 		]).then((values: any) => {
 			this.branchList = values[0]['data'];
@@ -124,19 +123,16 @@ export class BusinessPartnerPage extends PageBase {
 				this.departmentList.forEach((i) => {
 					i.Query = JSON.stringify(i.IDs);
 				});
-				if (values[2]['data']) {
-					values[2]['data'].forEach((e) => {
-						if ((e.Value == null || e.Value == 'null') && e._InheritedConfig) {
-							e.Value = e._InheritedConfig.Value;
-						}
-						this.pageConfig[e.Code] = JSON.parse(e.Value);
-						if (this.pageConfig.ContactUsedApprovalModule) {
-							this.pageConfig.canApprove = false;
-							this.pageConfig.canApprove = false;
-						}
-					});
+				if(values[2]){
+					this.pageConfig = {
+						...this.pageConfig,
+						...values[2]
+					};
+					if (this.pageConfig.ContactUsedApprovalModule) {
+						this.pageConfig.canApprove = false;
+						this.pageConfig.canApprove = false;
+					}
 				}
-				//console.log(this.departmentList)
 			});
 			super.preLoadData(null);
 		});
