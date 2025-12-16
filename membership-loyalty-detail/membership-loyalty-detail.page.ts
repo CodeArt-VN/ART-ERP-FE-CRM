@@ -21,7 +21,7 @@ export class MembershipLoyaltyDetailPage extends PageBase {
 			Take: 20,
 			Skip: 0,
 			IsCustomer: true,
-			Term: term,
+			Keyword: term
 		});
 	});
 	constructor(
