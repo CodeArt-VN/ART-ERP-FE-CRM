@@ -184,7 +184,7 @@ export class MCPDetailPage extends PageBase {
 						.search({
 							Take: 20,
 							Skip: 0,
-							Term: term ? term : this.item.IDSeller,
+							Keyword: term ? term : this.item.IDSeller,
 						})
 						.pipe(
 							catchError(() => of([])), // empty list on error
@@ -227,7 +227,7 @@ export class MCPDetailPage extends PageBase {
 						.search({
 							Take: 20,
 							Skip: 0,
-							Term: term ? term : this.item.IDSeller,
+							Keyword: term ? term : this.item.IDSeller,
 						})
 						.pipe(
 							catchError(() => of([])), // empty list on error

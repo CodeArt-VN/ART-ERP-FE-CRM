@@ -83,7 +83,7 @@ export class MemberCardDetailPage extends PageBase {
 ;
 
 	_memberDataSource = this.buildSelectDataSource((term) => {
-		return this.contactProvider.search({ SkipAddress: true, SortBy: ['Id_desc'], Take: 20, Skip: 0, Term: term });
+		return this.contactProvider.search({ SkipAddress: true, SortBy: ['Id_desc'], Take: 20, Skip: 0, Keyword: term });
 	});
 
 	segmentView = 's1';
