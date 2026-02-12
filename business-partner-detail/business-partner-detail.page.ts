@@ -459,6 +459,7 @@ export class BusinessPartnerDetailPage extends PageBase {
 			this.storerList = [...this.item._StorerConfig];
 		}
 		this.patchAddressesValue();
+		this.toggleAddressValidate(this.segmentView?.Page === 'bp-address');
 
 		this.salesmanSearch();
 	}
@@ -541,6 +542,20 @@ export class BusinessPartnerDetailPage extends PageBase {
 		}
 	}
 
+	toggleAddressValidate(isActive: boolean) {
+		const addresses = this.formGroup.get('Addresses');
+		if (!addresses) return;
+		if (!this.pageConfig.canEdit) {
+			addresses.disable({ emitEvent: false });
+			return;
+		}
+		if (isActive) {
+			addresses.enable({ emitEvent: false });
+		} else {
+			addresses.disable({ emitEvent: false });
+		}
+	}
+
 	addAddress(address, markAsDirty = false) {
 		// todo
 		let groups = <FormArray>this.formGroup.controls.Addresses;
@@ -577,6 +592,16 @@ export class BusinessPartnerDetailPage extends PageBase {
 			//this.formGroup.controls.IsPersonal.markAsDirty();
 		}
 		super.saveChange2();
+	}
+
+	onPersonalTypeChange() {
+		if (this.formGroup.controls.IsPersonal.value) {
+			if (this.formGroup.controls.CompanyName.value) {
+				this.formGroup.controls.CompanyName.setValue('');
+				this.formGroup.controls.CompanyName.markAsDirty();
+			}
+		}
+		this.saveChange();
 	}
 
 	async changeAddress(e) {
@@ -617,6 +642,7 @@ export class BusinessPartnerDetailPage extends PageBase {
 	segmentChanged(ev: any) {
 		this.pageConfig.isSubActive = true;
 		this.segmentView.Page = ev;
+		this.toggleAddressValidate(this.segmentView?.Page === 'bp-address');
 	}
 
 	selectedOption = this.optionGroup[0];
@@ -636,6 +662,7 @@ export class BusinessPartnerDetailPage extends PageBase {
 		}
 		this.selectedOption = option;
 		this.segmentView.Page = option.Code;
+		this.toggleAddressValidate(option.Code === 'bp-address');
 		if (option.Code === 'lotable') {
 			this.env
 				.showLoading(

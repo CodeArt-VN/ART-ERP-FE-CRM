@@ -126,6 +126,11 @@
 										</label>
 										<input (change)="saveChange()" class="c-input" id="Name" formControlName="Name" type="text" />
 									</div>
+									<app-form-control
+										*ngIf="!formGroup.controls.IsPersonal.value" (change)="saveChange()"
+										[field]="{id:'CompanyName', type : 'text', label: 'Company name', form : formGroup }"
+									></app-form-control>
+
 								</ion-col>
 								<ion-col size="12" size-sm="6" size-xl="4">
 									<div class="c-control">
@@ -291,13 +296,13 @@
 								<ion-col size="12" size-sm="6" size-xl="4">
 									<div class="c-control">
 										<span class="no-warp">
-											<input (change)="saveChange()" id="IsPersonal1" type="radio" [value]="true" formControlName="IsPersonal" class="c-checkbox" />
+											<input (change)="onPersonalTypeChange()" id="IsPersonal1" type="radio" [value]="true" formControlName="IsPersonal" class="c-checkbox" />
 											<label class="c-label radio" for="IsPersonal1">
 												<span>{{'Individual' | translate}}</span>
 											</label>
 										</span>
 										<span class="no-warp">
-											<input (change)="saveChange()" id="IsPersonal2" type="radio" [value]="false" formControlName="IsPersonal" class="c-checkbox" />
+											<input (change)="onPersonalTypeChange()" id="IsPersonal2" type="radio" [value]="false" formControlName="IsPersonal" class="c-checkbox" />
 											<label class="c-label radio" for="IsPersonal2">
 												<span>{{'Organization' | translate}}</span>
 												<span
