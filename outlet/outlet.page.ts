@@ -3,9 +3,7 @@ import { NavController, ModalController, AlertController, LoadingController, Pop
 import { EnvService } from 'src/app/services/core/env.service';
 import { PageBase } from 'src/app/page-base';
 import { BRA_BranchProvider, CRM_ContactProvider } from 'src/app/services/static/services.service';
-import { Location } from '@angular/common';
 import { lib } from 'src/app/services/static/global-functions';
-import { ApiSetting } from 'src/app/services/static/api-setting';
 
 @Component({
 	selector: 'app-outlet',
