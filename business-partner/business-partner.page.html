@@ -49,7 +49,7 @@
 
 
 	<div class="safe-max-width" *ngIf="pageConfig.showSpinner==false">
-		<app-data-table class="box-shadow responsive" [rows]="items" [trackBy]="'Id'" [(selectedRows)]="selectedItems"
+		<app-data-table class="box-shadow responsive padding-number-right" [rows]="items" [trackBy]="'Id'" [(selectedRows)]="selectedItems"
 			[showSpinner]="pageConfig.showSpinner" [showFilter]="pageConfig.isShowSearch" [(query)]="query"
 			(dataInfinite)="loadData($event)" (filter)="onDatatableFilter($event)" (sort)="onSort($event)"
 			(selectedRowsChange)="showCommandBySelectedRows($event)">
@@ -71,7 +71,7 @@
 					</div>
 				</ng-template>
 			</datatable-column>
-			<datatable-column class="col-name" name="Telephone" property="WorkPhone">
+			<datatable-column class="col-code" name="Telephone" property="WorkPhone">
 			</datatable-column>
 			<datatable-column class="col-id" name="abbreviation of outlet" property="Id">
 				<ng-template let-i="row" datatable-cell-template>
