@@ -1,4 +1,4 @@
-<ion-header>
+<ion-header [translucent]="true">
 	<ion-toolbar>
 		<!-- <ion-buttons slot="start" class="ion-hide-sm-down_">
             <ion-button color="dark" class="ion-hide-sm-down">
@@ -93,7 +93,7 @@
 		</form>
 	</section>
 </ion-header>
-<ion-content appScrollbarTheme class="header-table">
+<ion-content appScrollbarTheme class="header-table" [fullscreen]="true">
 	<section class="table">
 		<div class="row" [ngClass]="{selected: i.checked}" *ngFor="let i of items">
 			<div class="col-checkbox cell">

@@ -1,7 +1,7 @@
-<ion-header>
+<ion-header [translucent]="true">
 	<app-toolbar [page]="this"></app-toolbar>
 </ion-header>
-<ion-content appScrollbarTheme class="header-table">
+<ion-content [fullscreen]="true" appScrollbarTheme class="header-table">
 	<app-page-title class="ion-padding safe-max-width" [pageConfig]="pageConfig"></app-page-title>
 
 	<ion-fab *ngIf="pageConfig.isShowFeature && pageConfig.canMerge " class="feature" vertical="top" horizontal="end"
@@ -115,7 +115,7 @@
 
 	<ion-modal #mergeModal [isOpen]="isShowMergePopup" class="modal90" (willDismiss)="isShowMergePopup = false; ">
 		<ng-template>
-			<ion-header>
+			<ion-header [translucent]="true">
 				<ion-toolbar>
 					<ion-buttons slot="start" class="ion-hide-sm-down_">
 						<ion-button color="dark" class="ion-hide-sm-down"> {{'Merge contacts' | translate}}
@@ -129,7 +129,7 @@
 					</ion-buttons>
 				</ion-toolbar>
 			</ion-header>
-			<ion-content appScrollbarTheme class="scrollx">
+			<ion-content [fullscreen]="true" appScrollbarTheme class="scrollx">
 				<ion-grid class="merge-modal">
 					<ion-row>
 						<ion-col size="2">
