@@ -90,7 +90,7 @@ export class MemberCardDetailPage extends PageBase {
 	segmentChanged(ev: any) {
 		this.segmentView = ev.detail.value;
 	}
-	async saveChange() {
+	async saveChange(e = null) {
 		super.saveChange2();
 	}
 }

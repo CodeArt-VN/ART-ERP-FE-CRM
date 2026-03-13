@@ -38,12 +38,12 @@
 							<ion-col size="12" size-sm size-xl="4">
 								<!-- <app-form-control
 									[field]="{ id: 'Status', label: 'Status', type: 'ng-select-status', dataSource: statusList, bindValue:'Code', bindLabel:'Name', form : g, appendTo : '#ng-select-header' }"
-									(change)="saveChange(g)"
+									(change)="saveChange()"
 								></app-form-control> -->
 
 								<app-form-control
 									[field]="{ id: 'IDCampaign', label: 'Compaign', type: 'ng-select', dataSource: campaignList, bindValue:'Id', bindLabel:'Name', form : formGroup, appendTo : '#ng-select-header' }"
-									(change)="saveChange(g)"
+									(change)="saveChange()"
 								></app-form-control>
 								<app-form-control [field]="{id: 'AnnualRevenue', label: 'Annual revenue', type: 'number', form: formGroup }" (change)="saveChange()">
 								</app-form-control>

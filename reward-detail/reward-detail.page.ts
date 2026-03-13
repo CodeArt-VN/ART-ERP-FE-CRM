@@ -107,7 +107,7 @@ export class RewardDetailPage extends PageBase {
 
 	@ViewChild('uploadImage') uploadImage: any;
 	_isBanner;
-	onClickUpload(isBanner: boolean) {
+	onClickUpload(isBanner: boolean = null) {
 		this._isBanner = isBanner;
 		this.uploadImage.nativeElement.value = '';
 		this.uploadImage.nativeElement.click();
