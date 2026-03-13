@@ -576,12 +576,12 @@
 		></app-bp-person-info>
 
 		<!-- Tuyến bán -->
-		<app-master-coverage-plan
+		<app-bp-master-coverage-plan
 			[canEdit]="pageConfig.canEdit"
 			*ngIf=" pageConfig.showSpinner == false&& item?._Routes && segmentView.Page == 'bp-master-coverage-plan'"
 			[_routes]="item._Routes"
 		>
-		</app-master-coverage-plan>
+		</app-bp-master-coverage-plan>
 
 		<!-- Người liên hệ -->
 		<app-bp-contact-point
