@@ -117,11 +117,13 @@ export class BrandDetailPage extends PageBase {
 	};
 
 	ngAfterViewInit() {
-		this.quillElement.changes.subscribe((elements) => {
-			if (typeof elements.first !== 'undefined') {
-				this.loadQuillEditor();
-			}
-		});
+		this.subscriptions.push(
+			this.quillElement.changes.subscribe((elements) => {
+				if (typeof elements.first !== 'undefined') {
+					this.loadQuillEditor();
+				}
+			})
+		);
 	}
 
 	loadQuillEditor() {
