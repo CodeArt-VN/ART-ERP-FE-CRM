@@ -355,7 +355,7 @@ export class BusinessPartnerDetailPage extends PageBase {
 			SortBy: ['Id_desc'],
 			Take: 20,
 			Skip: 0,
-			Term: term,
+			Keyword: term,
 		});
 	});
 	_PriceListVendorDataSource = this.buildSelectDataSource((term) => {
@@ -363,7 +363,7 @@ export class BusinessPartnerDetailPage extends PageBase {
 			SortBy: ['Id_desc'],
 			Take: 20,
 			Skip: 0,
-			Term: term,
+			Keyword: term,
 		});
 	});
 	preLoadData(event) {
