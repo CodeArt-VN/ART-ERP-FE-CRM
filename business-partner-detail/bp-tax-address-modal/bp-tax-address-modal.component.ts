@@ -15,6 +15,7 @@ import { CRM_PartnerTaxInfoProvider } from 'src/app/services/static/services.ser
 export class BpTaxAddressModal extends PageBase {
 	@Input() IDPartner;
 	@Input() TaxAddressList;
+	@Input() canEdit = true;
 
 	hasTaxCode = true;
 	showSpinner = false;
@@ -59,6 +60,11 @@ export class BpTaxAddressModal extends PageBase {
 		this.item.IDPartner = this.IDPartner;
 
 		super.loadedData();
+		this.pageConfig.canEdit = this.canEdit;
+		this.pageConfig.canDelete = this.canEdit;
+		if (!this.canEdit) {
+			this.formGroup.disable({ emitEvent: false });
+		}
 
 		const taxCode = this.formGroup.get('TaxCode')?.value;
 		if (!this.item?.Id || this.item?.Id === 0) {
@@ -71,6 +77,7 @@ export class BpTaxAddressModal extends PageBase {
 	}
 
 	changeIsDefault(form: FormGroup) {
+		if (!this.canEdit) return;
 		this.pageProvider.commonService
 			.connect('GET', 'CRM/Contact/ChangeIsDefaultTaxAddresses', {
 				Id: form.get('Id').value,
@@ -88,6 +95,7 @@ export class BpTaxAddressModal extends PageBase {
 	}
 
 	saveAddress(form: FormGroup = this.formGroup) {
+		if (!this.canEdit) return Promise.resolve(null);
 		if (!this.id || this.id === 0) {
 			form.get('IDPartner')?.setValue(this.IDPartner);
 			form.get('IDPartner')?.markAsDirty();
@@ -109,6 +117,7 @@ export class BpTaxAddressModal extends PageBase {
 	}
 
 	onChangedHasCode(value: boolean) {
+		if (!this.canEdit) return;
 		this.hasTaxCode = value;
 		this.checkRuleHasTax(value);
 
@@ -155,6 +164,7 @@ export class BpTaxAddressModal extends PageBase {
 	}
 
 	changeTaxCode(event) {
+		if (!this.canEdit) return;
 		const value = event?.target?.value ?? this.formGroup.get('TaxCode')?.value ?? '';
 		if (!value) return;
 
@@ -197,6 +207,7 @@ export class BpTaxAddressModal extends PageBase {
 	}
 
 	delete(publishEventCode = this.pageConfig.pageName) {
+		if (!this.canEdit) return;
 		if (this.pageConfig.ShowDelete) {
 			this.env
 				.actionConfirm('delete', this.selectedItems.length, this.item?.Name, this.pageConfig.pageTitle, () =>

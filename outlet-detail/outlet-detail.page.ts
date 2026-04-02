@@ -124,7 +124,7 @@ export class OutletDetailPage extends PageBase {
 			groups.clear();
 			this.patchAddressesValue();
 		}
-		this.patchTaxInfosValue();
+		this.setTaxInfos(this.item?.TaxInfos || []);
 		this.salesmanSearch();
 		super.loadedData(event);	
 		this.pageConfig.ShowRequestDataCorrection = false;
@@ -289,6 +289,7 @@ export class OutletDetailPage extends PageBase {
 				item: { ...taxInfo },
 				TaxAddressList: this.item?.TaxInfos || [],
 				IDPartner: this.item.Id,
+				canEdit: this.pageConfig.canEdit,
 			},
 			cssClass: 'modal90vh',
 		});
@@ -354,14 +355,19 @@ export class OutletDetailPage extends PageBase {
 	}
 
 	changeTaxInfoDefault(value) {
+		const groups = this.formGroup.get('TaxInfos') as FormArray;
 		const selectedId = value.Id;
 		const selectedValue = !value.IsDefault;
 
-		const taxInfos = (this.item?.TaxInfos || []).map((item) => ({
-			...item,
-			IsDefault: item.Id === selectedId ? selectedValue : false,
-		}));
-		this.setTaxInfos(taxInfos);
+		(this.item?.TaxInfos || []).forEach((item) => {
+			item.IsDefault = item.Id === selectedId ? selectedValue : false;
+		});
+		groups.controls.forEach((ctrl) => {
+			const isSelected = ctrl.get('Id').value === selectedId;
+			ctrl.get('IsDefault').setValue(isSelected ? selectedValue : false);
+		});
+		this.selectedTaxInfos = [...this.selectedTaxInfos];
+		this.cdr.detectChanges();
 
 		this.taxInfoProvider.commonService
 			.connect('GET', 'CRM/Contact/ChangeIsDefaultTaxAddresses', {

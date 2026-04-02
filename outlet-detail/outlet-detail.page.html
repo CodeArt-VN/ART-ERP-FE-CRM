@@ -270,7 +270,11 @@
 											</ng-template>
 										</datatable-empty-message>
 										<datatable-column [checkbox]="pageConfig.canEdit" name=""></datatable-column>
-										<datatable-column class="col-id" name="#" property="Id"></datatable-column>
+										<datatable-column class="col-id" name="#" property="Id">
+											<ng-template let-i="row" datatable-cell-template>
+												<span class="clickable" (click)="openTaxInfoModal(i)">{{ i?.Id }}</span>
+											</ng-template>
+										</datatable-column>
 										<datatable-column class="col-name" name="Buyer" property="Name"></datatable-column>
 										<datatable-column class="col-name" name="Company name" property="CompanyName"></datatable-column>
 										<datatable-column class="col-name" name="Tax code" property="TaxCode"></datatable-column>
@@ -283,13 +287,6 @@
 												<div class="col-checkbox cell" style="display: flex; justify-content: center;">
 													<input class="c-checkbox" [checked]="i.IsDefault" type="checkbox" (change)="changeTaxInfoDefault(i)" />
 												</div>
-											</ng-template>
-										</datatable-column>
-										<datatable-column *ngIf="pageConfig.canEdit" class="col-icon" name="" property="Id">
-											<ng-template let-i="row" datatable-cell-template>
-												<ion-button fill="clear" size="small" title="{{ 'Edit' | translate }}" (click)="openTaxInfoModal(i)">
-													<ion-icon slot="icon-only" name="create-outline"></ion-icon>
-												</ion-button>
 											</ng-template>
 										</datatable-column>
 										<datatable-column *ngIf="pageConfig.canEdit" class="col-icon" name="" property="Id">

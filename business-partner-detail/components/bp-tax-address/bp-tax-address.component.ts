@@ -184,6 +184,7 @@ export class BpTaxAddressComponent extends PageBase {
 				item: i,
 				TaxAddressList: this.items,
 				IDPartner: this.query.IDPartner,
+				canEdit: this.canEdit,
 			},
 			cssClass: 'modal90vh',
 		});
