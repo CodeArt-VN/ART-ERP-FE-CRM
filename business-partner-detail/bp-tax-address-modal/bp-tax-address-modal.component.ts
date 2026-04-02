@@ -18,6 +18,7 @@ export class BpTaxAddressModal extends PageBase {
 
 	hasTaxCode = true;
 	showSpinner = false;
+	latestSavedItem: any = null;
 
 	constructor(
 		public pageProvider: CRM_PartnerTaxInfoProvider,
@@ -92,6 +93,19 @@ export class BpTaxAddressModal extends PageBase {
 			form.get('IDPartner')?.markAsDirty();
 		}
 		return this.saveChange2(form, null);
+	}
+
+	savedChange(savedItem = null, form = this.formGroup) {
+		super.savedChange(savedItem, form);
+		if (!savedItem) return;
+
+		this.latestSavedItem = {
+			...this.item,
+			...savedItem,
+		};
+		this.item = { ...this.latestSavedItem };
+		this.id = savedItem.Id;
+		form.patchValue(this.latestSavedItem, { emitEvent: false });
 	}
 
 	onChangedHasCode(value: boolean) {
@@ -192,12 +206,17 @@ export class BpTaxAddressModal extends PageBase {
 					this.env.showMessage('DELETE_RESULT_SUCCESS', 'success');
 					this.env.publishEvent({ Code: publishEventCode });
 					this.deleted();
-					this.closeModal();
+					this.modalController.dismiss({ deletedId: this.item?.Id });
 				})
 				.catch((err: any) => {
 					if (err != 'User abort action') this.env.showMessage('DELETE_RESULT_FAIL', 'danger');
 					console.log(err);
 				});
 		}
+	}
+
+	async closeModal() {
+		const data = this.latestSavedItem ? { savedItem: this.latestSavedItem } : null;
+		await this.modalController.dismiss(data);
 	}
 }

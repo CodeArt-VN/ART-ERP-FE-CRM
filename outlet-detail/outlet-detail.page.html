@@ -248,27 +248,75 @@
 							<ion-col size="12" size-md="12" size-lg="12" size-xl="3">
 								<ion-list lines="none">
 									<ion-list-header class="ion-no-padding">
-										<ion-label color="primary"> {{ 'Billing address' | translate }} </ion-label>
+										<ion-label color="primary"> {{ 'Invoice information' | translate }} </ion-label>
 									</ion-list-header>
 								</ion-list>
 							</ion-col>
-							<ion-col size="12" size-sm size-xl="8" class="ion-no-padding" *ngIf="formGroup.get('TaxInfos').value.length > 0">
-								<app-tax-info
-									*ngFor="let taxInfo of formGroup.get('TaxInfos')['controls']"
-									[taxInfo]="taxInfo.value"
-									[canEdit]="pageConfig.canEdit"
-									(onChange)="changeTaxInfo($event)"
-									(onDelete)="removeTaxInfo($event)"
-								></app-tax-info>
-							</ion-col>
-							<ion-col size="12" size-xl="4" *ngIf="formGroup.get('TaxInfos').value.length == 0 && pageConfig.canEdit &&  formGroup.get('TaxInfos').valid">
-								<ion-button (click)="addTaxInfo({})"> {{ 'Add billing information' | translate }} </ion-button>
-							</ion-col>
-						</ion-row>
-						<ion-row class="hr-group border" *ngIf="formGroup.get('TaxInfos').value.length > 0 && pageConfig.canEdit && formGroup.get('TaxInfos').valid">
-							<ion-col size="0" size-md="0" size-lg="0" size-xl="3"></ion-col>
-							<ion-col size="12" size-xl="4">
-								<ion-button (click)="addTaxInfo({})"> {{ 'Add billing information' | translate }} </ion-button>
+							<ion-col size="12" size-sm size-xl="8" class="ion-no-padding" *ngIf="item.Id">
+								<div class="table-contain invoice-tax-table">
+									<app-data-table
+										*ngIf="!pageConfig.showSpinner"
+										[rows]="item.TaxInfos || []"
+										[(query)]="taxInfoQuery"
+										[(selectedRows)]="selectedTaxInfos"
+										[showSpinner]="pageConfig.showSpinner"
+									>
+										<datatable-empty-message subMessage="Please click add new to start..." [showImg]="false" minHeight="125px">
+											<ng-template datatable-empty-message-template>
+												<ion-button (click)="openTaxInfoModal()" size="small" fill="outline" *ngIf="pageConfig.canEdit">
+													<ion-icon slot="start" name="add-outline"></ion-icon>
+													{{ 'Add billing address' | translate }}
+												</ion-button>
+											</ng-template>
+										</datatable-empty-message>
+										<datatable-column [checkbox]="pageConfig.canEdit" name=""></datatable-column>
+										<datatable-column class="col-id" name="#" property="Id"></datatable-column>
+										<datatable-column class="col-name" name="Buyer" property="Name"></datatable-column>
+										<datatable-column class="col-name" name="Company name" property="CompanyName"></datatable-column>
+										<datatable-column class="col-name" name="Tax code" property="TaxCode"></datatable-column>
+										<datatable-column class="col-code" name="Email" property="Email"></datatable-column>
+										<datatable-column class="col-code" name="Work phone" property="WorkPhone"></datatable-column>
+										<datatable-column class="col-name" name="Billing address" property="BillingAddress"></datatable-column>
+										<datatable-column class="col-name" name="Identity card number" property="IdentityCardNumber"></datatable-column>
+										<datatable-column class="col-custom" name="Is default" property="Id" *ngIf="pageConfig.canEdit">
+											<ng-template let-i="row" datatable-cell-template>
+												<div class="col-checkbox cell" style="display: flex; justify-content: center;">
+													<input class="c-checkbox" [checked]="i.IsDefault" type="checkbox" (change)="changeTaxInfoDefault(i)" />
+												</div>
+											</ng-template>
+										</datatable-column>
+										<datatable-column *ngIf="pageConfig.canEdit" class="col-icon" name="" property="Id">
+											<ng-template let-i="row" datatable-cell-template>
+												<ion-button fill="clear" size="small" title="{{ 'Edit' | translate }}" (click)="openTaxInfoModal(i)">
+													<ion-icon slot="icon-only" name="create-outline"></ion-icon>
+												</ion-button>
+											</ng-template>
+										</datatable-column>
+										<datatable-column *ngIf="pageConfig.canEdit" class="col-icon" name="" property="Id">
+											<ng-template datatable-header-template>
+												<ion-button
+													*ngIf="pageConfig.canEdit && selectedTaxInfos.length > 0"
+													(click)="removeSelectedTaxInfos()"
+													size="small"
+													title="{{ 'Delete' | translate }}"
+													fill="clear"
+												>
+													<ion-icon color="danger" class="min-btn clickable" slot="icon-only" name="trash-outline"></ion-icon>
+												</ion-button>
+											</ng-template>
+											<ng-template let-idx="idx" datatable-cell-template>
+												<ion-icon color="danger" class="min-btn clickable" slot="icon-only" name="trash-outline" (click)="removeTaxInfoLine(idx)"></ion-icon>
+											</ng-template>
+										</datatable-column>
+									</app-data-table>
+
+									<div class="ion-padding" *ngIf="pageConfig.canEdit && item.TaxInfos?.length > 0">
+										<ion-button fill="clear" size="small" (click)="openTaxInfoModal()">
+											<ion-icon slot="start" name="add-circle-outline"></ion-icon>
+											{{ 'Add billing address' | translate }}
+										</ion-button>
+									</div>
+								</div>
 							</ion-col>
 						</ion-row>
 

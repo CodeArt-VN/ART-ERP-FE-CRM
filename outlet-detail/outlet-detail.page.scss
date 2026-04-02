@@ -1,3 +1,9 @@
 .full-screen {
 	min-height: calc(100vh - 97px);
 }
+
+::ng-deep {
+	.invoice-tax-table datatable-body-cell.cell.col-custom {
+		max-width: 100px;
+	}
+}

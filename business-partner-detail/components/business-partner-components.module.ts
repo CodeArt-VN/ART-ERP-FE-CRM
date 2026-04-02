@@ -15,6 +15,7 @@ import { BPItemsComponent } from './bp-items/bp-items.component';
 import { RouterModule } from '@angular/router';
 import { MapCompsModule } from 'src/app/components/map-comps/map-comps.module';
 import { BpTaxAddressComponent } from './bp-tax-address/bp-tax-address.component';
+import { BpTaxAddressModal } from '../bp-tax-address-modal/bp-tax-address-modal.component';
 import { ItemPickerPage } from 'src/app/pages/WMS/item-picker/item-picker.page';
 import { TaxInfoComponent } from './tax-info/tax-info.component';
 import { BpMasterCoveragePlanComponent } from './bp-master-coverage-plan/bp-master-coverage-plan.component';
@@ -29,6 +30,7 @@ import { BpRecentOrderComponent } from './bp-recent-order/bp-recent-order.compon
 		BpStorerInfoComponent,
 		BpAddressComponent,
 		BpTaxAddressComponent,
+		BpTaxAddressModal,
 		TaxInfoComponent,
 		BpMapComponent,
 		BpOutletInfoComponent,
@@ -44,6 +46,7 @@ import { BpRecentOrderComponent } from './bp-recent-order/bp-recent-order.compon
 		BpStorerInfoComponent,
 		BpAddressComponent,
 		BpTaxAddressComponent,
+		BpTaxAddressModal,
 		TaxInfoComponent,
 		BpMapComponent,
 		BpOutletInfoComponent,
