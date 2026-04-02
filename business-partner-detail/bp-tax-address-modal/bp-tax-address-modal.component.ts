@@ -95,7 +95,6 @@ export class BpTaxAddressModal extends PageBase {
 	}
 
 	saveAddress(form: FormGroup = this.formGroup) {
-		if (!this.canEdit) return Promise.resolve(null);
 		if (!this.id || this.id === 0) {
 			form.get('IDPartner')?.setValue(this.IDPartner);
 			form.get('IDPartner')?.markAsDirty();
@@ -207,7 +206,6 @@ export class BpTaxAddressModal extends PageBase {
 	}
 
 	delete(publishEventCode = this.pageConfig.pageName) {
-		if (!this.canEdit) return;
 		if (this.pageConfig.ShowDelete) {
 			this.env
 				.actionConfirm('delete', this.selectedItems.length, this.item?.Name, this.pageConfig.pageTitle, () =>
