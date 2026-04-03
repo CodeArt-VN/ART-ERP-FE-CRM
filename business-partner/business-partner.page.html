@@ -48,7 +48,7 @@
 	</ion-fab>
 
 
-	<div class="safe-max-width" *ngIf="pageConfig.showSpinner==false">
+	<div class="safe-max-width">
 		<app-data-table class="box-shadow responsive padding-number-right" [rows]="items" [trackBy]="'Id'" [(selectedRows)]="selectedItems"
 			[showSpinner]="pageConfig.showSpinner" [showFilter]="pageConfig.isShowSearch" [(query)]="query"
 			(dataInfinite)="loadData($event)" (filter)="onDatatableFilter($event)" (sort)="onSort($event)"
@@ -73,32 +73,74 @@
 			</datatable-column>
 			<datatable-column class="col-code" name="Telephone" property="WorkPhone">
 			</datatable-column>
-			<datatable-column class="col-id" name="abbreviation of outlet" property="Id">
+			<datatable-column class="col-id flag-filter" name="abbreviation of outlet" property="IsOutlets">
+				<ng-template datatable-filter-template>
+					<ion-icon
+						class="min-btn clickable"
+						(click)="query.IsOutlets=query.IsOutlets===true?false:(query.IsOutlets===false? '': true); refresh()"
+						[name]="query.IsOutlets===true?'checkmark-outline':(query.IsOutlets===false?'ban-outline':'checkmark-done-outline')"
+					></ion-icon>
+				</ng-template>
 				<ng-template let-i="row" datatable-cell-template>
 					<ion-icon class="min-btn" *ngIf="i.IsOutlets" name="checkmark"></ion-icon>
 				</ng-template>
 			</datatable-column>
-			<datatable-column class="col-id" name="abbreviation of storer" property="Id">
+			<datatable-column class="col-id flag-filter" name="abbreviation of storer" property="IsStorer">
+				<ng-template datatable-filter-template>
+					<ion-icon
+						class="min-btn clickable"
+						(click)="query.IsStorer=query.IsStorer===true?false:(query.IsStorer===false? '': true); refresh()"
+						[name]="query.IsStorer===true?'checkmark-outline':(query.IsStorer===false?'ban-outline':'checkmark-done-outline')"
+					></ion-icon>
+				</ng-template>
 				<ng-template let-i="row" datatable-cell-template>
 					<ion-icon class="min-btn" *ngIf="i.IsStorer" name="checkmark"></ion-icon>
 				</ng-template>
 			</datatable-column>
-			<datatable-column class="col-id" name="abbreviation of vendor" property="Id">
+			<datatable-column class="col-id flag-filter" name="abbreviation of vendor" property="IsVendor">
+				<ng-template datatable-filter-template>
+					<ion-icon
+						class="min-btn clickable"
+						(click)="query.IsVendor=query.IsVendor===true?false:(query.IsVendor===false? '': true); refresh()"
+						[name]="query.IsVendor===true?'checkmark-outline':(query.IsVendor===false?'ban-outline':'checkmark-done-outline')"
+					></ion-icon>
+				</ng-template>
 				<ng-template let-i="row" datatable-cell-template>
 					<ion-icon class="min-btn" *ngIf="i.IsVendor" name="checkmark"></ion-icon>
 				</ng-template>
 			</datatable-column>
-			<datatable-column class="col-id" name="abbreviation of carrier" property="Id">
+			<datatable-column class="col-id flag-filter" name="abbreviation of carrier" property="IsCarrier">
+				<ng-template datatable-filter-template>
+					<ion-icon
+						class="min-btn clickable"
+						(click)="query.IsCarrier=query.IsCarrier===true?false:(query.IsCarrier===false? '': true); refresh()"
+						[name]="query.IsCarrier===true?'checkmark-outline':(query.IsCarrier===false?'ban-outline':'checkmark-done-outline')"
+					></ion-icon>
+				</ng-template>
 				<ng-template let-i="row" datatable-cell-template>
 					<ion-icon class="min-btn" *ngIf="i.IsCarrier" name="checkmark"></ion-icon>
 				</ng-template>
 			</datatable-column>
-			<datatable-column class="col-id" name="abbreviation of branch" property="Id">
+			<datatable-column class="col-id flag-filter" name="abbreviation of branch" property="IsBranch">
+				<ng-template datatable-filter-template>
+					<ion-icon
+						class="min-btn clickable"
+						(click)="query.IsBranch=query.IsBranch===true?false:(query.IsBranch===false? '': true); refresh()"
+						[name]="query.IsBranch===true?'checkmark-outline':(query.IsBranch===false?'ban-outline':'checkmark-done-outline')"
+					></ion-icon>
+				</ng-template>
 				<ng-template let-i="row" datatable-cell-template>
 					<ion-icon class="min-btn" *ngIf="i.IsBranch" name="checkmark"></ion-icon>
 				</ng-template>
 			</datatable-column>
-			<datatable-column class="col-id" name="abbreviation of staff" property="Id">
+			<datatable-column class="col-id flag-filter" name="abbreviation of staff" property="IsStaff">
+				<ng-template datatable-filter-template>
+					<ion-icon
+						class="min-btn clickable"
+						(click)="query.IsStaff=query.IsStaff===true?false:(query.IsStaff===false? '': true); refresh()"
+						[name]="query.IsStaff===true?'checkmark-outline':(query.IsStaff===false?'ban-outline':'checkmark-done-outline')"
+					></ion-icon>
+				</ng-template>
 				<ng-template let-i="row" datatable-cell-template>
 					<ion-icon class="min-btn" *ngIf="i.IsStaff" name="checkmark"></ion-icon>
 				</ng-template>
