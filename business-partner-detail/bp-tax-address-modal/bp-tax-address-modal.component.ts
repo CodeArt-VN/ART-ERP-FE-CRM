@@ -86,6 +86,11 @@ export class BpTaxAddressModal extends PageBase {
 			})
 			.toPromise()
 			.then(() => {
+				this.latestSavedItem = {
+					...this.item,
+					...form.getRawValue(),
+				};
+				this.item = { ...this.latestSavedItem };
 				this.env.showMessage('Saving completed!', 'success');
 				this.cdr.detectChanges();
 			})

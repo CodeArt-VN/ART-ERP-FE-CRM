@@ -4,22 +4,13 @@
 
 ::ng-deep {
 	.invoice-tax-table {
-		datatable-body-cell.cell.tax-default,
-		datatable-header-cell.cell.tax-default {
-			justify-content: center;
-		}
 
-		.sp-custom,
-		.sp-is-default-custom {
+		.sp-custom {
 			display: none;
 		}
-
-		.tax-default-toggle {
+		.col-default-custom {
 			display: inline-flex;
-			align-items: center;
 			justify-content: center;
-			gap: 6px;
-			white-space: nowrap;
 		}
 	}
 }
@@ -31,29 +22,19 @@
 				display: block !important;
 			}
 
-			.sp-is-default-custom {
-				display: inline-block !important;
-				margin-right: 6px;
-				white-space: nowrap;
+			datatable-body-cell.cell.col-custom:empty,
+			datatable-body-cell.cell.col-default-custom:empty {
+				display: none;
+				min-width: 0 !important;
+				max-width: 0 !important;
+				padding: 0 !important;
 			}
 
-			datatable-body-cell.cell.col-custom {
+			
+			datatable-body-cell.cell.col-custom,
+			datatable-body-cell.cell.col-default-custom  {
 				order: 8;
 				min-width: calc(100% + 100px) !important;
-			
-				justify-content: flex-start !important;
-			}
-
-			datatable-body-cell.cell.tax-default {
-				order: 1;
-				position: absolute;
-				top: 5px;
-				right: 30px;
-				min-width: fit-content !important;
-				max-width: fit-content !important;
-				
-				display: flex;
-				align-items: center;
 				justify-content: flex-start !important;
 			}
 

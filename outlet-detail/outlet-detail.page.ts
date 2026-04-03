@@ -354,35 +354,6 @@ export class OutletDetailPage extends PageBase {
 		this.cdr.detectChanges();
 	}
 
-	changeTaxInfoDefault(value) {
-		const groups = this.formGroup.get('TaxInfos') as FormArray;
-		const selectedId = value.Id;
-		const selectedValue = !value.IsDefault;
-
-		(this.item?.TaxInfos || []).forEach((item) => {
-			item.IsDefault = item.Id === selectedId ? selectedValue : false;
-		});
-		groups.controls.forEach((ctrl) => {
-			const isSelected = ctrl.get('Id').value === selectedId;
-			ctrl.get('IsDefault').setValue(isSelected ? selectedValue : false);
-		});
-		this.selectedTaxInfos = [...this.selectedTaxInfos];
-		this.cdr.detectChanges();
-
-		this.taxInfoProvider.commonService
-			.connect('GET', 'CRM/Contact/ChangeIsDefaultTaxAddresses', {
-				Id: selectedId,
-				Value: selectedValue,
-				IDPartner: this.item.Id,
-			})
-			.toPromise()
-			.then(() => {
-				this.env.showMessage('Cập nhật thành công!', 'success');
-			})
-			.catch(() => {
-				this.env.showMessage('Cập nhật thất bại!', 'danger');
-			});
-	}
 
 	removeTaxInfoLine(index) {
 		this.alertCtrl

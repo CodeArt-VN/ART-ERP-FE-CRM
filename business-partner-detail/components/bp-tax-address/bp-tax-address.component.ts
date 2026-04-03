@@ -80,35 +80,6 @@ export class BpTaxAddressComponent extends PageBase {
 		groups.push(group);
 	}
 
-	changeIsDefault(value) {
-		const groups = this.formGroup.get('TaxAddresses') as FormArray;
-		const selectedId = value.Id;
-		const selectedValue = !value.IsDefault;
-
-		this.items.forEach(item => {
-			item.IsDefault = (item.Id === selectedId) ? selectedValue : false;
-		});
-		groups.controls.forEach(ctrl => {
-			const isSelected = ctrl.get('Id').value === selectedId;
-			ctrl.get('IsDefault').setValue(isSelected ? selectedValue : false);
-		});
-
-		this.pageProvider.commonService
-			.connect('GET', 'CRM/Contact/ChangeIsDefaultTaxAddresses', {
-				Id: selectedId,
-				Value: selectedValue,
-				IDPartner: this.query.IDPartner,
-			})
-			.toPromise()
-			.then((result: any) => {
-				this.env.showMessage('Cập nhật thành công!', 'success');
-				this.cdr.detectChanges();
-			})
-			.catch((err) => {
-				this.env.showMessage('Cập nhật thất bại!', 'danger');
-			});
-	}
-
 	removeLine(index) {
 		this.alertCtrl
 			.create({
@@ -175,6 +146,48 @@ export class BpTaxAddressComponent extends PageBase {
 		}).then(alert => alert.present());
 	}
 
+	private taxAddressesForm() {
+		const groups = this.formGroup.get('TaxAddresses') as FormArray;
+		groups.clear();
+		this.items.forEach((item) => this.addAddress(item));
+		this.selectedItems = this.selectedItems.filter((selected) => this.items.some((item) => item.Id === selected.Id));
+		this.cdr.detectChanges();
+	}
+
+	private upsertTaxAddress(savedItem: any) {
+		if (!savedItem) return;
+
+		const normalizedItem = {
+			...savedItem,
+			IDPartner: this.query.IDPartner,
+		};
+
+		if (normalizedItem.IsDefault) {
+			this.items = this.items.map((item) => ({
+				...item,
+				IsDefault: item.Id === normalizedItem.Id,
+			}));
+		}
+
+		const index = this.items.findIndex((item) => item.Id === normalizedItem.Id);
+		if (index > -1) {
+			this.items[index] = {
+				...this.items[index],
+				...normalizedItem,
+			};
+		} else {
+			this.items = [normalizedItem, ...this.items];
+		}
+
+		this.taxAddressesForm();
+	}
+
+	private removeTaxAddress(deletedId: number) {
+		if (!deletedId) return;
+		this.items = this.items.filter((item) => item.Id !== deletedId);
+		this.taxAddressesForm();
+	}
+
 
 	async showModal(i) {
 		const modal = await this.modalController.create({
@@ -191,8 +204,15 @@ export class BpTaxAddressComponent extends PageBase {
 		
 		await modal.present();
 		const { data } = await modal.onWillDismiss();
-		this.preLoadData();
-		
+
+		if (data?.deletedId) {
+			this.removeTaxAddress(data.deletedId);
+			return;
+		}
+
+		if (data?.savedItem) {
+			this.upsertTaxAddress(data.savedItem);
+		}
 	}
 
 	add() {
