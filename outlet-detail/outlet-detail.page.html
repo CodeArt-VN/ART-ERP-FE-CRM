@@ -260,6 +260,7 @@
 										[(query)]="taxInfoQuery"
 										[(selectedRows)]="selectedTaxInfos"
 										[showSpinner]="pageConfig.showSpinner"
+										class="box-shadow responsive" 
 									>
 										<datatable-empty-message subMessage="Please click add new to start..." [showImg]="false" minHeight="125px">
 											<ng-template datatable-empty-message-template>
@@ -272,21 +273,39 @@
 										<datatable-column [checkbox]="pageConfig.canEdit" name=""></datatable-column>
 										<datatable-column class="col-id" name="#" property="Id">
 											<ng-template let-i="row" datatable-cell-template>
-												<span class="clickable" (click)="openTaxInfoModal(i)">{{ i?.Id }}</span>
+												<a class="clickable" (click)="openTaxInfoModal(i)">{{ i?.Id }}</a>
 											</ng-template>
 										</datatable-column>
-										<datatable-column class="col-name" name="Buyer" property="Name"></datatable-column>
-										<datatable-column class="col-name" name="Company name" property="CompanyName"></datatable-column>
-										<datatable-column class="col-name" name="Tax code" property="TaxCode"></datatable-column>
-										<datatable-column class="col-code" name="Email" property="Email"></datatable-column>
-										<datatable-column class="col-code" name="Work phone" property="WorkPhone"></datatable-column>
-										<datatable-column class="col-name" name="Billing address" property="BillingAddress"></datatable-column>
-										<datatable-column class="col-name" name="Identity card number" property="IdentityCardNumber"></datatable-column>
-										<datatable-column class="col-custom" name="Is default" property="Id" *ngIf="pageConfig.canEdit">
+										<datatable-column class="col-name" name="Buyer" property="Name">
 											<ng-template let-i="row" datatable-cell-template>
-												<div class="col-checkbox cell" style="display: flex; justify-content: center;">
+												<span class="sp-custom">{{ 'Buyer' | translate }}:</span>
+												<span>{{ i?.Name }}</span>
+											</ng-template>
+										</datatable-column>
+										<datatable-column class="col-name col-custom" name="Company name" property="CompanyName">
+											<ng-template let-i="row" datatable-cell-template>
+												<span class="sp-custom">{{ 'Company name' | translate }}:</span>
+												<span>{{ i?.CompanyName }}</span>
+											</ng-template>
+										</datatable-column>
+										<datatable-column class="col-name col-custom" name="Tax code" property="TaxCode">
+											<ng-template let-i="row" datatable-cell-template>
+												<span class="sp-custom">{{ 'Tax code' | translate }}:</span>
+												<span>{{ i?.TaxCode }}</span>
+											</ng-template>
+										</datatable-column>
+										<datatable-column class="col-name col-custom" name="Identity card number" property="IdentityCardNumber">
+											<ng-template let-i="row" datatable-cell-template>
+												<span class="sp-custom">{{ 'Identity card number' | translate }}:</span>
+												<span>{{ i?.IdentityCardNumber }}</span>
+											</ng-template>
+										</datatable-column>
+										<datatable-column class="col-custom tax-default" name="Is default" property="Id" *ngIf="pageConfig.canEdit">
+											<ng-template let-i="row" datatable-cell-template>
+												<label class="tax-default-toggle">
+													<span class="sp-is-default-custom">{{ 'Default' | translate }}:</span>
 													<input class="c-checkbox" [checked]="i.IsDefault" type="checkbox" (change)="changeTaxInfoDefault(i)" />
-												</div>
+												</label>
 											</ng-template>
 										</datatable-column>
 										<datatable-column *ngIf="pageConfig.canEdit" class="col-icon" name="" property="Id">
