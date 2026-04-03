@@ -55,7 +55,15 @@
 			(selectedRowsChange)="showCommandBySelectedRows($event)">
 			<datatable-column [checkbox]="true" name=""></datatable-column>
 			<datatable-column class="col-id" name="#" property="Id" [navLink]="pageConfig.pageName"></datatable-column>
-			<datatable-column class="col-icon large" name="" property="Id">
+			<datatable-column class="col-icon large flag-filter" name="" property="Id">
+				<ng-template datatable-filter-template>
+					<ion-icon
+						class="min-btn clickable"
+						[color]="query.IsPersonal===true ? 'success' : (query.IsPersonal===false ? 'warning' : 'primary')"
+						(click)="query.IsPersonal=query.IsPersonal===true?false:(query.IsPersonal===false? '': true); refresh()"
+						[name]="query.IsPersonal===true?'person-outline':(query.IsPersonal===false?'business-outline':'checkmark-done-outline')"
+					></ion-icon>
+				</ng-template>
 				<ng-template let-i="row" datatable-cell-template>
 					<ion-icon class="min-btn" [color]="i.IsPersonal?'success':'warning'"
 						[name]="i.IsPersonal?'person-outline':'business-outline'"></ion-icon>
