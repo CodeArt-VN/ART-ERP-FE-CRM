@@ -6,9 +6,10 @@ import { IonicModule } from '@ionic/angular';
 
 import { ShareModule } from 'src/app/share.module';
 import { MemberCardPage } from './member-card.page';
+import { WriteNfcModalPageModule } from './write-nfc-modal/write-nfc-modal.module';
 
 @NgModule({
-	imports: [IonicModule, CommonModule, FormsModule, ShareModule, RouterModule.forChild([{ path: '', component: MemberCardPage }])],
+	imports: [IonicModule, CommonModule, FormsModule, ShareModule,WriteNfcModalPageModule, RouterModule.forChild([{ path: '', component: MemberCardPage }])],
 	declarations: [MemberCardPage],
 })
 export class MemberCardPageModule {}

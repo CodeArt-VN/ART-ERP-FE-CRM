@@ -6,6 +6,7 @@ import { environment } from 'src/environments/environment';
 import { PageBase } from 'src/app/page-base';
 import { EnvService } from 'src/app/services/core/env.service';
 import { BRA_BranchProvider } from 'src/app/services/static/services.service';
+import { WriteNfcModalPage } from './write-nfc-modal/write-nfc-modal.page';
 
 @Component({
 	selector: 'app-member-card',
@@ -43,5 +44,29 @@ export class MemberCardPage extends PageBase {
 		});
 
 		super.loadedData(event);
+	}
+
+	async writeNFC() {
+		const requests = this.selectedItems?.length ? this.selectedItems : this.items;
+		if (!requests?.length) {
+			this.env.showMessage('Không có dữ liệu để ghi thẻ NFC.', 'warning');
+			return;
+		}
+
+		const modal = await this.modalController.create({
+			component: WriteNfcModalPage,
+			canDismiss: true,
+			componentProps: {
+				title: 'Ghi thẻ NFC',
+				requests,
+				selectedItems: this.selectedItems,
+			},
+		});
+
+		await modal.present();
+		const { data, role } = await modal.onDidDismiss();
+		if (role === 'confirm' || data?.savedItem) {
+			this.refresh();
+		}
 	}
 }

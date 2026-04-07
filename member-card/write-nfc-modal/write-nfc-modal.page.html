@@ -1,0 +1,224 @@
+<ion-header [translucent]="true">
+	<ion-toolbar>
+		<ion-buttons slot="end">
+			<ion-button color="medium" (click)="closeModal()">
+				<ion-icon slot="icon-only" name="close-outline"></ion-icon>
+			</ion-button>
+		</ion-buttons>
+
+		<ion-title>{{ title }}</ion-title>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" appScrollbarTheme class="left scrollx" forceOverscroll="false">
+	<div class="write-nfc-modal">
+		<section class="step-summary">
+			<ion-progress-bar [value]="currentStep / 3"></ion-progress-bar>
+
+			<div class="step-chips">
+				<ion-chip [outline]="currentStep !== 1" [color]="currentStep === 1 ? 'primary' : 'medium'">
+					<ion-label>1. Chọn yêu cầu</ion-label>
+				</ion-chip>
+				<ion-chip [outline]="currentStep !== 2" [color]="currentStep === 2 ? 'primary' : 'medium'">
+					<ion-label>2. Chọn IDContact</ion-label>
+				</ion-chip>
+				<ion-chip [outline]="currentStep !== 3" [color]="currentStep === 3 ? 'primary' : 'medium'">
+					<ion-label>3. Ghi NFC</ion-label>
+				</ion-chip>
+			</div>
+		</section>
+
+		<div class="step-slider">
+			<div class="step-track" [style.transform]="stepOffset">
+				<section class="step-pane">
+					<ion-card>
+						<ion-card-header>
+							<ion-card-title>Xác định danh sách thẻ cần ghi</ion-card-title>
+							<ion-card-subtitle>Chọn một yêu cầu ghi thẻ để tiếp tục.</ion-card-subtitle>
+						</ion-card-header>
+
+						<ion-card-content>
+							<div class="step1-toolbar">
+								<ion-searchbar
+									[(ngModel)]="requestKeyword"
+									placeholder="Tìm theo Code"
+									debounce="250"
+									animated="true"
+								></ion-searchbar>
+
+								<ion-button class="step1-add-btn" color="primary" fill="outline" (click)="addNewRequest()">
+									<ion-icon slot="start" name="add-outline"></ion-icon>
+									Thêm mới
+								</ion-button>
+							</div>
+
+							<ion-list *ngIf="filteredRequestList.length; else emptyRequestState" lines="full">
+								<ion-item
+									[button]="true"
+									[detail]="false"
+									*ngFor="let request of filteredRequestList; trackBy: trackByRequest"
+									(click)="selectRequest(request)"
+									[class.is-selected]="selectedRequest?.requestId === request.requestId"
+								>
+									<ion-label>
+										<h2>{{ request.displayName }}</h2>
+										<p *ngIf="request.displayCode">Code: {{ request.displayCode }}</p>
+										<p>{{ request.mode === 'Insert' ? 'Insert mới MemberCard' : 'Update MemberCard hiện có' }}</p>
+										<p *ngIf="request.remark">{{ request.remark }}</p>
+									</ion-label>
+
+									<ion-badge slot="end" [color]="request.requestStatus === 'Completed' ? 'success' : request.requestStatus === 'Failed' ? 'danger' : 'warning'">
+										{{ request.requestStatus }}
+									</ion-badge>
+								</ion-item>
+							</ion-list>
+
+							<ng-template #emptyRequestState>
+								<ion-card class="empty-state">
+									<ion-card-content>
+										<ion-icon name="albums-outline"></ion-icon>
+										<p>{{ requestEmptyMessage }}</p>
+									</ion-card-content>
+								</ion-card>
+							</ng-template>
+						</ion-card-content>
+					</ion-card>
+				</section>
+
+				<section class="step-pane">
+					<ion-card>
+						<ion-card-header>
+							<ion-card-title>Chọn IDContact</ion-card-title>
+							<ion-card-subtitle *ngIf="selectedRequest">
+								Đang xử lý: {{ selectedRequest.displayName }}
+							</ion-card-subtitle>
+						</ion-card-header>
+
+						<ion-card-content>
+							<div class="c-control contact-select">
+								<label class="c-label" for="member-card-contact-select">Contact</label>
+
+								<ng-select
+									[(ngModel)]="selectedContact"
+									appendTo="body"
+									class="c-input"
+									(change)="onContactSelected($event)"
+									labelForId="member-card-contact-select"
+									[items]="contactList$ | async"
+									[typeahead]="contactListInput$"
+									[loading]="contactListLoading"
+									[virtualScroll]="true"
+									[clearable]="true"
+									[compareWith]="compareContactById"
+									bindLabel="Name"
+									placeholder="Tìm theo tên, mã hoặc số điện thoại"
+								>
+									<ng-template ng-label-tmp let-contact="item">
+										<span *ngIf="contact">#{{ contact.Id }}-{{ contact.Name }}</span>
+									</ng-template>
+
+									<ng-template ng-option-tmp let-contact="item">
+										<div *ngIf="contact">
+											<div>
+												<span>{{ contact.Name || ('Contact #' + contact.Id) }}</span>
+												<span *ngIf="contact.Phone1">
+													| <small><b>{{ contact.Phone1 }}</b></small>
+												</span>
+											</div>
+											<small>
+												#<b>{{ contact.Id }}</b>
+												<span *ngIf="contact.Code"> - {{ contact.Code }}</span>
+												<span *ngIf="contact.Email"> | {{ contact.Email }}</span>
+											</small>
+										</div>
+									</ng-template>
+								</ng-select>
+							</div>
+						</ion-card-content>
+					</ion-card>
+				</section>
+
+				<section class="step-pane">
+					<ion-card>
+						<ion-card-header>
+							<ion-card-title>Ghi dữ liệu vào thẻ NFC</ion-card-title>
+							<ion-card-subtitle>Ghi nội dung là ID của contact, sau đó đọc serial của thẻ.</ion-card-subtitle>
+						</ion-card-header>
+
+						<ion-card-content>
+							<ion-list lines="none" class="summary-list">
+								<ion-item>
+									<ion-label>
+										<h3>Yêu cầu đang xử lý</h3>
+										<p>{{ selectedRequest?.displayName || 'Chưa chọn yêu cầu' }}</p>
+									</ion-label>
+									<ion-badge slot="end" [color]="selectedRequest?.mode === 'Insert' ? 'warning' : 'secondary'">
+										{{ selectedRequest?.mode || 'N/A' }}
+									</ion-badge>
+								</ion-item>
+
+								<ion-item>
+									<ion-label>
+										<h3>IDContact</h3>
+										<p>{{ selectedContactId || 'Chưa chọn' }}</p>
+									</ion-label>
+									<ion-note slot="end">{{ selectedContact?.Name || '' }}</ion-note>
+								</ion-item>
+
+								<ion-item *ngIf="lastDetectedSerial">
+									<ion-label>
+										<h3>Serial Number</h3>
+										<p>{{ lastDetectedSerial }}</p>
+									</ion-label>
+								</ion-item>
+							</ion-list>
+
+							<ion-card class="status-card" [class.is-error]="writePhase === 'error'" [class.is-success]="writePhase === 'success'">
+								<ion-card-content>
+									<div class="status-topline">
+										<ion-icon
+											[name]="writePhase === 'success' ? 'checkmark-circle' : writePhase === 'error' ? 'alert-circle' : 'radio-outline'"
+										></ion-icon>
+										<div>
+											<h2>{{ writeStateLabel }}</h2>
+											<p *ngIf="statusMessage">{{ statusMessage }}</p>
+											<p *ngIf="errorMessage" class="error-text">{{ errorMessage }}</p>
+										</div>
+									</div>
+
+									<div class="status-spinner" *ngIf="isBusy">
+										<ion-spinner name="crescent"></ion-spinner>
+									</div>
+								</ion-card-content>
+							</ion-card>
+
+							<ion-note class="step-note">
+								Sau khi ghi thành công, modal sẽ đọc serial của thẻ rồi insert hoặc update `CRM_MemberCard`.
+							</ion-note>
+						</ion-card-content>
+					</ion-card>
+				</section>
+			</div>
+		</div>
+	</div>
+</ion-content>
+
+<ion-footer>
+	<ion-toolbar>
+		<ion-buttons slot="start">
+			<ion-button color="medium" [disabled]="isBusy" (click)="closeModal()">
+				Đóng
+			</ion-button>
+		</ion-buttons>
+
+		<ion-buttons slot="end">
+			<ion-button fill="outline" [disabled]="currentStep === 1 || isBusy" (click)="goToPreviousStep()">
+				Quay lại
+			</ion-button>
+
+			<ion-button color="primary" [disabled]="isPrimaryDisabled" (click)="handlePrimaryAction()">
+				{{ footerPrimaryLabel }}
+			</ion-button>
+		</ion-buttons>
+	</ion-toolbar>
+</ion-footer>
