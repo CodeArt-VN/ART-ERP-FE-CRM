@@ -3,7 +3,7 @@ import { NavController, LoadingController, AlertController, PopoverController, M
 import { PageBase } from 'src/app/page-base';
 import { ActivatedRoute } from '@angular/router';
 import { EnvService } from 'src/app/services/core/env.service';
-import { APPROVAL_RequestProvider, CRM_ContactProvider, HRM_StaffProvider } from 'src/app/services/static/services.service';
+import { APPROVAL_RequestProvider, CRM_ContactProvider, CRM_PartnerTaxInfoProvider, HRM_StaffProvider } from 'src/app/services/static/services.service';
 import { FormBuilder, Validators, FormControl, FormArray, FormGroup } from '@angular/forms';
 import { CommonService } from 'src/app/services/core/common.service';
 import { concat, of, Subject } from 'rxjs';
@@ -11,6 +11,7 @@ import { catchError, distinctUntilChanged, switchMap, tap } from 'rxjs/operators
 import { thirdPartyLibs } from 'src/app/services/static/thirdPartyLibs';
 import { AddressService, DynamicScriptLoaderService } from 'src/app/services/custom/custom.service';
 import { DataCorrectionRequestModalPage } from 'src/app/modals/data-correction-request-modal/data-correction-request-modal.page';
+import { BpTaxAddressModal } from '../business-partner-detail/bp-tax-address-modal/bp-tax-address-modal.component';
 declare var ggMap;
 
 @Component({
@@ -22,9 +23,12 @@ declare var ggMap;
 export class OutletDetailPage extends PageBase {
 	statusList = [];
 	isShowAddAddress = true;
+	taxInfoQuery = {};
+	selectedTaxInfos = [];
 
 	constructor(
 		public pageProvider: CRM_ContactProvider,
+		public taxInfoProvider: CRM_PartnerTaxInfoProvider,
 		public staffProvider: HRM_StaffProvider,
 		public requestProvider: APPROVAL_RequestProvider,
 		public popoverCtrl: PopoverController,
@@ -120,11 +124,7 @@ export class OutletDetailPage extends PageBase {
 			groups.clear();
 			this.patchAddressesValue();
 		}
-		if (this.item.TaxInfos?.length > 0) {
-			let groups = this.formGroup.get('TaxInfos') as FormArray;
-			groups.clear();
-			this.patchTaxInfosValue();
-		}
+		this.setTaxInfos(this.item?.TaxInfos || []);
 		this.salesmanSearch();
 		super.loadedData(event);	
 		this.pageConfig.ShowRequestDataCorrection = false;
@@ -211,6 +211,8 @@ export class OutletDetailPage extends PageBase {
 
 
 	patchTaxInfosValue() {
+		let groups = this.formGroup.get('TaxInfos') as FormArray;
+		groups.clear();
 		if (this.item.TaxInfos) {
 			if (this.item.TaxInfos?.length) {
 				for (let i of this.item.TaxInfos) {
@@ -228,13 +230,15 @@ export class OutletDetailPage extends PageBase {
 		let group = this.formBuilder.group({
 			IDPartner: [this.formGroup.get('Id').value],
 			Id: new FormControl(taxAddress?.Id),
-			CompanyName: [taxAddress?.TaxCode, Validators.required],
+			Name: [taxAddress?.Name],
+			CompanyName: [taxAddress?.CompanyName, Validators.required],
 			TaxCode: [taxAddress?.TaxCode, Validators.required],
 			WorkPhone: [taxAddress?.WorkPhone],
 			Email: [taxAddress?.Email],
 			BillingAddress: [taxAddress?.BillingAddress, Validators.required],
 			IsDefault: [taxAddress?.IsDefault || false],
 			Remark: [taxAddress?.Remark],
+			IdentityCardNumber: [taxAddress?.IdentityCardNumber],
 		});
 		groups.push(group);
 		group.get('IDPartner').markAsDirty();
@@ -273,6 +277,137 @@ export class OutletDetailPage extends PageBase {
 			this.saveChange();
 		}
 		groups.removeAt(index);
+	}
+
+	async openTaxInfoModal(taxInfo = { Id: 0 }) {
+		if (!this.item?.Id) return;
+
+		const modal = await this.modalController.create({
+			component: BpTaxAddressModal,
+			componentProps: {
+				id: taxInfo?.Id || 0,
+				item: { ...taxInfo },
+				TaxAddressList: this.item?.TaxInfos || [],
+				IDPartner: this.item.Id,
+				canEdit: this.pageConfig.canEdit,
+			},
+			cssClass: 'modal90vh',
+		});
+
+		await modal.present();
+		const { data } = await modal.onWillDismiss();
+
+		if (data?.deletedId || data?.savedItem) {
+			await this.reloadTaxInfos();
+		}
+	}
+
+	async reloadTaxInfos() {
+		if (!this.item?.Id) return;
+
+		try {
+			const result: any = await this.taxInfoProvider.read({
+				IDPartner: this.item.Id,
+				Take: 100,
+				Skip: 0,
+			});
+			this.setTaxInfos(result?.data || []);
+		} catch (error) {
+			this.env.showMessage('Cannot extract data', 'danger');
+		}
+	}
+
+	upsertTaxInfo(taxInfo) {
+		if (!taxInfo?.Id) return;
+
+		let taxInfos = [...(this.item?.TaxInfos || [])];
+		const index = taxInfos.findIndex((d) => d.Id == taxInfo.Id);
+		const nextItem = { ...taxInfo };
+
+		if (nextItem.IsDefault) {
+			taxInfos = taxInfos.map((d) => ({ ...d, IsDefault: false }));
+		}
+
+		if (index > -1) {
+			taxInfos[index] = { ...taxInfos[index], ...nextItem };
+		} else {
+			taxInfos = [nextItem, ...taxInfos];
+		}
+
+		this.setTaxInfos(taxInfos);
+	}
+
+	removeTaxInfoLocal(id: number) {
+		if (!id) return;
+
+		const taxInfos = (this.item?.TaxInfos || []).filter((d) => d.Id != id);
+		this.setTaxInfos(taxInfos);
+	}
+
+	setTaxInfos(taxInfos = []) {
+		this.item = {
+			...this.item,
+			TaxInfos: [...taxInfos],
+		};
+		this.selectedTaxInfos = this.selectedTaxInfos.filter((d) => taxInfos.some((t) => t.Id == d.Id));
+		this.patchTaxInfosValue();
+		this.cdr.detectChanges();
+	}
+
+
+	removeTaxInfoLine(index) {
+		this.alertCtrl
+			.create({
+				header: 'Xóa thông tin xuất hóa đơn',
+				message: 'Bạn có chắc muốn xóa thông tin xuất hóa đơn này?',
+				buttons: [
+					{
+						text: 'Không',
+						role: 'cancel',
+					},
+					{
+						text: 'Đồng ý xóa',
+						cssClass: 'danger-btn',
+						handler: () => {
+							const taxInfo = this.item?.TaxInfos?.[index];
+							if (!taxInfo?.Id) return;
+							this.taxInfoProvider.delete([{ Id: taxInfo.Id }]).then(() => {
+								this.removeTaxInfoLocal(taxInfo.Id);
+								this.env.showMessage('Deleted!', 'success');
+							});
+						},
+					},
+				],
+			})
+			.then((alert) => {
+				alert.present();
+			});
+	}
+
+	removeSelectedTaxInfos() {
+		if (this.selectedTaxInfos.length === 0) return;
+
+		this.alertCtrl
+			.create({
+				header: 'Xóa thông tin xuất hóa đơn',
+				message: 'Bạn có chắc muốn xóa các thông tin được chọn?',
+				buttons: [
+					{ text: 'Không', role: 'cancel' },
+					{
+						text: 'Đồng ý xóa',
+						cssClass: 'danger-btn',
+						handler: () => {
+							const ids = this.selectedTaxInfos.map((item) => ({ Id: item.Id }));
+							this.taxInfoProvider.delete(ids).then(() => {
+								const deletingIds = ids.map((x) => x.Id);
+								this.setTaxInfos((this.item?.TaxInfos || []).filter((d) => !deletingIds.includes(d.Id)));
+								this.env.showMessage('Đã xóa thành công!', 'success');
+							});
+						},
+					},
+				],
+			})
+			.then((alert) => alert.present());
 	}
 
 	checkPhoneNumber() {

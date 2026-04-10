@@ -15,9 +15,11 @@ import { CRM_PartnerTaxInfoProvider } from 'src/app/services/static/services.ser
 export class BpTaxAddressModal extends PageBase {
 	@Input() IDPartner;
 	@Input() TaxAddressList;
+	@Input() canEdit = true;
 
 	hasTaxCode = true;
 	showSpinner = false;
+	latestSavedItem: any = null;
 
 	constructor(
 		public pageProvider: CRM_PartnerTaxInfoProvider,
@@ -58,6 +60,11 @@ export class BpTaxAddressModal extends PageBase {
 		this.item.IDPartner = this.IDPartner;
 
 		super.loadedData();
+		this.pageConfig.canEdit = this.canEdit;
+		this.pageConfig.canDelete = this.canEdit;
+		if (!this.canEdit) {
+			this.formGroup.disable({ emitEvent: false });
+		}
 
 		const taxCode = this.formGroup.get('TaxCode')?.value;
 		if (!this.item?.Id || this.item?.Id === 0) {
@@ -70,6 +77,7 @@ export class BpTaxAddressModal extends PageBase {
 	}
 
 	changeIsDefault(form: FormGroup) {
+		if (!this.canEdit) return;
 		this.pageProvider.commonService
 			.connect('GET', 'CRM/Contact/ChangeIsDefaultTaxAddresses', {
 				Id: form.get('Id').value,
@@ -78,6 +86,11 @@ export class BpTaxAddressModal extends PageBase {
 			})
 			.toPromise()
 			.then(() => {
+				this.latestSavedItem = {
+					...this.item,
+					...form.getRawValue(),
+				};
+				this.item = { ...this.latestSavedItem };
 				this.env.showMessage('Saving completed!', 'success');
 				this.cdr.detectChanges();
 			})
@@ -94,7 +107,21 @@ export class BpTaxAddressModal extends PageBase {
 		return this.saveChange2(form, null);
 	}
 
+	savedChange(savedItem = null, form = this.formGroup) {
+		super.savedChange(savedItem, form);
+		if (!savedItem) return;
+
+		this.latestSavedItem = {
+			...this.item,
+			...savedItem,
+		};
+		this.item = { ...this.latestSavedItem };
+		this.id = savedItem.Id;
+		form.patchValue(this.latestSavedItem, { emitEvent: false });
+	}
+
 	onChangedHasCode(value: boolean) {
+		if (!this.canEdit) return;
 		this.hasTaxCode = value;
 		this.checkRuleHasTax(value);
 
@@ -141,6 +168,7 @@ export class BpTaxAddressModal extends PageBase {
 	}
 
 	changeTaxCode(event) {
+		if (!this.canEdit) return;
 		const value = event?.target?.value ?? this.formGroup.get('TaxCode')?.value ?? '';
 		if (!value) return;
 
@@ -192,12 +220,17 @@ export class BpTaxAddressModal extends PageBase {
 					this.env.showMessage('DELETE_RESULT_SUCCESS', 'success');
 					this.env.publishEvent({ Code: publishEventCode });
 					this.deleted();
-					this.closeModal();
+					this.modalController.dismiss({ deletedId: this.item?.Id });
 				})
 				.catch((err: any) => {
 					if (err != 'User abort action') this.env.showMessage('DELETE_RESULT_FAIL', 'danger');
 					console.log(err);
 				});
 		}
+	}
+
+	async closeModal() {
+		const data = this.latestSavedItem ? { savedItem: this.latestSavedItem } : null;
+		await this.modalController.dismiss(data);
 	}
 }

@@ -6,6 +6,16 @@
 	text-overflow: ellipsis;
 }
 
+::ng-deep {
+	app-data-table .row.header.filter .flag-filter {
+		justify-content: center;
+	}
+
+	app-data-table .row.header.filter .flag-filter .min-btn {
+		margin-left: 0 !important;
+	}
+}
+
 ion-grid.merge-modal ion-row {
 	min-height: 50px;
 }
