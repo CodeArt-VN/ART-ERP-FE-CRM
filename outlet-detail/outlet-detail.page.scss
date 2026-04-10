@@ -2,47 +2,14 @@
 	min-height: calc(100vh - 97px);
 }
 
-::ng-deep {
-	.invoice-tax-table {
-
-		.sp-custom {
-			display: none;
-		}
-		.col-default-custom {
-			display: inline-flex;
-			justify-content: center;
-		}
-	}
-}
-
 @media screen and (max-width: 1164px) {
 	::ng-deep {
-		.invoice-tax-table {
-			.sp-custom {
-				display: block !important;
-			}
-
-			datatable-body-cell.cell.col-custom:empty,
-			datatable-body-cell.cell.col-default-custom:empty {
-				display: none;
-				min-width: 0 !important;
-				max-width: 0 !important;
-				padding: 0 !important;
-			}
-
-			
-			datatable-body-cell.cell.col-custom,
-			datatable-body-cell.cell.col-default-custom  {
-				order: 8;
-				min-width: calc(100% + 100px) !important;
-				justify-content: flex-start !important;
-			}
-
-			app-data-table .col-name,
-			.table .col-name {
-				min-width: 85%;
-			}
-
+		.row {
+			box-shadow:
+				0 7px 14px 0 rgba(85, 110, 145, 0),
+				0 1px 3px 0 rgba(0, 0, 0, 0.1),
+				0 5px 10px 0 rgba(0, 0, 0, 0.08),
+				inset 0 -1px 0 0 rgba(0, 0, 0, 0.2);
 		}
 	}
 }

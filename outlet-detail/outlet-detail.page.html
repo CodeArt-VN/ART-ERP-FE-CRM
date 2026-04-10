@@ -1,6 +1,11 @@
 <ion-header [translucent]="true">
 	<app-toolbar [page]="this">
-		<ion-button *ngIf="pageConfig.canRequestDataCorrection && pageConfig.ShowRequestDataCorrection" title="{{'Request data correction' | translate}}" color="secondary" (click)="openRequestDataConnectionModal()">
+		<ion-button
+			*ngIf="pageConfig.canRequestDataCorrection && pageConfig.ShowRequestDataCorrection"
+			title="{{'Request data correction' | translate}}"
+			color="secondary"
+			(click)="openRequestDataConnectionModal()"
+		>
 			{{'Request data correction' | translate}}
 		</ion-button>
 	</app-toolbar>
@@ -46,9 +51,7 @@
 									<ion-text color="success" *ngIf="formGroup.controls.WorkPhone.valid && formGroup.controls.WorkPhone.dirty">
 										{{'Valid phone number' | translate}}
 									</ion-text>
-									<ion-text color="danger" *ngIf="!formGroup.controls.WorkPhone.valid">
-										{{'Invalid phone number or already in use' | translate}}
-									</ion-text>
+									<ion-text color="danger" *ngIf="!formGroup.controls.WorkPhone.valid"> {{'Invalid phone number or already in use' | translate}} </ion-text>
 								</div>
 
 								<!-- <div class="c-control">
@@ -237,6 +240,7 @@
 								<ion-button (click)="addAddress({})"> {{ 'Add address' | translate }} </ion-button>
 							</ion-col>
 						</ion-row>
+
 						<ion-row class="hr-group border" *ngIf="formGroup.get('Addresses').value.length > 0 && pageConfig.canEdit && isShowAddAddress">
 							<ion-col size="0" size-md="0" size-lg="0" size-xl="3"></ion-col>
 							<ion-col size="12" size-xl="4">
@@ -244,7 +248,8 @@
 							</ion-col>
 						</ion-row>
 
-						<ion-row class="hr-group">
+						<!-- Invoice information -->
+						<ion-row class="hr-group" *ngIf="item.Id">
 							<ion-col size="12" size-md="12" size-lg="12" size-xl="3">
 								<ion-list lines="none">
 									<ion-list-header class="ion-no-padding">
@@ -252,207 +257,83 @@
 									</ion-list-header>
 								</ion-list>
 							</ion-col>
-							<ion-col size="12" size-sm size-xl="8" class="ion-no-padding" *ngIf="item.Id">
-								<div class="table-contain invoice-tax-table">
-									<app-data-table
-										*ngIf="!pageConfig.showSpinner"
-										[rows]="item.TaxInfos || []"
-										[(query)]="taxInfoQuery"
-										[(selectedRows)]="selectedTaxInfos"
-										[showSpinner]="pageConfig.showSpinner"
-										class="box-shadow responsive" 
-									>
-										<datatable-empty-message subMessage="Please click add new to start..." [showImg]="false" minHeight="125px">
-											<ng-template datatable-empty-message-template>
-												<ion-button (click)="openTaxInfoModal()" size="small" fill="outline" *ngIf="pageConfig.canEdit">
-													<ion-icon slot="start" name="add-outline"></ion-icon>
-													{{ 'Add billing address' | translate }}
-												</ion-button>
-											</ng-template>
-										</datatable-empty-message>
-										<datatable-column [checkbox]="pageConfig.canEdit" name=""></datatable-column>
-										<datatable-column class="col-id" name="#" property="Id">
-											<ng-template let-i="row" datatable-cell-template>
-												<a class="clickable" (click)="openTaxInfoModal(i)">{{ i?.Id }}</a>
-											</ng-template>
-										</datatable-column>
-										<datatable-column class="col-name" name="Buyer" property="Name">
-											<ng-template let-i="row" datatable-cell-template>
-												<span *ngIf="i.Name" class="sp-custom">{{ 'Buyer' | translate }}:&nbsp;</span>
-												<span *ngIf="i.Name">{{ i.Name }}</span>
-											</ng-template>
-										</datatable-column>
-										<datatable-column class="col-name col-custom" name="Company name" property="CompanyName">
-											<ng-template let-i="row" datatable-cell-template>
-												<span *ngIf="i.CompanyName"  class="sp-custom">{{ 'Company name' | translate }}:&nbsp;</span>
-												<span *ngIf="i.CompanyName">{{ i.CompanyName }}</span>
-											</ng-template>
-										</datatable-column>
-										<datatable-column class="col-name col-custom" name="Tax code" property="TaxCode">
+							<ion-col size="12" size-sm size-xl="8" class="ion-no-padding">
+								<app-data-table
+									*ngIf="!pageConfig.showSpinner"
+									[rows]="item.TaxInfos || []"
+									[(query)]="taxInfoQuery"
+									[(selectedRows)]="selectedTaxInfos"
+									[showSpinner]="pageConfig.showSpinner"
+									class="box-shadow responsive"
+								>
+									<datatable-empty-message subMessage="Please click add new to start..." [showImg]="false" minHeight="125px">
+										<ng-template datatable-empty-message-template>
+											<ion-button (click)="openTaxInfoModal()" size="small" fill="outline" *ngIf="pageConfig.canEdit">
+												<ion-icon slot="start" name="add-outline"></ion-icon>
+												{{ 'Add billing address' | translate }}
+											</ion-button>
+										</ng-template>
+									</datatable-empty-message>
+									<datatable-column [checkbox]="pageConfig.canEdit" name=""></datatable-column>
+									<datatable-column class="col-name" name="Billing address" property="Id">
+										<ng-template let-i="row" datatable-cell-template>
+											<a class="clickable" (click)="openTaxInfoModal(i)">
+												<span>{{ i.Name || i.CompanyName }}</span>
+												&nbsp;<ion-icon color="warning" name="star" *ngIf="i.IsDefault"></ion-icon>
+											</a>
+										</ng-template>
+									</datatable-column>
+
+									<!-- <datatable-column class="col-name col-custom" name="Tax code" property="TaxCode">
 											<ng-template let-i="row" datatable-cell-template>
 												<span *ngIf="i.TaxCode" class="sp-custom">{{ 'Tax code' | translate }}:&nbsp;</span>
 												<span *ngIf="i.TaxCode">{{ i.TaxCode }}</span>
 											</ng-template>
 										</datatable-column>
+
 										<datatable-column class="col-name col-custom" name="Identity card number" property="IdentityCardNumber">
 											<ng-template let-i="row" datatable-cell-template>
 												<span *ngIf="i.IdentityCardNumber" class="sp-custom">{{ 'Identity card number' | translate }}:&nbsp;</span>
 												<span *ngIf="i.IdentityCardNumber">{{ i.IdentityCardNumber }}</span>
 											</ng-template>
-										</datatable-column>
-										<datatable-column class="col-name col-default-custom" name="Default" property="IsDefault">
+										</datatable-column> -->
+
+									<!-- <datatable-column class="col-checkbox" name="" property="IsDefault">
 											<ng-template let-i="row" datatable-cell-template>
 												<span *ngIf="i.IsDefault" class="sp-custom">{{ 'Default' | translate }}:&nbsp;</span>
 												<ion-icon class="min-btn" *ngIf="i.IsDefault" name="checkmark"></ion-icon>
 											</ng-template>
-										</datatable-column>
-										<datatable-column *ngIf="pageConfig.canEdit" class="col-icon" name="" property="Id">
-											<ng-template datatable-header-template>
-												<ion-button
-													*ngIf="pageConfig.canEdit && selectedTaxInfos.length > 0"
-													(click)="removeSelectedTaxInfos()"
-													size="small"
-													title="{{ 'Delete' | translate }}"
-													fill="clear"
-												>
-													<ion-icon color="danger" class="min-btn clickable" slot="icon-only" name="trash-outline"></ion-icon>
-												</ion-button>
-											</ng-template>
-											<ng-template let-idx="idx" datatable-cell-template>
-												<ion-icon color="danger" class="min-btn clickable" slot="icon-only" name="trash-outline" (click)="removeTaxInfoLine(idx)"></ion-icon>
-											</ng-template>
-										</datatable-column>
-									</app-data-table>
+										</datatable-column> -->
 
-									<div class="ion-padding" *ngIf="pageConfig.canEdit && item.TaxInfos?.length > 0">
-										<ion-button fill="clear" size="small" (click)="openTaxInfoModal()">
-											<ion-icon slot="start" name="add-circle-outline"></ion-icon>
-											{{ 'Add billing address' | translate }}
-										</ion-button>
-									</div>
-								</div>
-							</ion-col>
-						</ion-row>
+									<datatable-column *ngIf="pageConfig.canEdit" class="col-icon" name="" property="Id">
+										<ng-template datatable-header-template>
+											<ion-button
+												*ngIf="pageConfig.canEdit && selectedTaxInfos.length > 0"
+												(click)="removeSelectedTaxInfos()"
+												size="small"
+												title="{{ 'Delete' | translate }}"
+												fill="clear"
+											>
+												<ion-icon color="danger" class="min-btn clickable" slot="icon-only" name="trash-outline"></ion-icon>
+											</ion-button>
+										</ng-template>
+										<ng-template let-idx="idx" datatable-cell-template>
+											<ion-icon color="danger" class="min-btn clickable" slot="icon-only" name="trash-outline" (click)="removeTaxInfoLine(idx)"></ion-icon>
+										</ng-template>
+									</datatable-column>
+								</app-data-table>
 
-						<!-- <app-bp-address
-                  [bpId]="item.Id"
-                  [canEdit]="pageConfig.canEdit"
-                  [canEdit]="pageConfig.canEdit"
-                  *ngIf="item.Id"
-                ></app-bp-address> -->
-						<!-- <app-bp-address [bpId]="item.Id" [canEdit]="pageConfig.canEdit" *ngIf="item.Id"></app-bp-address> -->
-
-						<!-- Thông tin hóa đơn -->
-						<!-- <app-bp-tax-address [bpId]="item.Id" [canEdit]="pageConfig.canEdit" *ngIf="item.Id"></app-bp-tax-address> -->
-						<ion-row class="hr-group" *ngIf="item.Id==0">
-							<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
-								<ion-list-header class="ion-no-padding">
-									<ion-label color="primary">{{'Invoice information' | translate}}</ion-label>
-								</ion-list-header>
-							</ion-col>
-							<ion-col size="12" size-sm="6" size-xl="4">
-								<div class="c-control">
-									<label class="c-label" for="CompanyName"
-										>{{'Company / organization name' | translate}}
-										<span
-											*ngIf="!formGroup.controls.CompanyName.valid && !formGroup.controls.CompanyName.pending && (formGroup.controls.CompanyName.dirty || submitAttempt)"
-											ion-text
-											color="danger"
-											>(*)</span
-										>
-									</label>
-									<input (change)="saveChange()" class="c-input" id="CompanyName" formControlName="CompanyName" type="text" />
-								</div>
-								<div class="c-control">
-									<label class="c-label" for="TaxCode"
-										>{{'Tax code' | translate}}
-										<span
-											*ngIf="!formGroup.controls.TaxCode.valid && !formGroup.controls.TaxCode.pending && (formGroup.controls.TaxCode.dirty || submitAttempt)"
-											ion-text
-											color="danger"
-											>(*)</span
-										>
-									</label>
-									<input (change)="saveChange()" class="c-input" id="TaxCode" formControlName="TaxCode" type="text" />
-								</div>
-								<div class="c-control">
-									<label class="c-label" for="Email"
-										>{{'Email address' | translate}}
-										<span
-											*ngIf="!formGroup.controls.Email.valid && !formGroup.controls.Email.pending && (formGroup.controls.Email.dirty || submitAttempt)"
-											ion-text
-											color="danger"
-											>(*)</span
-										>
-									</label>
-									<input (change)="saveChange()" class="c-input" id="Email" formControlName="Email" type="text" />
-								</div>
-							</ion-col>
-							<ion-col size="12" size-sm="6" size-xl="4">
-								<div class="c-control">
-									<label class="c-label" for="BillingAddress"
-										>{{'Invoice address' | translate}}
-										<span
-											*ngIf="!formGroup.controls.BillingAddress.valid && !formGroup.controls.BillingAddress.pending && (formGroup.controls.BillingAddress.dirty || submitAttempt)"
-											ion-text
-											color="danger"
-											>(*)</span
-										>
-									</label>
-									<textarea (change)="saveChange()" rows="3" class="c-input" id="BillingAddress" formControlName="BillingAddress" type="textarea"></textarea>
+								<div class="ion-padding" *ngIf="pageConfig.canEdit && item.TaxInfos?.length > 0">
+									<ion-button fill="clear" size="small" (click)="openTaxInfoModal()">
+										<ion-icon slot="start" name="add-circle-outline"></ion-icon>
+										{{ 'Add billing address' | translate }}
+									</ion-button>
 								</div>
 							</ion-col>
 						</ion-row>
 
 						<!-- Thông tin phân loại -->
 						<app-bp-outlet-info [bpId]="item.Id" [canEdit]="pageConfig.canEdit" *ngIf="item.Id && formGroup.controls.IsOutlets.value"></app-bp-outlet-info>
-
-						<!-- <ion-row class="hr-group">
-							<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
-								<ion-list-header class="ion-no-padding">
-									<ion-label color="primary">{{'Classification information' | translate}}</ion-label>
-								</ion-list-header>
-							</ion-col>
-
-							<ion-col size="12" size-sm="6" size-xl="4">
-								<div class="c-control">
-									<label class="c-label" for="NumberOfEmployees">{{'Scale (staff)' | translate}}
-										<span *ngIf="!formGroup.controls.NumberOfEmployees.valid && !formGroup.controls.NumberOfEmployees.pending && (formGroup.controls.NumberOfEmployees.dirty || submitAttempt)" ion-text color="danger">(*)</span>
-									</label>
-									<input (change)="saveChange()" class="c-input" id="NumberOfEmployees" formControlName="NumberOfEmployees" type="number">
-								</div>
-								<div class="c-control">
-									<label class="c-label" for="AnnualRevenue">{{'Scale (revenue)' | translate}}
-										<span *ngIf="!formGroup.controls.AnnualRevenue.valid && !formGroup.controls.AnnualRevenue.pending && (formGroup.controls.AnnualRevenue.dirty || submitAttempt)" ion-text color="danger">(*)</span>
-									</label>
-									<input (change)="saveChange()" class="c-input" id="AnnualRevenue" formControlName="AnnualRevenue" type="number">
-								</div>
-							</ion-col>
-							<ion-col size="12" size-sm="6" size-xl="4">
-
-								<div class="c-control">
-									<label class="c-label" for="Website">{{'Website' | translate}}
-										<span *ngIf="!formGroup.controls.Website.valid && !formGroup.controls.Website.pending && (formGroup.controls.Website.dirty || submitAttempt)" ion-text color="danger">(*)</span>
-									</label>
-									<input (change)="saveChange()" class="c-input" id="Website" formControlName="Website" type="text">
-								</div>
-
-								<div class="c-control">
-									<label class="c-label" for="BankName">{{'Bank name' | translate}}
-										<span *ngIf="!formGroup.controls.BankName.valid && !formGroup.controls.BankName.pending && (formGroup.controls.BankName.dirty || submitAttempt)" ion-text color="danger">(*)</span>
-									</label>
-									<input (change)="saveChange()" class="c-input" id="BankName" formControlName="BankName" type="number">
-								</div>
-
-								<div class="c-control">
-									<label class="c-label" for="BankAccount">{{'Bank account number' | translate}}
-										<span *ngIf="!formGroup.controls.BankAccount.valid && !formGroup.controls.BankAccount.pending && (formGroup.controls.BankAccount.dirty || submitAttempt)" ion-text color="danger">(*)</span>
-									</label>
-									<input (change)="saveChange()" class="c-input" id="BankAccount" formControlName="BankAccount" type="number">
-								</div>
-
-							</ion-col>
-						</ion-row> -->
 
 						<!-- Tuyến bán -->
 						<ion-row class="hr-group" *ngIf="item?._Routes">
