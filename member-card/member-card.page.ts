@@ -1,11 +1,10 @@
-import { CRM_MemberCardProvider } from './../../../services/static/services.service';
 import { Component } from '@angular/core';
 import { Location } from '@angular/common';
 import { NavController, ModalController, AlertController, LoadingController, PopoverController } from '@ionic/angular';
 import { environment } from 'src/environments/environment';
 import { PageBase } from 'src/app/page-base';
 import { EnvService } from 'src/app/services/core/env.service';
-import { BRA_BranchProvider } from 'src/app/services/static/services.service';
+import { BRA_BranchProvider, CRM_MemberCardProvider } from 'src/app/services/static/services.service';
 import { WriteNfcModalPage } from './write-nfc-modal/write-nfc-modal.page';
 
 @Component({
@@ -15,6 +14,7 @@ import { WriteNfcModalPage } from './write-nfc-modal/write-nfc-modal.page';
 	standalone: false,
 })
 export class MemberCardPage extends PageBase {
+	statusList = [];
 
 	constructor(
 		public pageProvider: CRM_MemberCardProvider,
@@ -29,13 +29,14 @@ export class MemberCardPage extends PageBase {
 	) {
 		super();
 	}
-	statusList = [];
+
 	preLoadData(event?: any): void {
 		Promise.all([this.env.getStatus('StandardApprovalStatus')]).then((values: any) => {
 			this.statusList = values[0];
 			super.preLoadData(event);
 		});
 	}
+
 	loadedData(event) {
 		this.items.forEach((i) => {
 			i._Status = this.statusList.find((d) => d.Code == i.Status);
@@ -47,19 +48,11 @@ export class MemberCardPage extends PageBase {
 	}
 
 	async writeNFC() {
-		const requests = this.selectedItems?.length ? this.selectedItems : this.items;
-		if (!requests?.length) {
-			this.env.showMessage('Không có dữ liệu để ghi thẻ NFC.', 'warning');
-			return;
-		}
-
 		const modal = await this.modalController.create({
 			component: WriteNfcModalPage,
 			canDismiss: true,
 			componentProps: {
 				title: 'Ghi thẻ NFC',
-				requests,
-				selectedItems: this.selectedItems,
 			},
 		});
 

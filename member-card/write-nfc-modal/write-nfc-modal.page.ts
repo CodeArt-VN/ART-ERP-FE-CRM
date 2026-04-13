@@ -1,9 +1,12 @@
-import { ChangeDetectorRef, Component, Input, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { ModalController } from '@ionic/angular';
+import { ChangeDetectorRef, Component, Input, NgZone, OnDestroy } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { LoadingController, ModalController, NavController } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
 import { concat, Observable, of, Subject } from 'rxjs';
 import { catchError, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
 import { NFC, NDEFMessagesTransformable, NDEFWriteOptions, TagInfo } from '@exxili/capacitor-nfc';
+import { environment } from 'src/environments/environment';
+import { PageBase } from 'src/app/page-base';
 import { EnvService } from 'src/app/services/core/env.service';
 import { CRM_ContactProvider, CRM_MemberCardProvider } from 'src/app/services/static/services.service';
 
@@ -40,15 +43,15 @@ interface WriteRequestViewModel {
 	styleUrls: ['write-nfc-modal.page.scss'],
 	standalone: false,
 })
-export class WriteNfcModalPage implements OnInit, OnDestroy {
-	@Input() requests: any[] = [];
-	@Input() selectedItems: any[] = [];
-	@Input() title = 'Ghi thẻ NFC';
+export class WriteNfcModalPage extends PageBase implements OnDestroy {
+	@Input() title = 'Write NFC Card';
 
 	currentStep: StepKey = 1;
 	requestKeyword = '';
 	requestList: WriteRequestViewModel[] = [];
 	selectedRequest: WriteRequestViewModel = null;
+	statusList = [];
+	private localRequestList: WriteRequestViewModel[] = [];
 
 	contactOptions: ContactOption[] = [];
 	contactList$: Observable<ContactOption[]>;
@@ -59,7 +62,7 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 	selectedContact: ContactOption = null;
 
 	writePhase: WritePhase = 'idle';
-	statusMessage = 'Đưa thẻ NFC vào điện thoại để bắt đầu ghi.';
+	statusMessage = 'Place the NFC card near the phone to start writing.';
 	errorMessage = '';
 	lastDetectedSerial = '';
 	lastSavedItem: any = null;
@@ -69,26 +72,55 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 	private removeErrorListener?: () => void;
 	private removeReadListener?: () => void;
 	private hasWrittenPayload = false;
+	private addRequestLoading?: HTMLIonLoadingElement;
 
 	constructor(
-		private modalController: ModalController,
-		private memberCardProvider: CRM_MemberCardProvider,
+		public pageProvider: CRM_MemberCardProvider,
+		public env: EnvService,
+		public navCtrl: NavController,
+		public route: ActivatedRoute,
+		public modalController: ModalController,
+		public loadingController: LoadingController,
 		private contactProvider: CRM_ContactProvider,
-		private env: EnvService,
 		private zone: NgZone,
-		private cdr: ChangeDetectorRef
-	) {}
-
-	async ngOnInit(): Promise<void> {
-		this.requestList = this.normalizeRequests();
-		this.initContactSearch();
-		this.contactListInput$.next('');
+		public cdr: ChangeDetectorRef
+	) {
+		super();
+		this.pageConfig.isDetailPage = false;
+		this.pageConfig.infiniteScroll = true;
 	}
 
 	ngOnDestroy(): void {
+		super.ngOnDestroy();
 		this.writeToken++;
 		this.contactListInput$.complete();
 		void this.cleanupNfc();
+	}
+
+	preLoadData(event?: any): void {
+		Promise.all([this.env.getStatus('StandardApprovalStatus')]).then((values: any) => {
+			this.statusList = values[0] || [];
+			super.preLoadData(event);
+		});
+	}
+
+	loadData(event = null, forceReload = false) {
+		this.query.Take = this.query.Take || 20;
+		this.query.SortBy = this.query.SortBy || '[Id_desc]';
+		super.loadData(event, forceReload);
+	}
+
+	loadedData(event = null) {
+		this.items.forEach((item) => {
+			item._Status = this.statusList.find((status) => status.Code == item.Status);
+			item.Avatar = item._Member?.Code ? environment.staffAvatarsServer + item._Staff?.Code + '.jpg' : 'assets/avartar-empty.jpg';
+			item.Email = item._Member?.Email ? item._Staff?.Email.replace(environment.loginEmail, '') : '';
+		});
+
+		this.initContactSearch();
+		this.contactListInput$.next('');
+		this.rebuildRequestList();
+		super.loadedData(event);
 	}
 
 	get stepOffset(): string {
@@ -112,33 +144,34 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 	}
 
 	get footerPrimaryLabel(): string {
-		if (this.currentStep === 1 || this.currentStep === 2) return 'Tiếp tục';
-		if (this.writePhase === 'success') return this.hasPendingRequest() ? 'Xử lý tiếp' : 'Hoàn tất';
-		if (this.writePhase === 'error' && this.lastDetectedSerial) return 'Lưu lại database';
-		if (this.writePhase === 'error' && this.hasWrittenPayload) return 'Đọc lại serial';
-		if (this.writePhase === 'error') return 'Thử lại';
-		return 'Bắt đầu ghi';
+		if (this.currentStep === 1 || this.currentStep === 2) return 'Continue';
+		if (this.writePhase === 'success') return this.hasPendingRequest() ? 'Process Next' : 'Finish';
+		if (this.writePhase === 'error' && this.lastDetectedSerial) return 'Save To Database';
+		if (this.writePhase === 'error' && this.hasWrittenPayload) return 'Read Serial Again';
+		if (this.writePhase === 'error') return 'Retry';
+		return 'Start Writing';
 	}
 
 	get writeStateLabel(): string {
 		switch (this.writePhase) {
 			case 'writing':
-				return 'Đang ghi dữ liệu';
+				return 'Writing Data';
 			case 'awaitingSerial':
-				return 'Đang chờ đọc serial';
+				return 'Waiting For Serial';
 			case 'saving':
-				return 'Đang lưu database';
+				return 'Saving To Database';
 			case 'success':
-				return 'Ghi thành công';
+				return 'Write Successful';
 			case 'error':
-				return 'Ghi thất bại';
+				return 'Write Failed';
 			default:
-				return 'Đang chờ đưa thẻ vào điện thoại';
+				return 'Waiting For NFC Card';
 		}
 	}
 
 	get requestEmptyMessage(): string {
-		return 'Chưa có danh sách yêu cầu ghi thẻ để xử lý.';
+		if (this.pageConfig.showSpinner) return 'Loading card write requests.';
+		return 'No card write requests available.';
 	}
 
 	get filteredRequestList(): WriteRequestViewModel[] {
@@ -162,6 +195,27 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 		return first.Id === second.Id;
 	};
 
+	onRequestSearch(event: any): void {
+		const keyword = `${event?.detail?.value ?? event?.target?.value ?? ''}`;
+		this.requestKeyword = keyword;
+
+		if (keyword.length > 2 || keyword === '') {
+			this.query.Keyword = keyword;
+			this.query.Skip = 0;
+			this.pageConfig.isEndOfData = false;
+			this.loadData('search', true);
+		}
+	}
+
+	loadMoreRequests(event: any): void {
+		if (this.currentStep !== 1 || this.pageConfig.isEndOfData) {
+			event?.target?.complete();
+			return;
+		}
+
+		this.loadData(event);
+	}
+
 	async closeModal(role: 'cancel' | 'confirm' = 'cancel'): Promise<void> {
 		this.writeToken++;
 		await this.cleanupNfc();
@@ -175,25 +229,92 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 		);
 	}
 
-	addNewRequest(): void {
-		const newRequest: WriteRequestViewModel = {
-			requestId: `new-${Date.now()}`,
-			mode: 'Insert',
-			memberCardId: null,
-			displayName: 'Yêu cầu ghi thẻ mới',
-			displayCode: '',
-			remark: 'Tạo mới MemberCard',
-			selectedContactId: null,
-			selectedContact: null,
-			memberCardPayload: null,
-			requestStatus: 'Pending',
-			serialNumber: '',
-			raw: {},
-		};
+	async addNewRequest(): Promise<void> {
+		const token = ++this.writeToken;
+		await this.cleanupNfc();
 
-		this.requestList = [newRequest, ...this.requestList];
-		this.requestKeyword = '';
-		this.selectRequest(newRequest);
+		this.removeReadListener?.();
+		this.removeReadListener = NFC.onRead((data) => {
+			this.runInZone(() => {
+				if (token !== this.writeToken) return;
+
+				const serialNumber = this.extractSerialNumber(data);
+				if (!serialNumber) {
+					void this.dismissAddRequestLoading();
+					this.env.showMessage('Cannot read the serial number. Please try again.', 'danger');
+					return;
+				}
+
+				this.removeReadListener?.();
+				this.removeErrorListener?.();
+				void this.dismissAddRequestLoading();
+				void NFC.cancelScan().catch(() => {});
+
+				const duplicatedRequest = this.findRequestByCardCode(serialNumber);
+				if (duplicatedRequest) {
+					this.env.showMessage(`Card ${serialNumber} already exists in the request list.`, 'warning');
+					return;
+				}
+
+				void this.checkCardCodeExistsInDatabase(serialNumber)
+					.then((isDuplicatedInDatabase) => {
+						this.runInZone(() => {
+							if (token !== this.writeToken) return;
+							if (isDuplicatedInDatabase) {
+								this.env.showMessage(`Card ${serialNumber} already exists in the database.`, 'warning');
+								return;
+							}
+
+							const newRequest: WriteRequestViewModel = {
+								requestId: `new-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+								mode: 'Insert',
+								memberCardId: null,
+								displayName: `New Card Write Request #${this.requestList.length + 1}`,
+								displayCode: serialNumber,
+								remark: 'Create New MemberCard',
+								selectedContactId: null,
+								selectedContact: null,
+								memberCardPayload: null,
+								requestStatus: 'Pending',
+								serialNumber: serialNumber,
+								raw: {},
+							};
+
+							this.localRequestList = [newRequest, ...this.localRequestList];
+							this.rebuildRequestList();
+							this.requestKeyword = '';
+							this.env.showMessage(`Serial scanned successfully: ${serialNumber}`, 'success');
+						});
+					})
+					.catch((error) => {
+						this.runInZone(() => {
+							if (token !== this.writeToken) return;
+							this.env.showMessage(this.resolveErrorMessage(error, 'Cannot check duplicate card codes in the database.'), 'danger');
+						});
+					});
+			});
+		});
+
+		this.removeErrorListener = NFC.onError((error) => {
+			this.runInZone(() => {
+				if (token !== this.writeToken) return;
+				void this.dismissAddRequestLoading();
+				this.env.showMessage(this.resolveErrorMessage(error, 'Cannot read the NFC card.'), 'danger');
+			});
+		});
+
+		try {
+			if (Capacitor.getPlatform() === 'android') {
+				await this.presentAddRequestLoading();
+				this.env.showMessage('Place the new NFC card near the phone to scan the serial number.', 'primary');
+				// await NFC.startScan();
+			} else {
+				await NFC.startScan({ mode: 'auto' });
+			}
+		} catch (error) {
+			await this.dismissAddRequestLoading();
+			this.env.showMessage(this.resolveErrorMessage(error, 'Failed to open the NFC scanner.'), 'danger');
+		}
 	}
 
 	selectRequest(request: WriteRequestViewModel): void {
@@ -278,7 +399,7 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 
 	private async startWriteFlow(): Promise<void> {
 		if (!this.selectedRequest || !this.selectedContactId) {
-			this.errorMessage = 'Cần chọn yêu cầu ghi thẻ và IDContact trước khi bắt đầu.';
+			this.errorMessage = 'Please select a card write request and Contact ID before starting.';
 			this.writePhase = 'error';
 			return;
 		}
@@ -286,7 +407,7 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 		const token = ++this.writeToken;
 		this.resetStep3State();
 		this.writePhase = 'writing';
-		this.statusMessage = 'Đưa thẻ NFC vào điện thoại để bắt đầu ghi dữ liệu.';
+		this.statusMessage = 'Place the NFC card near the phone to start writing data.';
 
 		const pluginReady = await this.ensureNfcReady();
 		if (!pluginReady || token !== this.writeToken) return;
@@ -297,9 +418,16 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 			this.runInZone(() => {
 				if (token !== this.writeToken) return;
 				this.hasWrittenPayload = true;
-				this.writePhase = 'awaitingSerial';
-				this.statusMessage = 'Đã ghi dữ liệu. Đưa lại thẻ vào điện thoại để đọc serial.';
-				void this.captureSerialNumber(token);
+
+				if (this.selectedRequest?.serialNumber) {
+					this.lastDetectedSerial = this.selectedRequest.serialNumber;
+					this.statusMessage = 'Data written successfully. Updating the database...';
+					void this.saveToDatabase(this.lastDetectedSerial);
+				} else {
+					this.writePhase = 'awaitingSerial';
+					this.statusMessage = 'Data written successfully. Place the card near the phone again to read the serial number.';
+					void this.captureSerialNumber(token);
+				}
 			});
 		});
 
@@ -307,7 +435,10 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 			this.runInZone(() => {
 				if (token !== this.writeToken) return;
 				this.writePhase = 'error';
-				this.errorMessage = this.resolveErrorMessage(error, this.hasWrittenPayload ? 'Không thể đọc serial của thẻ.' : 'Không thể ghi dữ liệu vào thẻ NFC.');
+				this.errorMessage = this.resolveErrorMessage(
+					error,
+					this.hasWrittenPayload ? 'Cannot read the card serial number.' : 'Cannot write data to the NFC card.'
+				);
 				this.statusMessage = '';
 			});
 		});
@@ -318,7 +449,7 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 		} catch (error) {
 			if (token !== this.writeToken) return;
 			this.writePhase = 'error';
-			this.errorMessage = this.resolveErrorMessage(error, 'Không thể khởi tạo phiên ghi NFC.');
+			this.errorMessage = this.resolveErrorMessage(error, 'Cannot initialize the NFC write session.');
 		}
 	}
 
@@ -332,7 +463,7 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 				const serialNumber = this.extractSerialNumber(data);
 				if (!serialNumber) {
 					this.writePhase = 'error';
-					this.errorMessage = 'Không đọc được serial của thẻ NFC.';
+					this.errorMessage = 'Cannot read the NFC card serial number.';
 					return;
 				}
 
@@ -347,7 +478,7 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 			} catch (error) {
 				if (token !== this.writeToken) return;
 				this.writePhase = 'error';
-				this.errorMessage = this.resolveErrorMessage(error, 'Không thể khởi động phiên đọc serial NFC.');
+				this.errorMessage = this.resolveErrorMessage(error, 'Cannot start the NFC serial read session.');
 			}
 		}
 	}
@@ -355,18 +486,18 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 	private async saveToDatabase(serialNumber: string): Promise<void> {
 		if (!this.selectedRequest || !this.selectedContactId) {
 			this.writePhase = 'error';
-			this.errorMessage = 'Thiếu dữ liệu để lưu MemberCard xuống database.';
+			this.errorMessage = 'Missing data required to save the MemberCard to the database.';
 			return;
 		}
 
 		this.writePhase = 'saving';
 		this.errorMessage = '';
-		this.statusMessage = 'Đang cập nhật dữ liệu MemberCard xuống database.';
+		this.statusMessage = 'Updating MemberCard data in the database.';
 
 		try {
 			await this.cleanupNfc();
 			const payload = this.buildSavePayload(serialNumber);
-			const savedItem :any = await this.memberCardProvider.save(payload, this.selectedRequest.mode === 'Insert');
+			const savedItem: any = await this.pageProvider.save(payload, this.selectedRequest.mode === 'Insert');
 
 			this.lastSavedItem = savedItem;
 			this.selectedRequest.requestStatus = 'Completed';
@@ -374,12 +505,21 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 			this.selectedRequest.memberCardId = savedItem?.Id || this.selectedRequest.memberCardId;
 			this.selectedRequest.memberCardPayload = savedItem || payload;
 			this.writePhase = 'success';
-			this.statusMessage = 'Đã ghi dữ liệu NFC và cập nhật database thành công.';
-			this.env.showMessage('Ghi thẻ NFC thành công', 'success');
+			const completedRequestId = this.selectedRequest.requestId;
+			const shouldMoveToNextPendingRequest = this.hasPendingRequest();
+			if (shouldMoveToNextPendingRequest) {
+				setTimeout(() => {
+					if (this.writePhase === 'success' && this.selectedRequest?.requestId === completedRequestId) {
+						this.moveToNextPendingRequest();
+					}
+				});
+			}
+			this.statusMessage = 'NFC data was written and the database was updated successfully.';
+			this.env.showMessage('NFC card written successfully.', 'success');
 		} catch (error) {
 			this.selectedRequest.requestStatus = 'Failed';
 			this.writePhase = 'error';
-			this.errorMessage = this.resolveErrorMessage(error, 'Không thể lưu dữ liệu MemberCard xuống database.');
+			this.errorMessage = this.resolveErrorMessage(error, 'Cannot save MemberCard data to the database.');
 			this.statusMessage = '';
 		}
 	}
@@ -389,19 +529,21 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 			records: [
 				{
 					type: 'T',
-					payload: `${this.selectedContactId}`,
+					payload: JSON.stringify({
+						IDBP: this.selectedContactId,
+					}),
 				},
 			],
 		};
 	}
 
 	private buildSavePayload(serialNumber: string): any {
-		const basePayload = this.selectedRequest?.memberCardPayload && typeof this.selectedRequest.memberCardPayload === 'object' ? { ...this.selectedRequest.memberCardPayload } : {};
+		const basePayload =
+			this.selectedRequest?.memberCardPayload && typeof this.selectedRequest.memberCardPayload === 'object' ? { ...this.selectedRequest.memberCardPayload } : {};
 		const payload: any = {
-			...basePayload,
 			Code: serialNumber,
 			IDMember: this.selectedContactId,
-			IDBranch: basePayload?.IDBranch || this.env.selectedBranch,
+			Status: 'Approved',
 		};
 
 		if (!payload.Name && (basePayload?.Name || this.selectedContact?.Name || this.selectedRequest?.displayName)) {
@@ -411,12 +553,13 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 		if (this.selectedRequest.mode === 'Update') {
 			const memberCardId = this.selectedRequest.memberCardId || basePayload?.Id;
 			if (!memberCardId) {
-				throw new Error('Thiếu MemberCard Id để cập nhật dữ liệu.');
+				throw new Error('Missing MemberCard Id for update.');
 			}
 
 			payload.Id = memberCardId;
 		} else {
-			delete payload.Id;
+			payload.StartDate = new Date().toISOString();
+			payload.Id = 0;
 		}
 
 		return payload;
@@ -425,13 +568,13 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 	private async ensureNfcReady(): Promise<boolean> {
 		if (Capacitor.getPlatform() === 'web') {
 			this.writePhase = 'error';
-			this.errorMessage = 'NFC không hỗ trợ trên nền tảng web.';
+			this.errorMessage = 'NFC is not supported on the web platform.';
 			return false;
 		}
 
 		if (!Capacitor.isPluginAvailable('NFC')) {
 			this.writePhase = 'error';
-			this.errorMessage = 'Plugin NFC chưa sẵn sàng trong bản build hiện tại.';
+			this.errorMessage = 'The NFC plugin is not available in the current build.';
 			return false;
 		}
 
@@ -439,12 +582,12 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 			const support = await NFC.isSupported();
 			if (!support?.supported) {
 				this.writePhase = 'error';
-				this.errorMessage = 'Thiết bị này không hỗ trợ NFC hoặc NFC đang bị tắt.';
+				this.errorMessage = 'This device does not support NFC or NFC is turned off.';
 				return false;
 			}
 		} catch (error) {
 			this.writePhase = 'error';
-			this.errorMessage = this.resolveErrorMessage(error, 'Không kiểm tra được trạng thái NFC của thiết bị.');
+			this.errorMessage = this.resolveErrorMessage(error, 'Cannot determine the NFC status of this device.');
 			return false;
 		}
 
@@ -473,7 +616,7 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 								this.syncSelectedContactIntoOptions();
 							}),
 							catchError((error) => {
-								this.env.showMessage(this.resolveErrorMessage(error, 'Không tải được danh sách contact.'), 'danger');
+								this.env.showMessage(this.resolveErrorMessage(error, 'Cannot load the contact list.'), 'danger');
 								return of([]);
 							}),
 							tap(() => {
@@ -486,8 +629,7 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 		);
 	}
 
-	private normalizeRequests(): WriteRequestViewModel[] {
-		const source = Array.isArray(this.requests) && this.requests.length ? this.requests : this.selectedItems;
+	private normalizeRequests(source: any[] = this.items): WriteRequestViewModel[] {
 		if (!Array.isArray(source) || !source.length) return [];
 
 		return source.map((raw, index) => {
@@ -505,20 +647,74 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 			const selectedContactId = raw?.IDMember || raw?.IDContact || preselectedContact?.Id || null;
 
 			return {
-				requestId: `${memberCardId || raw?.Id || index}-${index}`,
+				requestId: `${memberCardId || raw?.Id || raw?.Code || raw?.SerialNumber || index}`,
 				mode,
 				memberCardId,
-				displayName: raw?.Name || raw?.Title || preselectedContact?.Name || `Yêu cầu ghi thẻ #${index + 1}`,
+				displayName: raw?.Name || raw?.Title || preselectedContact?.Name || `Card Write Request #${index + 1}`,
 				displayCode: raw?.Code || raw?.RequestCode || raw?.MemberCardCode || '',
 				remark: raw?.Remark || raw?.Description || '',
 				selectedContactId,
 				selectedContact: preselectedContact,
 				memberCardPayload,
-				requestStatus: 'Pending',
+				requestStatus: this.normalizeRequestStatus(raw),
 				serialNumber: raw?.SerialNumber || raw?.Code || '',
 				raw,
 			};
 		});
+	}
+
+	private rebuildRequestList(): void {
+		const existingRequests = new Map(this.requestList.map((item) => [item.requestId, item]));
+		const remoteRequests = this.normalizeRequests(this.items).map((item) => this.mergeRequestState(item, existingRequests.get(item.requestId)));
+		const nextRequestList = this.mergeUniqueRequests([...this.localRequestList, ...remoteRequests]);
+		this.requestList = nextRequestList;
+		this.syncSelectedRequestReference();
+	}
+
+	private mergeRequestState(request: WriteRequestViewModel, existing?: WriteRequestViewModel): WriteRequestViewModel {
+		if (!existing) return request;
+
+		return {
+			...request,
+			requestStatus: existing.requestStatus || request.requestStatus,
+			selectedContactId: existing.selectedContactId ?? request.selectedContactId,
+			selectedContact: existing.selectedContact ?? request.selectedContact,
+			memberCardPayload: existing.memberCardPayload ?? request.memberCardPayload,
+			serialNumber: existing.serialNumber || request.serialNumber,
+		};
+	}
+
+	private mergeUniqueRequests(requests: WriteRequestViewModel[]): WriteRequestViewModel[] {
+		const uniqueRequests = new Map<string, WriteRequestViewModel>();
+
+		requests.forEach((request) => {
+			const requestKey = this.getRequestIdentityKey(request);
+			if (!uniqueRequests.has(requestKey)) {
+				uniqueRequests.set(requestKey, request);
+			}
+		});
+
+		return Array.from(uniqueRequests.values());
+	}
+
+	private getRequestIdentityKey(request: WriteRequestViewModel): string {
+		if (request.memberCardId) return `member-card-${request.memberCardId}`;
+
+		const cardCode = this.normalizeCardCode(request.serialNumber || request.displayCode);
+		if (cardCode) return `card-code-${cardCode}`;
+
+		return `request-id-${request.requestId}`;
+	}
+
+	private syncSelectedRequestReference(): void {
+		if (!this.selectedRequest) return;
+
+		const matchedRequest = this.requestList.find((item) => item.requestId === this.selectedRequest.requestId);
+		if (!matchedRequest) return;
+
+		this.selectedRequest = matchedRequest;
+		this.selectedContact = matchedRequest.selectedContact || this.selectedContact;
+		this.selectedContactId = matchedRequest.selectedContactId || this.selectedContactId;
 	}
 
 	private looksLikeMemberCard(raw: any): boolean {
@@ -527,7 +723,7 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 	}
 
 	private moveToNextPendingRequest(): void {
-		const nextRequest = this.requestList.find((item) => item.requestStatus !== 'Completed' && item.requestId !== this.selectedRequest?.requestId);
+		const nextRequest = this.getNextPendingRequest();
 		if (!nextRequest) {
 			void this.closeModal('confirm');
 			return;
@@ -537,7 +733,49 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 	}
 
 	private hasPendingRequest(): boolean {
-		return this.requestList.some((item) => item.requestStatus !== 'Completed' && item.requestId !== this.selectedRequest?.requestId);
+		return !!this.getNextPendingRequest();
+	}
+
+	private getNextPendingRequest(): WriteRequestViewModel | null {
+		return this.requestList.find((item) => item.requestStatus === 'Pending' && item.requestId !== this.selectedRequest?.requestId) || null;
+	}
+
+	private findRequestByCardCode(cardCode: string): WriteRequestViewModel | null {
+		const normalizedCardCode = this.normalizeCardCode(cardCode);
+		if (!normalizedCardCode) return null;
+
+		return (
+			this.requestList.find((item) => {
+				const requestCardCode = this.normalizeCardCode(item.serialNumber || item.displayCode || item.raw?.Code || item.raw?.SerialNumber);
+				return requestCardCode === normalizedCardCode;
+			}) || null
+		);
+	}
+
+	private async checkCardCodeExistsInDatabase(cardCode: string): Promise<boolean> {
+		const normalizedCardCode = this.normalizeCardCode(cardCode);
+		if (!normalizedCardCode) return false;
+
+		const result: any = await this.pageProvider.read(
+			{
+				Code_eq: cardCode,
+				Take: 1,
+			},
+			true
+		);
+		const records = Array.isArray(result?.data) ? result.data : [];
+		return records.some((item) => this.normalizeCardCode(item?.Code || item?.SerialNumber) === normalizedCardCode);
+	}
+
+	private normalizeCardCode(value: any): string {
+		return `${value || ''}`.trim().toLowerCase();
+	}
+
+	private normalizeRequestStatus(raw: any): WriteRequestViewModel['requestStatus'] {
+		const status = `${raw?.Status || ''}`.trim();
+		if (status === 'Approved') return 'Completed';
+		if (status === 'Unapproved') return 'Failed';
+		return 'Pending';
 	}
 
 	private extractSerialNumber(data: NDEFMessagesTransformable): string {
@@ -556,7 +794,7 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 
 	private resetStep3State(): void {
 		this.writePhase = 'idle';
-		this.statusMessage = 'Đưa thẻ NFC vào điện thoại để bắt đầu ghi.';
+		this.statusMessage = 'Place the NFC card near the phone to start writing.';
 		this.errorMessage = '';
 		this.lastDetectedSerial = '';
 		this.hasWrittenPayload = false;
@@ -600,13 +838,32 @@ export class WriteNfcModalPage implements OnInit, OnDestroy {
 
 		await NFC.cancelScan().catch(() => undefined);
 		await NFC.cancelWriteAndroid().catch(() => undefined);
+		await this.dismissAddRequestLoading();
+	}
+
+	private async presentAddRequestLoading(): Promise<void> {
+		await this.dismissAddRequestLoading();
+		this.addRequestLoading = await this.loadingController.create({
+			message: 'Waiting to scan the NFC card...',
+			spinner: 'crescent',
+			backdropDismiss: false,
+		});
+		await this.addRequestLoading.present();
+	}
+
+	private async dismissAddRequestLoading(): Promise<void> {
+		if (!this.addRequestLoading) return;
+
+		const loading = this.addRequestLoading;
+		this.addRequestLoading = undefined;
+		await loading.dismiss().catch(() => undefined);
 	}
 
 	private resolveErrorMessage(error: any, fallback: string): string {
 		const message = `${error?.error || error?.message || error || fallback}`.trim();
 		if (!message) return fallback;
-		if (/permission/i.test(message)) return 'Thiết bị chưa cấp quyền cần thiết để dùng NFC.';
-		if (/cancelled|canceled|cancel/i.test(message)) return 'Phiên NFC đã bị hủy.';
+		if (/permission/i.test(message)) return 'The device has not granted the required NFC permission.';
+		if (/cancelled|canceled|cancel/i.test(message)) return 'The NFC session was canceled.';
 		return message;
 	}
 
