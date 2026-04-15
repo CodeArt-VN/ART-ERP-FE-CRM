@@ -1,18 +1,18 @@
 import { ChangeDetectorRef, Component, Input, NgZone, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { LoadingController, ModalController, NavController } from '@ionic/angular';
+import { ModalController, NavController } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
 import { concat, Observable, of, Subject } from 'rxjs';
 import { catchError, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
-import { NFC, NDEFMessagesTransformable, NDEFWriteOptions, TagInfo } from '@exxili/capacitor-nfc';
+import { NFC, NDEFWriteOptions } from '@exxili/capacitor-nfc';
 import { environment } from 'src/environments/environment';
 import { PageBase } from 'src/app/page-base';
 import { EnvService } from 'src/app/services/core/env.service';
 import { CRM_ContactProvider, CRM_MemberCardProvider } from 'src/app/services/static/services.service';
 
 type RequestMode = 'Insert' | 'Update';
-type StepKey = 1 | 2 | 3;
-type WritePhase = 'idle' | 'writing' | 'awaitingSerial' | 'saving' | 'success' | 'error';
+type StepKey = 1 | 2;
+type WritePhase = 'idle' | 'waitingForCard' | 'validatingCard' | 'writing' | 'saving' | 'success' | 'error' | 'completed';
 
 interface ContactOption {
 	Id: number;
@@ -62,7 +62,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 	selectedContact: ContactOption = null;
 
 	writePhase: WritePhase = 'idle';
-	statusMessage = 'Place the NFC card near the phone to start writing.';
+	statusMessage = 'Prepare the request queue to start batch write.';
 	errorMessage = '';
 	lastDetectedSerial = '';
 	lastSavedItem: any = null;
@@ -72,7 +72,6 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 	private removeErrorListener?: () => void;
 	private removeReadListener?: () => void;
 	private hasWrittenPayload = false;
-	private addRequestLoading?: HTMLIonLoadingElement;
 
 	constructor(
 		public pageProvider: CRM_MemberCardProvider,
@@ -80,7 +79,6 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		public navCtrl: NavController,
 		public route: ActivatedRoute,
 		public modalController: ModalController,
-		public loadingController: LoadingController,
 		private contactProvider: CRM_ContactProvider,
 		private zone: NgZone,
 		public cdr: ChangeDetectorRef
@@ -127,45 +125,40 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		return `translateX(-${(this.currentStep - 1) * 100}%)`;
 	}
 
-	get canStartWrite(): boolean {
-		return !!this.selectedRequest && !!this.selectedContactId && !this.isBusy;
+	get isBusy(): boolean {
+		return ['waitingForCard', 'validatingCard', 'writing', 'saving'].includes(this.writePhase);
 	}
 
 	get isPrimaryDisabled(): boolean {
-		if (this.isBusy) return true;
-		if (this.currentStep === 1) return !this.selectedRequest;
-		if (this.currentStep === 2) return !this.selectedContactId;
-		if (this.writePhase === 'idle') return !this.canStartWrite;
-		return false;
-	}
-
-	get isBusy(): boolean {
-		return ['writing', 'awaitingSerial', 'saving'].includes(this.writePhase);
+		if (this.currentStep === 1) return !this.canStartBatch;
+		return this.isBusy || !['error', 'completed'].includes(this.writePhase);
 	}
 
 	get footerPrimaryLabel(): string {
-		if (this.currentStep === 1 || this.currentStep === 2) return 'Continue';
-		if (this.writePhase === 'success') return this.hasPendingRequest() ? 'Process Next' : 'Finish';
-		if (this.writePhase === 'error' && this.lastDetectedSerial) return 'Save To Database';
-		if (this.writePhase === 'error' && this.hasWrittenPayload) return 'Read Serial Again';
-		if (this.writePhase === 'error') return 'Retry';
-		return 'Start Writing';
+		if (this.currentStep === 1) return 'Start Batch Write';
+		if (this.writePhase === 'completed') return 'Finish';
+		if (this.writePhase === 'error' && this.hasWrittenPayload && this.lastDetectedSerial) return 'Save To Database';
+		return 'Retry Current Request';
 	}
 
 	get writeStateLabel(): string {
 		switch (this.writePhase) {
+			case 'waitingForCard':
+				return 'Waiting For Card';
+			case 'validatingCard':
+				return 'Validating Card';
 			case 'writing':
 				return 'Writing Data';
-			case 'awaitingSerial':
-				return 'Waiting For Serial';
 			case 'saving':
 				return 'Saving To Database';
 			case 'success':
-				return 'Write Successful';
+				return 'Request Completed';
+			case 'completed':
+				return 'Batch Completed';
 			case 'error':
-				return 'Write Failed';
+				return 'Action Required';
 			default:
-				return 'Waiting For NFC Card';
+				return 'Preparation';
 		}
 	}
 
@@ -178,7 +171,57 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		const keyword = `${this.requestKeyword || ''}`.trim().toLowerCase();
 		if (!keyword) return this.requestList;
 
-		return this.requestList.filter((item) => `${item.displayCode || ''}`.toLowerCase().includes(keyword));
+		return this.requestList.filter((item) => {
+			const searchSource = [item.displayName, item.displayCode, item.selectedContact?.Name, item.selectedContact?.Code, item.selectedContactId]
+				.filter(Boolean)
+				.join(' ')
+				.toLowerCase();
+			return searchSource.includes(keyword);
+		});
+	}
+
+	get totalRequestCount(): number {
+		return this.requestList.length;
+	}
+
+	get completedRequestCount(): number {
+		return this.requestList.filter((item) => item.requestStatus === 'Completed').length;
+	}
+
+	get failedRequestCount(): number {
+		return this.requestList.filter((item) => item.requestStatus === 'Failed').length;
+	}
+
+	get pendingRequestCount(): number {
+		return this.requestList.filter((item) => item.requestStatus === 'Pending').length;
+	}
+
+	get pendingWithoutContactCount(): number {
+		return this.requestList.filter((item) => item.requestStatus === 'Pending' && !item.selectedContactId).length;
+	}
+
+	get readyRequestCount(): number {
+		return this.getBatchRequests().length;
+	}
+
+	get canStartBatch(): boolean {
+		return this.pendingRequestCount > 0 && this.pendingWithoutContactCount === 0 && !this.isBusy;
+	}
+
+	get batchProgressValue(): number {
+		const total = this.totalRequestCount || 1;
+		return this.completedRequestCount / total;
+	}
+
+	get currentBatchSequence(): number {
+		if (!this.selectedRequest) return 0;
+		const queue = this.getBatchQueueOrder();
+		const index = queue.findIndex((item) => item.requestId === this.selectedRequest.requestId);
+		return index >= 0 ? index + 1 : 0;
+	}
+
+	get batchQueuePreview(): WriteRequestViewModel[] {
+		return this.requestList.slice(0, 6);
 	}
 
 	trackByRequest(_: number, item: WriteRequestViewModel): string {
@@ -224,107 +267,45 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 				savedItem: this.lastSavedItem,
 				request: this.selectedRequest,
 				serialNumber: this.lastDetectedSerial || this.selectedRequest?.serialNumber || null,
+				completedCount: this.completedRequestCount,
+				totalCount: this.totalRequestCount,
 			},
 			role
 		);
 	}
 
-	async addNewRequest(): Promise<void> {
-		const token = ++this.writeToken;
-		await this.cleanupNfc();
+	addNewRequest(): void {
+		const newRequest: WriteRequestViewModel = {
+			requestId: `new-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+			mode: 'Insert',
+			memberCardId: null,
+			displayName: `Manual Batch Request #${this.localRequestList.length + 1}`,
+			displayCode: '',
+			remark: 'Assign a contact before starting batch write.',
+			selectedContactId: null,
+			selectedContact: null,
+			memberCardPayload: null,
+			requestStatus: 'Pending',
+			serialNumber: '',
+			raw: {},
+		};
 
-		this.removeReadListener?.();
-		this.removeReadListener = NFC.onRead((data) => {
-			this.runInZone(() => {
-				if (token !== this.writeToken) return;
-
-				const serialNumber = this.extractSerialNumber(data);
-				if (!serialNumber) {
-					void this.dismissAddRequestLoading();
-					this.env.showMessage('Cannot read the serial number. Please try again.', 'danger');
-					return;
-				}
-
-				this.removeReadListener?.();
-				this.removeErrorListener?.();
-				void this.dismissAddRequestLoading();
-				void NFC.cancelScan().catch(() => {});
-
-				const duplicatedRequest = this.findRequestByCardCode(serialNumber);
-				if (duplicatedRequest) {
-					this.env.showMessage(`Card ${serialNumber} already exists in the request list.`, 'warning');
-					return;
-				}
-
-				void this.checkCardCodeExistsInDatabase(serialNumber)
-					.then((isDuplicatedInDatabase) => {
-						this.runInZone(() => {
-							if (token !== this.writeToken) return;
-							if (isDuplicatedInDatabase) {
-								this.env.showMessage(`Card ${serialNumber} already exists in the database.`, 'warning');
-								return;
-							}
-
-							const newRequest: WriteRequestViewModel = {
-								requestId: `new-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
-								mode: 'Insert',
-								memberCardId: null,
-								displayName: `New Card Write Request #${this.requestList.length + 1}`,
-								displayCode: serialNumber,
-								remark: 'Create New MemberCard',
-								selectedContactId: null,
-								selectedContact: null,
-								memberCardPayload: null,
-								requestStatus: 'Pending',
-								serialNumber: serialNumber,
-								raw: {},
-							};
-
-							this.localRequestList = [newRequest, ...this.localRequestList];
-							this.rebuildRequestList();
-							this.requestKeyword = '';
-							this.env.showMessage(`Serial scanned successfully: ${serialNumber}`, 'success');
-						});
-					})
-					.catch((error) => {
-						this.runInZone(() => {
-							if (token !== this.writeToken) return;
-							this.env.showMessage(this.resolveErrorMessage(error, 'Cannot check duplicate card codes in the database.'), 'danger');
-						});
-					});
-			});
-		});
-
-		this.removeErrorListener = NFC.onError((error) => {
-			this.runInZone(() => {
-				if (token !== this.writeToken) return;
-				void this.dismissAddRequestLoading();
-				this.env.showMessage(this.resolveErrorMessage(error, 'Cannot read the NFC card.'), 'danger');
-			});
-		});
-
-		try {
-			if (Capacitor.getPlatform() === 'android') {
-				await this.presentAddRequestLoading();
-				this.env.showMessage('Place the new NFC card near the phone to scan the serial number.', 'primary');
-				// await NFC.startScan();
-			} else {
-				await NFC.startScan({ mode: 'auto' });
-			}
-		} catch (error) {
-			await this.dismissAddRequestLoading();
-			this.env.showMessage(this.resolveErrorMessage(error, 'Failed to open the NFC scanner.'), 'danger');
-		}
+		this.localRequestList = [newRequest, ...this.localRequestList];
+		this.rebuildRequestList();
+		this.selectRequest(newRequest);
+		this.env.showMessage('A new batch request was added. Please assign a contact.', 'primary');
 	}
 
 	selectRequest(request: WriteRequestViewModel): void {
+		if (!request) return;
+		if (this.isBusy && this.currentStep === 2) return;
+
 		this.selectedRequest = request;
 		this.selectedContact = request.selectedContact || null;
 		this.selectedContactId = request.selectedContactId || null;
 		this.syncSelectedContactIntoOptions();
 		this.triggerContactSearch();
-		this.resetStep3State();
-		this.goToStep(2);
+		this.resetBatchState(false);
 	}
 
 	async onContactSelected(contact: ContactOption | null): Promise<void> {
@@ -337,10 +318,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		}
 
 		this.syncSelectedContactIntoOptions();
-
-		if (this.selectedContactId) {
-			this.goToStep(3);
-		}
+		this.rebuildRequestList();
 	}
 
 	goToStep(step: StepKey): void {
@@ -349,144 +327,172 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 	}
 
 	goToPreviousStep(): void {
-		if (this.isBusy) return;
-		if (this.currentStep === 3) {
-			this.goToStep(2);
-			return;
-		}
-		if (this.currentStep === 2) {
-			this.goToStep(1);
-		}
+		if (this.currentStep === 1 || this.isBusy) return;
+
+		this.writeToken++;
+		void this.cleanupNfc();
+		this.resetBatchState(true);
+		this.goToStep(1);
 	}
 
 	async handlePrimaryAction(): Promise<void> {
 		if (this.currentStep === 1) {
-			if (this.selectedRequest) {
-				this.goToStep(2);
-			}
+			await this.startBatchSession();
 			return;
 		}
 
-		if (this.currentStep === 2) {
-			if (this.selectedContactId) {
-				this.goToStep(3);
-			}
-			return;
-		}
-
-		if (this.writePhase === 'success') {
-			if (this.hasPendingRequest()) {
-				this.moveToNextPendingRequest();
-				return;
-			}
-
+		if (this.writePhase === 'completed') {
 			await this.closeModal('confirm');
 			return;
 		}
 
-		if (this.writePhase === 'error' && this.lastDetectedSerial) {
+		if (this.writePhase === 'error' && this.hasWrittenPayload && this.lastDetectedSerial) {
 			await this.saveToDatabase(this.lastDetectedSerial);
-			return;
-		}
-
-		if (this.writePhase === 'error' && this.hasWrittenPayload) {
-			await this.captureSerialNumber(this.writeToken);
 			return;
 		}
 
 		await this.startWriteFlow();
 	}
 
+	private async startBatchSession(): Promise<void> {
+		if (this.pendingWithoutContactCount > 0) {
+			this.env.showMessage('Please assign a contact to every pending request before starting batch write.', 'warning');
+			return;
+		}
+
+		const nextRequest = this.getNextPendingRequest();
+		if (!nextRequest) {
+			this.env.showMessage('No pending request is ready for batch write.', 'warning');
+			return;
+		}
+
+		this.selectRequest(nextRequest);
+		this.goToStep(2);
+		await this.startWriteFlow();
+	}
+
 	private async startWriteFlow(): Promise<void> {
 		if (!this.selectedRequest || !this.selectedContactId) {
-			this.errorMessage = 'Please select a card write request and Contact ID before starting.';
 			this.writePhase = 'error';
+			this.errorMessage = 'Please assign a contact before continuing.';
+			this.statusMessage = '';
 			return;
 		}
 
 		const token = ++this.writeToken;
-		this.resetStep3State();
-		this.writePhase = 'writing';
-		this.statusMessage = 'Place the NFC card near the phone to start writing data.';
+		this.resetBatchState(false);
+		this.writePhase = 'waitingForCard';
+		this.statusMessage = `Place an NFC card near the phone to write member ${this.selectedRequest.displayName}.`;
 
 		const pluginReady = await this.ensureNfcReady();
 		if (!pluginReady || token !== this.writeToken) return;
 
 		await this.cleanupNfc();
-
-		this.removeWriteListener = NFC.onWrite(() => {
-			this.runInZone(() => {
-				if (token !== this.writeToken) return;
-				this.hasWrittenPayload = true;
-
-				if (this.selectedRequest?.serialNumber) {
-					this.lastDetectedSerial = this.selectedRequest.serialNumber;
-					this.statusMessage = 'Data written successfully. Updating the database...';
-					void this.saveToDatabase(this.lastDetectedSerial);
-				} else {
-					this.writePhase = 'awaitingSerial';
-					this.statusMessage = 'Data written successfully. Place the card near the phone again to read the serial number.';
-					void this.captureSerialNumber(token);
-				}
-			});
-		});
+		if (token !== this.writeToken) return;
 
 		this.removeErrorListener = NFC.onError((error) => {
 			this.runInZone(() => {
 				if (token !== this.writeToken) return;
 				this.writePhase = 'error';
-				this.errorMessage = this.resolveErrorMessage(
-					error,
-					this.hasWrittenPayload ? 'Cannot read the card serial number.' : 'Cannot write data to the NFC card.'
-				);
+				this.errorMessage = this.resolveErrorMessage(error, 'Cannot continue the NFC batch write session.');
 				this.statusMessage = '';
 			});
 		});
 
+		await this.writeCardData(token);
+	}
+
+	private async writeCardData(token: number): Promise<void> {
+		if (token !== this.writeToken) return;
+
+		this.runInZone(() => {
+			if (token !== this.writeToken) return;
+			this.writePhase = 'waitingForCard';
+			this.statusMessage = 'Place an NFC card near the phone and keep it steady until the write completes.';
+			this.errorMessage = '';
+		});
+
+		this.removeWriteListener?.();
+		this.removeWriteListener = NFC.onWrite((result?: any) => {
+			void this.handleWriteSuccess(result, token);
+		});
+
 		try {
-			const payload = this.buildWritePayload();
-			await NFC.writeNDEF(payload);
+			this.runInZone(() => {
+				if (token !== this.writeToken) return;
+				this.writePhase = 'writing';
+				this.statusMessage = 'Ready to write. Place the NFC card near the phone now.';
+			});
+			await NFC.writeNDEF(this.buildWritePayload());
 		} catch (error) {
 			if (token !== this.writeToken) return;
 			this.writePhase = 'error';
 			this.errorMessage = this.resolveErrorMessage(error, 'Cannot initialize the NFC write session.');
+			this.statusMessage = '';
 		}
 	}
 
-	private async captureSerialNumber(token: number): Promise<void> {
+	private async handleWriteSuccess(result: any, token: number): Promise<void> {
 		if (token !== this.writeToken) return;
 
-		this.removeReadListener?.();
-		this.removeReadListener = NFC.onRead((data) => {
+		const rawSerialNumber = `${result?.tagInfo?.uid || result?.uid || ''}`.trim();
+		const normalizedSerialNumber = this.normalizeCardCode(rawSerialNumber);
+		if (!normalizedSerialNumber) {
 			this.runInZone(() => {
 				if (token !== this.writeToken) return;
-				const serialNumber = this.extractSerialNumber(data);
-				if (!serialNumber) {
-					this.writePhase = 'error';
-					this.errorMessage = 'Cannot read the NFC card serial number.';
-					return;
-				}
-
-				this.lastDetectedSerial = serialNumber;
-				void this.saveToDatabase(serialNumber);
+				this.writePhase = 'error';
+				this.errorMessage = 'The NFC write completed but the card serial number was not returned by the device.';
+				this.statusMessage = '';
 			});
+			return;
+		}
+
+		this.runInZone(() => {
+			if (token !== this.writeToken) return;
+			this.hasWrittenPayload = true;
+			this.lastDetectedSerial = rawSerialNumber;
+			this.writePhase = 'validatingCard';
+			this.statusMessage = 'Checking the written card before saving.';
+			this.errorMessage = '';
 		});
 
-		if (Capacitor.getPlatform() === 'ios') {
-			try {
-				await NFC.startScan({ mode: 'auto' });
-			} catch (error) {
-				if (token !== this.writeToken) return;
-				this.writePhase = 'error';
-				this.errorMessage = this.resolveErrorMessage(error, 'Cannot start the NFC serial read session.');
-			}
+		const duplicatedRequest = this.findRequestByCardCode(normalizedSerialNumber, this.selectedRequest?.requestId);
+		if (duplicatedRequest) {
+			this.selectedRequest.requestStatus = 'Failed';
+			this.writePhase = 'error';
+			this.errorMessage = `Card ${this.lastDetectedSerial} already exists in the request queue.`;
+			this.statusMessage = '';
+			this.env.showMessage(this.errorMessage, 'warning');
+			return;
 		}
+
+		try {
+			const existsInDatabase = await this.checkCardCodeExistsInDatabase(rawSerialNumber, this.selectedRequest?.memberCardId);
+			if (token !== this.writeToken) return;
+			if (existsInDatabase) {
+				this.selectedRequest.requestStatus = 'Failed';
+				this.writePhase = 'error';
+				this.errorMessage = `Card ${this.lastDetectedSerial} already exists in the database.`;
+				this.statusMessage = '';
+				this.env.showMessage(this.errorMessage, 'warning');
+				return;
+			}
+		} catch (error) {
+			this.writePhase = 'error';
+			this.errorMessage = this.resolveErrorMessage(error, 'Cannot validate the card code in the database.');
+			this.statusMessage = '';
+			return;
+		}
+
+		this.statusMessage = 'NFC write completed. Saving to the database.';
+		await this.saveToDatabase(this.lastDetectedSerial);
 	}
 
 	private async saveToDatabase(serialNumber: string): Promise<void> {
 		if (!this.selectedRequest || !this.selectedContactId) {
 			this.writePhase = 'error';
 			this.errorMessage = 'Missing data required to save the MemberCard to the database.';
+			this.statusMessage = '';
 			return;
 		}
 
@@ -502,20 +508,27 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 			this.lastSavedItem = savedItem;
 			this.selectedRequest.requestStatus = 'Completed';
 			this.selectedRequest.serialNumber = serialNumber;
+			this.selectedRequest.displayCode = serialNumber;
 			this.selectedRequest.memberCardId = savedItem?.Id || this.selectedRequest.memberCardId;
 			this.selectedRequest.memberCardPayload = savedItem || payload;
+			this.hasWrittenPayload = false;
 			this.writePhase = 'success';
+			this.statusMessage = 'The card was written successfully. Preparing the next request.';
+			this.env.showMessage(`Card written successfully for ${this.selectedRequest.displayName}.`, 'success');
+
 			const completedRequestId = this.selectedRequest.requestId;
-			const shouldMoveToNextPendingRequest = this.hasPendingRequest();
-			if (shouldMoveToNextPendingRequest) {
-				setTimeout(() => {
-					if (this.writePhase === 'success' && this.selectedRequest?.requestId === completedRequestId) {
-						this.moveToNextPendingRequest();
-					}
-				});
+			const nextRequest = this.getNextPendingRequest();
+			if (!nextRequest) {
+				this.writePhase = 'completed';
+				this.statusMessage = 'All selected requests have been written successfully.';
+				return;
 			}
-			this.statusMessage = 'NFC data was written and the database was updated successfully.';
-			this.env.showMessage('NFC card written successfully.', 'success');
+
+			setTimeout(() => {
+				if (this.selectedRequest?.requestId !== completedRequestId || this.currentStep !== 2) return;
+				this.selectRequest(nextRequest);
+				void this.startWriteFlow();
+			}, 250);
 		} catch (error) {
 			this.selectedRequest.requestStatus = 'Failed';
 			this.writePhase = 'error';
@@ -681,6 +694,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 			selectedContact: existing.selectedContact ?? request.selectedContact,
 			memberCardPayload: existing.memberCardPayload ?? request.memberCardPayload,
 			serialNumber: existing.serialNumber || request.serialNumber,
+			displayCode: existing.displayCode || request.displayCode,
 		};
 	}
 
@@ -722,49 +736,58 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		return ['Code', 'StartDate', 'EndDate', 'Quota', 'DailyLimit', 'IDMember'].some((key) => Object.prototype.hasOwnProperty.call(raw, key));
 	}
 
-	private moveToNextPendingRequest(): void {
-		const nextRequest = this.getNextPendingRequest();
-		if (!nextRequest) {
-			void this.closeModal('confirm');
-			return;
-		}
-
-		this.selectRequest(nextRequest);
+	private getBatchRequests(): WriteRequestViewModel[] {
+		return this.requestList.filter((item) => item.requestStatus === 'Pending' && !!item.selectedContactId);
 	}
 
-	private hasPendingRequest(): boolean {
-		return !!this.getNextPendingRequest();
+	private getBatchQueueOrder(): WriteRequestViewModel[] {
+		return this.requestList.filter((item) => item.requestStatus !== 'Failed');
 	}
 
 	private getNextPendingRequest(): WriteRequestViewModel | null {
-		return this.requestList.find((item) => item.requestStatus === 'Pending' && item.requestId !== this.selectedRequest?.requestId) || null;
+		const pendingRequests = this.getBatchRequests();
+		if (!pendingRequests.length) return null;
+
+		const currentIndex = pendingRequests.findIndex((item) => item.requestId === this.selectedRequest?.requestId);
+		if (currentIndex >= 0 && currentIndex < pendingRequests.length - 1) {
+			return pendingRequests[currentIndex + 1];
+		}
+
+		if (currentIndex === -1) return pendingRequests[0];
+		return null;
 	}
 
-	private findRequestByCardCode(cardCode: string): WriteRequestViewModel | null {
+	private findRequestByCardCode(cardCode: string, excludeRequestId?: string): WriteRequestViewModel | null {
 		const normalizedCardCode = this.normalizeCardCode(cardCode);
 		if (!normalizedCardCode) return null;
 
 		return (
 			this.requestList.find((item) => {
+				if (excludeRequestId && item.requestId === excludeRequestId) return false;
 				const requestCardCode = this.normalizeCardCode(item.serialNumber || item.displayCode || item.raw?.Code || item.raw?.SerialNumber);
 				return requestCardCode === normalizedCardCode;
 			}) || null
 		);
 	}
 
-	private async checkCardCodeExistsInDatabase(cardCode: string): Promise<boolean> {
+	private async checkCardCodeExistsInDatabase(cardCode: string, excludeMemberCardId?: number): Promise<boolean> {
 		const normalizedCardCode = this.normalizeCardCode(cardCode);
 		if (!normalizedCardCode) return false;
 
 		const result: any = await this.pageProvider.read(
 			{
 				Code_eq: cardCode,
-				Take: 1,
+				Take: 5,
 			},
 			true
 		);
 		const records = Array.isArray(result?.data) ? result.data : [];
-		return records.some((item) => this.normalizeCardCode(item?.Code || item?.SerialNumber) === normalizedCardCode);
+		return records.some((item) => {
+			const sameCode = this.normalizeCardCode(item?.Code || item?.SerialNumber) === normalizedCardCode;
+			if (!sameCode) return false;
+			if (excludeMemberCardId && item?.Id === excludeMemberCardId) return false;
+			return true;
+		});
 	}
 
 	private normalizeCardCode(value: any): string {
@@ -778,23 +801,13 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		return 'Pending';
 	}
 
-	private extractSerialNumber(data: NDEFMessagesTransformable): string {
-		const stringView = data?.string?.();
-		const numberView = data?.numberArray?.();
-		const tagInfo = (stringView?.tagInfo || numberView?.tagInfo || {}) as TagInfo;
-		if (tagInfo?.uid) return `${tagInfo.uid}`.trim();
-
-		const firstRecord = stringView?.messages?.[0]?.records?.[0];
-		if (firstRecord?.type === 'ID' && typeof firstRecord.payload === 'string') {
-			return firstRecord.payload.trim();
-		}
-
-		return '';
-	}
-
-	private resetStep3State(): void {
-		this.writePhase = 'idle';
-		this.statusMessage = 'Place the NFC card near the phone to start writing.';
+	private resetBatchState(resetForPreparation = false): void {
+		this.writePhase = resetForPreparation ? 'idle' : this.writePhase === 'completed' ? 'completed' : 'idle';
+		this.statusMessage = resetForPreparation
+			? 'Prepare the request queue to start batch write.'
+			: this.currentStep === 2 && this.selectedRequest
+			? `Ready to process ${this.selectedRequest.displayName}.`
+			: 'Prepare the request queue to start batch write.';
 		this.errorMessage = '';
 		this.lastDetectedSerial = '';
 		this.hasWrittenPayload = false;
@@ -838,25 +851,6 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 
 		await NFC.cancelScan().catch(() => undefined);
 		await NFC.cancelWriteAndroid().catch(() => undefined);
-		await this.dismissAddRequestLoading();
-	}
-
-	private async presentAddRequestLoading(): Promise<void> {
-		await this.dismissAddRequestLoading();
-		this.addRequestLoading = await this.loadingController.create({
-			message: 'Waiting to scan the NFC card...',
-			spinner: 'crescent',
-			backdropDismiss: false,
-		});
-		await this.addRequestLoading.present();
-	}
-
-	private async dismissAddRequestLoading(): Promise<void> {
-		if (!this.addRequestLoading) return;
-
-		const loading = this.addRequestLoading;
-		this.addRequestLoading = undefined;
-		await loading.dismiss().catch(() => undefined);
 	}
 
 	private resolveErrorMessage(error: any, fallback: string): string {

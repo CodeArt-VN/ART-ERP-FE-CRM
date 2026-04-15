@@ -13,17 +13,14 @@
 <ion-content [fullscreen]="true" appScrollbarTheme class="left scrollx" forceOverscroll="false">
 	<div class="write-nfc-modal">
 		<section class="step-summary">
-			<ion-progress-bar [value]="currentStep / 3"></ion-progress-bar>
+			<ion-progress-bar [value]="currentStep / 2"></ion-progress-bar>
 
 			<div class="step-chips">
 				<ion-chip [outline]="currentStep !== 1" [color]="currentStep === 1 ? 'primary' : 'medium'">
-					<ion-label>{{ '1. Select Request' | translate }}</ion-label>
+					<ion-label>{{ '1. Prepare Queue' | translate }}</ion-label>
 				</ion-chip>
 				<ion-chip [outline]="currentStep !== 2" [color]="currentStep === 2 ? 'primary' : 'medium'">
-					<ion-label>{{ '2. Select Contact ID' | translate }}</ion-label>
-				</ion-chip>
-				<ion-chip [outline]="currentStep !== 3" [color]="currentStep === 3 ? 'primary' : 'medium'">
-					<ion-label>{{ '3. Write NFC' | translate }}</ion-label>
+					<ion-label>{{ '2. Batch Write' | translate }}</ion-label>
 				</ion-chip>
 			</div>
 		</section>
@@ -31,10 +28,42 @@
 		<div class="step-slider">
 			<div class="step-track" [style.transform]="stepOffset">
 				<section class="step-pane">
+					<ion-card class="summary-card">
+						<ion-card-header>
+							<ion-card-title>{{ 'Batch Preparation' | translate }}</ion-card-title>
+							<ion-card-subtitle>{{ 'Prepare the queue before opening the NFC write session.' | translate }}</ion-card-subtitle>
+						</ion-card-header>
+
+						<ion-card-content>
+							<div class="stats-grid">
+								<div class="stat-item">
+									<span>{{ 'Total' | translate }}</span>
+									<strong>{{ totalRequestCount }}</strong>
+								</div>
+								<div class="stat-item">
+									<span>{{ 'Ready' | translate }}</span>
+									<strong>{{ readyRequestCount }}</strong>
+								</div>
+								<div class="stat-item">
+									<span>{{ 'Missing Contact' | translate }}</span>
+									<strong>{{ pendingWithoutContactCount }}</strong>
+								</div>
+								<div class="stat-item">
+									<span>{{ 'Completed' | translate }}</span>
+									<strong>{{ completedRequestCount }}</strong>
+								</div>
+							</div>
+
+							<p class="summary-note">
+								{{ 'Every pending request must have a contact before the batch session can start.' | translate }}
+							</p>
+						</ion-card-content>
+					</ion-card>
+
 					<ion-card>
 						<ion-card-header>
-							<ion-card-title>{{ 'Select The Cards To Write' | translate }}</ion-card-title>
-							<ion-card-subtitle>{{ 'Choose a card write request to continue.' | translate }}</ion-card-subtitle>
+							<ion-card-title>{{ 'Prepare Member Card Requests' | translate }}</ion-card-title>
+							<ion-card-subtitle>{{ 'Select a request, assign the contact, then start the batch write loop.' | translate }}</ion-card-subtitle>
 						</ion-card-header>
 
 						<ion-card-content>
@@ -42,36 +71,84 @@
 								<ion-searchbar
 									[(ngModel)]="requestKeyword"
 									(ionInput)="onRequestSearch($event)"
-									[placeholder]="'Search by Code' | translate"
+									[placeholder]="'Search by member, code, or contact' | translate"
 									debounce="250"
 									animated="true"
 								></ion-searchbar>
 
 								<ion-button class="step1-add-btn" color="primary" fill="outline" (click)="addNewRequest()">
 									<ion-icon slot="start" name="add-outline"></ion-icon>
-									{{ 'Add New' | translate }}
+									{{ 'Add Request' | translate }}
 								</ion-button>
 							</div>
 
 							<ion-list *ngIf="filteredRequestList.length; else emptyRequestState" lines="full">
-								<ion-item
-									[button]="true"
-									[detail]="false"
+								<div
+									class="request-row"
 									*ngFor="let request of filteredRequestList; trackBy: trackByRequest"
-									(click)="selectRequest(request)"
 									[class.is-selected]="selectedRequest?.requestId === request.requestId"
 								>
-									<ion-label>
-										<h2>{{ request.displayName }}</h2>
-										<p *ngIf="request.displayCode">{{ 'Code' | translate }}: {{ request.displayCode }}</p>
-										<p>{{ (request.mode === 'Insert' ? 'Insert New MemberCard' : 'Update Existing MemberCard') | translate }}</p>
-										<p *ngIf="request.remark">{{ request.remark }}</p>
-									</ion-label>
+									<ion-item [button]="true" [detail]="false" (click)="selectRequest(request)">
+										<ion-label>
+											<h2>{{ request.displayName }}</h2>
+											<p *ngIf="request.displayCode">{{ 'Card Code' | translate }}: {{ request.displayCode }}</p>
+											<p>{{ (request.mode === 'Insert' ? 'Insert MemberCard' : 'Update MemberCard') | translate }}</p>
+											<p *ngIf="request.selectedContactId">
+												{{ 'Contact' | translate }}:
+												#{{ request.selectedContactId }}<span *ngIf="request.selectedContact?.Name"> - {{ request.selectedContact?.Name }}</span>
+											</p>
+											<p *ngIf="!request.selectedContactId">{{ 'Contact is not assigned yet.' | translate }}</p>
+											<p *ngIf="request.remark">{{ request.remark | translate }}</p>
+										</ion-label>
 
-									<ion-badge slot="end" [color]="request.requestStatus === 'Completed' ? 'success' : request.requestStatus === 'Failed' ? 'danger' : 'warning'">
-										{{ request.requestStatus | translate }}
-									</ion-badge>
-								</ion-item>
+										<ion-badge slot="end" [color]="request.requestStatus === 'Completed' ? 'success' : request.requestStatus === 'Failed' ? 'danger' : request.selectedContactId ? 'primary' : 'warning'">
+											{{ request.requestStatus === 'Pending' && !request.selectedContactId ? ('Needs Contact' | translate) : (request.requestStatus | translate) }}
+										</ion-badge>
+									</ion-item>
+
+									<div class="inline-contact-editor" *ngIf="selectedRequest?.requestId === request.requestId">
+										<div class="inline-contact-head">
+											<h3>{{ 'Assign Contact' | translate }}</h3>
+											<p>{{ 'Choose the member directly in the queue without leaving the list.' | translate }}</p>
+										</div>
+
+										<ng-select
+											[(ngModel)]="selectedContact"
+											appendTo="body"
+											class="c-input"
+											(change)="onContactSelected($event)"
+											[items]="contactList$ | async"
+											[typeahead]="contactListInput$"
+											[loading]="contactListLoading"
+											[virtualScroll]="true"
+											[clearable]="true"
+											[compareWith]="compareContactById"
+											bindLabel="Name"
+											[placeholder]="'Search by name, code, or phone number' | translate"
+											(click)="$event.stopPropagation()"
+										>
+											<ng-template ng-label-tmp let-contact="item">
+												<span *ngIf="contact">#{{ contact.Id }}-{{ contact.Name }}</span>
+											</ng-template>
+
+											<ng-template ng-option-tmp let-contact="item">
+												<div *ngIf="contact">
+													<div>
+														<span>{{ contact.Name || ('Contact #' + contact.Id) }}</span>
+														<span *ngIf="contact.Phone1">
+															| <small><b>{{ contact.Phone1 }}</b></small>
+														</span>
+													</div>
+													<small>
+														#<b>{{ contact.Id }}</b>
+														<span *ngIf="contact.Code"> - {{ contact.Code }}</span>
+														<span *ngIf="contact.Email"> | {{ contact.Email }}</span>
+													</small>
+												</div>
+											</ng-template>
+										</ng-select>
+									</div>
+								</div>
 							</ion-list>
 
 							<ng-template #emptyRequestState>
@@ -84,113 +161,106 @@
 							</ng-template>
 						</ion-card-content>
 					</ion-card>
+
 				</section>
 
 				<section class="step-pane">
-					<ion-card>
+					<ion-card class="summary-card">
 						<ion-card-header>
-							<ion-card-title>{{ 'Select Contact ID' | translate }}</ion-card-title>
-							<ion-card-subtitle *ngIf="selectedRequest">
-								{{ 'Processing' | translate }}: {{ selectedRequest.displayCode }}
-							</ion-card-subtitle>
+							<ion-card-title>{{ 'Batch Write Session' | translate }}</ion-card-title>
+							<ion-card-subtitle>{{ 'Keep placing cards on the phone. The modal advances to the next request automatically.' | translate }}</ion-card-subtitle>
 						</ion-card-header>
 
 						<ion-card-content>
-							<div class="c-control contact-select">
-								<label class="c-label" for="member-card-contact-select">{{ 'Contact' | translate }}</label>
+							<div class="batch-progress-head">
+								<div>
+									<div class="progress-caption">{{ 'Completed' | translate }}</div>
+									<div class="progress-value">{{ completedRequestCount }}/{{ totalRequestCount }}</div>
+								</div>
 
-								<ng-select
-									[(ngModel)]="selectedContact"
-									appendTo="body"
-									class="c-input"
-									(change)="onContactSelected($event)"
-									labelForId="member-card-contact-select"
-									[items]="contactList$ | async"
-									[typeahead]="contactListInput$"
-									[loading]="contactListLoading"
-									[virtualScroll]="true"
-									[clearable]="true"
-									[compareWith]="compareContactById"
-									bindLabel="Name"
-									[placeholder]="'Search by name, code, or phone number' | translate"
-								>
-									<ng-template ng-label-tmp let-contact="item">
-										<span *ngIf="contact">#{{ contact.Id }}-{{ contact.Name }}</span>
-									</ng-template>
-
-									<ng-template ng-option-tmp let-contact="item">
-										<div *ngIf="contact">
-											<div>
-												<span>{{ contact.Name || ('Contact #' + contact.Id) }}</span>
-												<span *ngIf="contact.Phone1">
-													| <small><b>{{ contact.Phone1 }}</b></small>
-												</span>
-											</div>
-											<small>
-												#<b>{{ contact.Id }}</b>
-												<span *ngIf="contact.Code"> - {{ contact.Code }}</span>
-												<span *ngIf="contact.Email"> | {{ contact.Email }}</span>
-											</small>
-										</div>
-									</ng-template>
-								</ng-select>
+								<div *ngIf="currentBatchSequence" class="queue-marker">
+									{{ 'Queue' | translate }} {{ currentBatchSequence }}
+								</div>
 							</div>
+
+							<ion-progress-bar [value]="batchProgressValue"></ion-progress-bar>
 						</ion-card-content>
 					</ion-card>
-				</section>
 
-				<section class="step-pane">
-					<ion-card>
+					<ion-card class="current-request-card">
 						<ion-card-header>
-							<ion-card-title>{{ 'Write Data To NFC Card' | translate }}</ion-card-title>
+							<ion-card-title>{{ 'Current Request' | translate }}</ion-card-title>
+							<ion-card-subtitle *ngIf="selectedRequest">
+								{{ selectedRequest.displayName }}
+							</ion-card-subtitle>
 						</ion-card-header>
 
 						<ion-card-content>
 							<ion-list lines="none" class="summary-list">
 								<ion-item>
 									<ion-label>
-										<h3>{{ 'Current Request' | translate }}</h3>
-										<p>{{ (selectedRequest?.displayName || 'No request selected') | translate }}</p>
+										<h3>{{ 'Mode' | translate }}</h3>
+										<p>{{ (selectedRequest?.mode || 'N/A') | translate }}</p>
 									</ion-label>
-									<ion-badge slot="end" [color]="selectedRequest?.mode === 'Insert' ? 'warning' : 'secondary'">
-										{{ (selectedRequest?.mode || 'N/A') | translate }}
-									</ion-badge>
 								</ion-item>
 
 								<ion-item>
 									<ion-label>
 										<h3>{{ 'Contact ID' | translate }}</h3>
-										<p>{{ selectedContactId || ('Not selected' | translate) }}</p>
+										<p>{{ selectedContactId || ('Not assigned' | translate) }}</p>
 									</ion-label>
 									<ion-note slot="end">{{ selectedContact?.Name || '' }}</ion-note>
 								</ion-item>
 
 								<ion-item *ngIf="lastDetectedSerial">
 									<ion-label>
-										<h3>{{ 'Serial Number' | translate }}</h3>
+										<h3>{{ 'Last Serial' | translate }}</h3>
 										<p>{{ lastDetectedSerial }}</p>
 									</ion-label>
 								</ion-item>
 							</ion-list>
+						</ion-card-content>
+					</ion-card>
 
-							<ion-card class="status-card" [class.is-error]="writePhase === 'error'" [class.is-success]="writePhase === 'success'">
-								<ion-card-content>
-									<div class="status-topline">
-										<ion-icon
-											[name]="writePhase === 'success' ? 'checkmark-circle' : writePhase === 'error' ? 'alert-circle' : 'radio-outline'"
-										></ion-icon>
-										<div>
-											<h2>{{ writeStateLabel | translate }}</h2>
-											<p *ngIf="statusMessage">{{ statusMessage | translate }}</p>
-											<p *ngIf="errorMessage" class="error-text">{{ errorMessage | translate }}</p>
-										</div>
-									</div>
+					<ion-card class="status-card" [class.is-error]="writePhase === 'error'" [class.is-success]="writePhase === 'success' || writePhase === 'completed'">
+						<ion-card-content>
+							<div class="status-topline">
+								<ion-icon
+									[name]="writePhase === 'completed' || writePhase === 'success' ? 'checkmark-circle' : writePhase === 'error' ? 'alert-circle' : 'radio-outline'"
+								></ion-icon>
+								<div>
+									<h2>{{ writeStateLabel | translate }}</h2>
+									<p *ngIf="statusMessage">{{ statusMessage | translate }}</p>
+									<p *ngIf="errorMessage" class="error-text">{{ errorMessage | translate }}</p>
+								</div>
+							</div>
 
-									<div class="status-spinner" *ngIf="isBusy">
-										<ion-spinner name="crescent"></ion-spinner>
-									</div>
-								</ion-card-content>
-							</ion-card>
+							<div class="status-spinner" *ngIf="isBusy">
+								<ion-spinner name="crescent"></ion-spinner>
+							</div>
+						</ion-card-content>
+					</ion-card>
+
+					<ion-card>
+						<ion-card-header>
+							<ion-card-title>{{ 'Queue Snapshot' | translate }}</ion-card-title>
+							<ion-card-subtitle>{{ 'A quick view of current request statuses.' | translate }}</ion-card-subtitle>
+						</ion-card-header>
+
+						<ion-card-content>
+							<ion-list lines="full" class="queue-list">
+								<ion-item *ngFor="let request of batchQueuePreview; trackBy: trackByRequest" [class.is-selected]="selectedRequest?.requestId === request.requestId">
+									<ion-label>
+										<h3>{{ request.displayName }}</h3>
+										<p *ngIf="request.selectedContactId">
+											#{{ request.selectedContactId }}<span *ngIf="request.selectedContact?.Name"> - {{ request.selectedContact?.Name }}</span>
+										</p>
+									</ion-label>
+									<ion-badge slot="end" [color]="request.requestStatus === 'Completed' ? 'success' : request.requestStatus === 'Failed' ? 'danger' : 'warning'">
+										{{ request.requestStatus | translate }}
+									</ion-badge>
+								</ion-item>
+							</ion-list>
 						</ion-card-content>
 					</ion-card>
 				</section>
@@ -213,7 +283,7 @@
 
 		<ion-buttons slot="end">
 			<ion-button fill="outline" [disabled]="currentStep === 1 || isBusy" (click)="goToPreviousStep()">
-				{{ 'Back' | translate }}
+				{{ 'Back To Preparation' | translate }}
 			</ion-button>
 
 			<ion-button color="primary" [disabled]="isPrimaryDisabled" (click)="handlePrimaryAction()">
