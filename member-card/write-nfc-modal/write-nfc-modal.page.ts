@@ -1,8 +1,8 @@
-import { ChangeDetectorRef, Component, Input, NgZone, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Input, NgZone, OnDestroy, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ModalController, NavController } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
-import { concat, Observable, of, Subject } from 'rxjs';
+import { concat, firstValueFrom, Observable, of, Subject } from 'rxjs';
 import { catchError, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
 import { NFC, NDEFWriteOptions } from '@exxili/capacitor-nfc';
 import { environment } from 'src/environments/environment';
@@ -20,6 +20,22 @@ interface ContactOption {
 	Code?: string;
 	Phone1?: string;
 	Email?: string;
+}
+
+interface ImportQueueSummary {
+	TotalRows: number;
+	ValidForQueueCount: number;
+	CreatedContactCount: number;
+	AlreadyHasMemberCardCount: number;
+	DisabledOrDeletedCount: number;
+	DuplicatePhoneCount: number;
+	InvalidRowCount: number;
+}
+
+interface ImportQueueResult {
+	Summary?: ImportQueueSummary;
+	ValidContactsForQueue?: ContactOption[];
+	FileUrl?: string;
 }
 
 interface WriteRequestViewModel {
@@ -45,6 +61,7 @@ interface WriteRequestViewModel {
 })
 export class WriteNfcModalPage extends PageBase implements OnDestroy {
 	@Input() title = 'Write NFC Card';
+	@ViewChild('importFileInput') importFileInput?: ElementRef<HTMLInputElement>;
 
 	currentStep: StepKey = 1;
 	requestKeyword = '';
@@ -52,14 +69,23 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 	selectedRequest: WriteRequestViewModel = null;
 	statusList = [];
 	private localRequestList: WriteRequestViewModel[] = [];
+	private removedRequestIds = new Set<string>();
 
 	contactOptions: ContactOption[] = [];
 	contactList$: Observable<ContactOption[]>;
 	contactListLoading = false;
 	contactListInput$ = new Subject<string>();
 	contactListSelected: ContactOption[] = [];
+	contactPickerOpen = false;
+	contactPickerKeyword = '';
+	contactPickerOptions: ContactOption[] = [];
+	contactPickerLoading = false;
+	contactPickerSelection: { [contactId: number]: ContactOption } = {};
 	selectedContactId: number = null;
 	selectedContact: ContactOption = null;
+	importSummary: ImportQueueSummary | null = null;
+	importChecklistUrl = '';
+	lastImportedQueueCount = 0;
 
 	writePhase: WritePhase = 'idle';
 	statusMessage = 'Prepare the request queue to start batch write.';
@@ -208,6 +234,10 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		return this.pendingRequestCount > 0 && this.pendingWithoutContactCount === 0 && !this.isBusy;
 	}
 
+	get selectedContactCount(): number {
+		return Object.keys(this.contactPickerSelection).length;
+	}
+
 	get batchProgressValue(): number {
 		const total = this.totalRequestCount || 1;
 		return this.completedRequestCount / total;
@@ -221,7 +251,11 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 	}
 
 	get batchQueuePreview(): WriteRequestViewModel[] {
-		return this.requestList.slice(0, 6);
+		return this.requestList.filter((item) => item.requestStatus === 'Pending');
+	}
+
+	get hasImportSummary(): boolean {
+		return !!this.importSummary;
 	}
 
 	trackByRequest(_: number, item: WriteRequestViewModel): string {
@@ -274,26 +308,120 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		);
 	}
 
-	addNewRequest(): void {
-		const newRequest: WriteRequestViewModel = {
-			requestId: `new-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
-			mode: 'Insert',
-			memberCardId: null,
-			displayName: `Manual Batch Request #${this.localRequestList.length + 1}`,
-			displayCode: '',
-			remark: 'Assign a contact before starting batch write.',
-			selectedContactId: null,
-			selectedContact: null,
-			memberCardPayload: null,
-			requestStatus: 'Pending',
-			serialNumber: '',
-			raw: {},
-		};
+	openImportFilePicker(): void {
+		if (this.isBusy) return;
+		this.importFileInput?.nativeElement?.click();
+	}
 
-		this.localRequestList = [newRequest, ...this.localRequestList];
+	async onImportFileSelected(event: Event): Promise<void> {
+		const input = event?.target as HTMLInputElement;
+		const file = input?.files?.[0];
+		if (!file) return;
+
+		try {
+			await this.importContactsFromExcel(file);
+		} catch (error) {
+			this.env.showMessage(this.resolveErrorMessage(error, 'Cannot import contacts from the selected Excel file.'), 'danger');
+		} finally {
+			if (input) {
+				input.value = '';
+			}
+		}
+	}
+
+	downloadImportChecklist(): void {
+		if (!this.importChecklistUrl) return;
+		this.downloadURLContent(this.importChecklistUrl);
+	}
+
+	async addNewRequest(): Promise<void> {
+		this.contactPickerOpen = true;
+		this.contactPickerKeyword = '';
+		this.contactPickerSelection = {};
+		await this.loadContactPickerOptions();
+	}
+
+	closeContactPicker(): void {
+		this.contactPickerOpen = false;
+		this.contactPickerKeyword = '';
+		this.contactPickerLoading = false;
+		this.contactPickerSelection = {};
+	}
+
+	onContactPickerSearch(event: any): void {
+		this.contactPickerKeyword = `${event?.detail?.value ?? event?.target?.value ?? ''}`;
+		void this.loadContactPickerOptions(this.contactPickerKeyword);
+	}
+
+	toggleContactPickerSelection(contact: ContactOption): void {
+		if (!contact?.Id || this.isContactQueued(contact.Id)) return;
+
+		if (this.contactPickerSelection[contact.Id]) {
+			delete this.contactPickerSelection[contact.Id];
+		} else {
+			this.contactPickerSelection = {
+				...this.contactPickerSelection,
+				[contact.Id]: contact,
+			};
+		}
+	}
+
+	isContactPickerSelected(contactId: number): boolean {
+		return !!this.contactPickerSelection[contactId];
+	}
+
+	isContactQueued(contactId: number): boolean {
+		return this.requestList.some((item) => item.selectedContactId === contactId);
+	}
+
+	async addSelectedContactsToQueue(): Promise<void> {
+		const contacts = Object.values(this.contactPickerSelection);
+		if (!contacts.length) {
+			this.env.showMessage('Please select at least one contact.', 'warning');
+			return;
+		}
+
+		this.contactPickerLoading = true;
+		try {
+			const nextRequests = await this.buildRequestsFromContacts(contacts);
+			if (!nextRequests.length) {
+				this.env.showMessage('All selected contacts are already in the queue.', 'warning');
+				return;
+			}
+
+			this.localRequestList = [...nextRequests, ...this.localRequestList];
+			this.rebuildRequestList();
+			this.selectRequest(nextRequests[0]);
+			this.closeContactPicker();
+			this.env.showMessage(`${nextRequests.length} contact(s) were added to the queue.`, 'success');
+		} catch (error) {
+			this.env.showMessage(this.resolveErrorMessage(error, 'Cannot prepare the selected contacts.'), 'danger');
+		} finally {
+			this.contactPickerLoading = false;
+		}
+	}
+
+	removeQueuedRequest(request: WriteRequestViewModel, event?: Event): void {
+		event?.stopPropagation();
+		if (!request || this.isBusy) return;
+
+		this.localRequestList = this.localRequestList.filter((item) => item.requestId !== request.requestId);
+		this.removedRequestIds.add(request.requestId);
 		this.rebuildRequestList();
-		this.selectRequest(newRequest);
-		this.env.showMessage('A new batch request was added. Please assign a contact.', 'primary');
+
+		if (this.selectedRequest?.requestId === request.requestId) {
+			const nextRequest = this.requestList.find((item) => item.requestStatus === 'Pending') || this.requestList[0] || null;
+			if (nextRequest) {
+				this.selectRequest(nextRequest);
+			} else {
+				this.selectedRequest = null;
+				this.selectedContact = null;
+				this.selectedContactId = null;
+				this.resetBatchState(true);
+			}
+		}
+
+		this.env.showMessage(`Removed ${request.displayName} from the queue.`, 'primary');
 	}
 
 	selectRequest(request: WriteRequestViewModel): void {
@@ -360,7 +488,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 			return;
 		}
 
-		const nextRequest = this.getNextPendingRequest();
+		const nextRequest = this.getFirstPendingRequest();
 		if (!nextRequest) {
 			this.env.showMessage('No pending request is ready for batch write.', 'warning');
 			return;
@@ -458,11 +586,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 
 		const duplicatedRequest = this.findRequestByCardCode(normalizedSerialNumber, this.selectedRequest?.requestId);
 		if (duplicatedRequest) {
-			this.selectedRequest.requestStatus = 'Failed';
-			this.writePhase = 'error';
-			this.errorMessage = `Card ${this.lastDetectedSerial} already exists in the request queue.`;
-			this.statusMessage = '';
-			this.env.showMessage(this.errorMessage, 'warning');
+			await this.retryCurrentRequestWithAnotherCard(`Card ${this.lastDetectedSerial} is already assigned in the current queue. Please place another card.`);
 			return;
 		}
 
@@ -470,11 +594,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 			const existsInDatabase = await this.checkCardCodeExistsInDatabase(rawSerialNumber, this.selectedRequest?.memberCardId);
 			if (token !== this.writeToken) return;
 			if (existsInDatabase) {
-				this.selectedRequest.requestStatus = 'Failed';
-				this.writePhase = 'error';
-				this.errorMessage = `Card ${this.lastDetectedSerial} already exists in the database.`;
-				this.statusMessage = '';
-				this.env.showMessage(this.errorMessage, 'warning');
+				await this.retryCurrentRequestWithAnotherCard(`Card ${this.lastDetectedSerial} has already been used in the system. Please place another card.`);
 				return;
 			}
 		} catch (error) {
@@ -521,6 +641,11 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 			if (!nextRequest) {
 				this.writePhase = 'completed';
 				this.statusMessage = 'All selected requests have been written successfully.';
+				setTimeout(() => {
+					if (this.writePhase === 'completed') {
+						void this.closeModal('confirm');
+					}
+				}, 500);
 				return;
 			}
 
@@ -642,6 +767,162 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		);
 	}
 
+	private async loadContactPickerOptions(keyword = ''): Promise<void> {
+		this.contactPickerLoading = true;
+		try {
+			const result: any = await firstValueFrom(
+				this.contactProvider.search({
+					SkipAddress: true,
+					SortBy: ['Id_desc'],
+					Take: 30,
+					Skip: 0,
+					Keyword: keyword || '',
+				})
+			);
+			this.contactPickerOptions = Array.isArray(result) ? result : result?.data || [];
+		} catch (error) {
+			this.contactPickerOptions = [];
+			this.env.showMessage(this.resolveErrorMessage(error, 'Cannot load contacts for the picker.'), 'danger');
+		} finally {
+			this.contactPickerLoading = false;
+			this.cdr.detectChanges();
+		}
+	}
+
+	private async importContactsFromExcel(file: File): Promise<void> {
+		const response = (await this.env.showLoading('Processing the import file.', this.uploadImportFile(file))) as ImportQueueResult;
+		const importedContacts = Array.isArray(response?.ValidContactsForQueue) ? response.ValidContactsForQueue : [];
+		const nextRequests = await this.buildRequestsFromContacts(importedContacts);
+
+		if (nextRequests.length) {
+			this.localRequestList = [...nextRequests, ...this.localRequestList];
+			this.rebuildRequestList();
+			this.selectRequest(nextRequests[0]);
+		}
+
+		this.importSummary = response?.Summary || null;
+		this.importChecklistUrl = response?.FileUrl || '';
+		this.lastImportedQueueCount = nextRequests.length;
+
+		const skippedQueuedCount = Math.max(importedContacts.length - nextRequests.length, 0);
+		const summaryMessage = this.buildImportSummaryMessage(this.importSummary, nextRequests.length, skippedQueuedCount);
+
+		this.env.showMessage(`${nextRequests.length} contact(s) were added to the queue from the import file.`, nextRequests.length ? 'success' : 'warning');
+
+		if (this.importChecklistUrl) {
+			await this.env
+				.showPrompt(summaryMessage, 'Would you like to download the import checklist now?', 'Import Contact Queue', 'Download Checklist', 'Close')
+				.then(() => {
+					this.downloadImportChecklist();
+				})
+				.catch(() => undefined);
+			return;
+		}
+
+		await this.env.showPrompt(summaryMessage, null, 'Import Contact Queue', 'Close', null).catch(() => undefined);
+	}
+
+	private uploadImportFile(file: File): Promise<ImportQueueResult> {
+		const apiPath = {
+			postImport: {
+				method: 'UPLOAD',
+				url: () => 'CRM/MemberCard/ImportContactQueue',
+			},
+		};
+
+		return this.pageProvider.commonService.import(apiPath, file) as Promise<ImportQueueResult>;
+	}
+
+	private buildImportSummaryMessage(summary: ImportQueueSummary | null, addedToQueueCount: number, skippedQueuedCount: number): string {
+		if (!summary) {
+			return `Added ${addedToQueueCount} contact(s) to the queue.`;
+		}
+
+		const lines = [
+			`Total rows: ${summary.TotalRows || 0}`,
+			`Added to queue: ${addedToQueueCount}`,
+			`Created contacts: ${summary.CreatedContactCount || 0}`,
+			`Already has member card: ${summary.AlreadyHasMemberCardCount || 0}`,
+			`Disabled or deleted contact: ${summary.DisabledOrDeletedCount || 0}`,
+			`Duplicate phone: ${summary.DuplicatePhoneCount || 0}`,
+			`Invalid rows: ${summary.InvalidRowCount || 0}`,
+		];
+
+		if (skippedQueuedCount > 0) {
+			lines.push(`Skipped because the contact was already queued: ${skippedQueuedCount}`);
+		}
+
+		return lines.join('<br>');
+	}
+
+	private async buildRequestsFromContacts(contacts: ContactOption[]): Promise<WriteRequestViewModel[]> {
+		const dedupedContacts = contacts.filter((contact, index, source) => source.findIndex((item) => item.Id === contact.Id) === index && !this.isContactQueued(contact.Id));
+		if (!dedupedContacts.length) return [];
+
+		const existingCardsByContactId = await this.resolveExistingMemberCards(dedupedContacts.map((item) => item.Id));
+		return dedupedContacts.map((contact, index) => this.createRequestFromContact(contact, existingCardsByContactId.get(contact.Id), index));
+	}
+
+	private async resolveExistingMemberCards(contactIds: number[]): Promise<Map<number, any>> {
+		const mapByContactId = new Map<number, any>();
+		if (!contactIds.length) return mapByContactId;
+
+		try {
+			const result: any = await this.pageProvider.read(
+				{
+					IDMember: contactIds,
+					Take: Math.max(contactIds.length, 30),
+				},
+				true
+			);
+			const records = Array.isArray(result?.data) ? result.data : [];
+			records.forEach((item) => {
+				const contactId = item?.IDMember || item?._Member?.Id;
+				if (contactId && !mapByContactId.has(contactId)) {
+					mapByContactId.set(contactId, item);
+				}
+			});
+		} catch {
+			for (const contactId of contactIds) {
+				try {
+					const result: any = await this.pageProvider.read(
+						{
+							IDMember_eq: contactId,
+							Take: 1,
+						},
+						true
+					);
+					const matched = Array.isArray(result?.data) ? result.data[0] : null;
+					if (matched) {
+						mapByContactId.set(contactId, matched);
+					}
+				} catch {
+					/* ignore fallback errors per item */
+				}
+			}
+		}
+
+		return mapByContactId;
+	}
+
+	private createRequestFromContact(contact: ContactOption, existingMemberCard: any, index: number): WriteRequestViewModel {
+		const hasExistingMemberCard = !!existingMemberCard?.Id;
+		return {
+			requestId: `${hasExistingMemberCard ? existingMemberCard.Id : 'contact'}-${contact.Id}-${Date.now()}-${index}`,
+			mode: hasExistingMemberCard ? 'Update' : 'Insert',
+			memberCardId: existingMemberCard?.Id || null,
+			displayName: contact?.Name || `Contact #${contact.Id}`,
+			displayCode: existingMemberCard?.Code || '',
+			remark: hasExistingMemberCard ? 'Existing MemberCard will be updated during batch write.' : 'A new MemberCard will be created during batch write.',
+			selectedContactId: contact.Id,
+			selectedContact: contact,
+			memberCardPayload: existingMemberCard || null,
+			requestStatus: 'Pending',
+			serialNumber: existingMemberCard?.SerialNumber || existingMemberCard?.Code || '',
+			raw: existingMemberCard || { _Member: contact },
+		};
+	}
+
 	private normalizeRequests(source: any[] = this.items): WriteRequestViewModel[] {
 		if (!Array.isArray(source) || !source.length) return [];
 
@@ -679,7 +960,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 	private rebuildRequestList(): void {
 		const existingRequests = new Map(this.requestList.map((item) => [item.requestId, item]));
 		const remoteRequests = this.normalizeRequests(this.items).map((item) => this.mergeRequestState(item, existingRequests.get(item.requestId)));
-		const nextRequestList = this.mergeUniqueRequests([...this.localRequestList, ...remoteRequests]);
+		const nextRequestList = this.mergeUniqueRequests([...this.localRequestList, ...remoteRequests]).filter((item) => !this.removedRequestIds.has(item.requestId));
 		this.requestList = nextRequestList;
 		this.syncSelectedRequestReference();
 	}
@@ -738,6 +1019,10 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 
 	private getBatchRequests(): WriteRequestViewModel[] {
 		return this.requestList.filter((item) => item.requestStatus === 'Pending' && !!item.selectedContactId);
+	}
+
+	private getFirstPendingRequest(): WriteRequestViewModel | null {
+		return this.getBatchRequests()[0] || null;
 	}
 
 	private getBatchQueueOrder(): WriteRequestViewModel[] {
@@ -812,6 +1097,24 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		this.lastDetectedSerial = '';
 		this.hasWrittenPayload = false;
 		this.lastSavedItem = null;
+	}
+
+	private async retryCurrentRequestWithAnotherCard(message: string): Promise<void> {
+		this.hasWrittenPayload = false;
+		this.runInZone(() => {
+			this.writePhase = 'error';
+			this.errorMessage = message;
+			this.statusMessage = 'Please place another NFC card for the current request.';
+		});
+
+		this.env.showMessage(message, 'warning');
+		await this.cleanupNfc();
+
+		setTimeout(() => {
+			if (this.currentStep !== 2 || !this.selectedRequest || this.selectedRequest.requestStatus !== 'Pending') return;
+			if (this.isBusy) return;
+			void this.startWriteFlow();
+		}, 450);
 	}
 
 	private syncSelectedContactIntoOptions(): void {

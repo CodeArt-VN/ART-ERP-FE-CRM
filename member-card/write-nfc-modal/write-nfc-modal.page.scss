@@ -120,6 +120,42 @@ ion-card {
 	color: var(--ion-color-medium-shade);
 }
 
+.import-summary-card {
+	margin-top: 14px;
+	border: 1px solid rgba(var(--ion-color-primary-rgb), 0.14);
+	background: rgba(255, 255, 255, 0.84);
+}
+
+.import-summary-head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.import-summary-head h3 {
+	margin: 0 0 4px;
+	font-size: 15px;
+	font-weight: 700;
+	color: #0f172a;
+}
+
+.import-summary-head p {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.5;
+	color: var(--ion-color-medium-shade);
+}
+
+.stats-grid.compact {
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.stats-grid.compact .stat-item strong {
+	font-size: 18px;
+}
+
 ion-item.is-selected {
 	--background: rgba(var(--ion-color-primary-rgb), 0.08);
 }
@@ -142,6 +178,12 @@ ion-item.is-selected {
 
 .request-row.is-selected ion-item {
 	--background: rgba(var(--ion-color-primary-rgb), 0.08);
+}
+
+.queue-remove-btn {
+	margin-left: 4px;
+	--padding-start: 6px;
+	--padding-end: 6px;
 }
 
 .inline-contact-editor {
@@ -297,6 +339,213 @@ ion-item.is-selected {
 	color: var(--ion-color-danger) !important;
 }
 
+.contact-picker-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(15, 23, 42, 0.42);
+	backdrop-filter: blur(2px);
+	z-index: 1100;
+}
+
+.contact-picker-sheet {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 1101;
+	background: linear-gradient(180deg, var(--ion-background-color, #ffffff) 0%, var(--ion-item-background, #f8fafc) 100%);
+	color: var(--ion-text-color, #0f172a);
+	border-radius: 24px 24px 0 0;
+	box-shadow: 0 -20px 40px rgba(15, 23, 42, 0.18);
+	padding: 10px 16px calc(16px + env(safe-area-inset-bottom));
+	max-height: min(82vh, 760px);
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.sheet-handle {
+	width: 44px;
+	height: 5px;
+	border-radius: 999px;
+	background: rgba(148, 163, 184, 0.7);
+	margin: 0 auto;
+}
+
+.sheet-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.sheet-header h2 {
+	margin: 0 0 4px;
+	font-size: 18px;
+	font-weight: 700;
+	color: var(--ion-text-color, #0f172a);
+}
+
+.sheet-header p {
+	margin: 0;
+	line-height: 1.5;
+	color: var(--ion-color-medium-shade);
+}
+
+.sheet-body {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	min-height: 0;
+}
+
+.sheet-body ion-searchbar {
+	padding: 0;
+	--background: var(--ion-color-light, #f1f5f9);
+	--color: var(--ion-text-color, #0f172a);
+	--placeholder-color: var(--ion-color-medium, #64748b);
+	--icon-color: var(--ion-color-medium, #64748b);
+	--clear-button-color: var(--ion-color-medium, #64748b);
+}
+
+.sheet-selection-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.sheet-selection-bar ion-note {
+	color: var(--ion-color-medium-shade);
+	font-size: 12px;
+	text-align: right;
+}
+
+.contact-picker-list {
+	overflow: auto;
+	min-height: 220px;
+	max-height: calc(82vh - 220px);
+	padding-bottom: 4px;
+}
+
+.contact-picker-list ion-list {
+	background: transparent;
+}
+
+.contact-picker-list ion-item {
+	--padding-start: 6px;
+	--inner-padding-end: 6px;
+	border-radius: 14px;
+	margin-bottom: 8px;
+	--background: color-mix(in srgb, var(--ion-item-background, #ffffff) 88%, transparent);
+	--color: var(--ion-text-color, #0f172a);
+	border: 1px solid color-mix(in srgb, var(--ion-text-color, #0f172a) 10%, transparent);
+}
+
+.contact-picker-list ion-item.is-checked {
+	--background: rgba(var(--ion-color-primary-rgb), 0.08);
+	border-color: rgba(var(--ion-color-primary-rgb), 0.24);
+}
+
+.contact-picker-list ion-item.is-disabled {
+	opacity: 0.72;
+}
+
+.contact-picker-list ion-item h3,
+.contact-picker-list ion-item p,
+.contact-picker-list ion-item ion-label {
+	color: inherit;
+}
+
+.contact-picker-state {
+	min-height: 220px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	color: var(--ion-color-medium-shade);
+}
+
+.contact-picker-state ion-icon {
+	font-size: 28px;
+}
+
+.sheet-footer {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 12px;
+	padding-top: 4px;
+}
+
+.sheet-footer ion-button[color='primary'] {
+	--color: var(--ion-color-primary-contrast, #ffffff);
+}
+
+:host-context(body.dark),
+:host-context(.dark) {
+	.import-summary-card {
+		background: rgba(255, 255, 255, 0.04);
+		border-color: rgba(var(--ion-color-primary-rgb), 0.24);
+	}
+
+	.import-summary-head h3 {
+		color: #f8fafc;
+	}
+
+	.import-summary-head p {
+		color: rgba(226, 232, 240, 0.78);
+	}
+
+	.contact-picker-backdrop {
+		background: rgba(2, 6, 23, 0.68);
+	}
+
+	.contact-picker-sheet {
+		background: linear-gradient(180deg, #111827 0%, #0f172a 100%);
+		box-shadow: 0 -20px 40px rgba(0, 0, 0, 0.45);
+	}
+
+	.sheet-handle {
+		background: rgba(148, 163, 184, 0.45);
+	}
+
+	.sheet-body ion-searchbar {
+		--background: rgba(255, 255, 255, 0.08);
+		--color: #f8fafc;
+		--placeholder-color: rgba(226, 232, 240, 0.72);
+		--icon-color: rgba(226, 232, 240, 0.72);
+		--clear-button-color: rgba(226, 232, 240, 0.72);
+	}
+
+	.sheet-selection-bar ion-note,
+	.sheet-header p,
+	.contact-picker-state {
+		color: rgba(226, 232, 240, 0.78);
+	}
+
+	.contact-picker-list ion-item {
+		--background: rgba(255, 255, 255, 0.04);
+		--color: #f8fafc;
+		border-color: rgba(255, 255, 255, 0.08);
+	}
+
+	.contact-picker-list ion-item.is-checked {
+		--background: rgba(var(--ion-color-primary-rgb), 0.18);
+		border-color: rgba(var(--ion-color-primary-rgb), 0.38);
+	}
+
+	.contact-picker-list ion-item.is-disabled {
+		opacity: 0.5;
+	}
+
+	.sheet-footer ion-button[fill='outline'] {
+		--border-color: rgba(255, 255, 255, 0.18);
+		--color: #e5e7eb;
+	}
+}
+
 ion-footer ion-toolbar {
 	--padding-start: 10px;
 	--padding-end: 10px;
@@ -320,8 +569,31 @@ ion-footer ion-toolbar {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
+	.import-summary-head {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.stats-grid.compact {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
 	.batch-progress-head {
 		flex-direction: column;
 		align-items: flex-start;
+	}
+
+	.sheet-selection-bar {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.sheet-selection-bar ion-note {
+		text-align: left;
+	}
+
+	.sheet-footer {
+		flex-direction: column-reverse;
+		align-items: stretch;
 	}
 }
