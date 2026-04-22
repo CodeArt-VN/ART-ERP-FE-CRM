@@ -33,6 +33,12 @@ export interface Rd300WriteResult {
 	};
 }
 
+export interface Rd300DetectedTag {
+	uid: string;
+	tagType: Rd300TagType;
+	uidSource: Rd300UidSource;
+}
+
 export class Rd300WebSerialWriter {
 	private readonly stx = 0x02;
 	private readonly successStatus = 0x00;
@@ -45,15 +51,93 @@ export class Rd300WebSerialWriter {
 
 	constructor(private onStatus?: Rd300Status) {}
 
+	async connect(): Promise<void> {
+		await this.ensureConnected();
+	}
+
 	async writeMemberCard(contactId: number): Promise<Rd300WriteResult> {
 		await this.ensureConnected();
+		this.readBuffer = [];
 		const readerInfo = await this.getReaderInfo().catch(() => '');
-		const payload = JSON.stringify({ IDBP: contactId });
-		const ndefMessage = this.buildNdefTextRecord(payload);
 
 		this.report('Place an NFC card on the RD300 reader.');
-		const tag = await this.detectTag();
-		this.report(`Detected ${tag.tagType === 'desfire-ev3' ? 'MIFARE DESFire EV3 / Type 4' : 'NTAG / Type 2'} card ${tag.uid}.`);
+		const tag = await this.waitForStableCard();
+		return this.writeMemberCardToDetectedTag(contactId, tag, readerInfo);
+	}
+
+	async waitForStableCard(options?: { blockedUid?: string; timeoutMs?: number; stableReads?: number }): Promise<Rd300DetectedTag> {
+		await this.ensureConnected();
+		const timeoutMs = Math.max(options?.timeoutMs ?? 30000, 1000);
+		const stableReads = Math.max(options?.stableReads ?? 2, 1);
+		const blockedUid = this.normalizeUid(options?.blockedUid || '');
+		const startedAt = Date.now();
+		let lastTag: Rd300DetectedTag | null = null;
+		let matchedReads = 0;
+		let sawBlockedCard = false;
+
+		while (Date.now() - startedAt < timeoutMs) {
+			const tag = await this.tryDetectTagOnce();
+			if (!tag) {
+				lastTag = null;
+				matchedReads = 0;
+				await this.delay(250);
+				continue;
+			}
+
+			if (blockedUid && this.normalizeUid(tag.uid) === blockedUid) {
+				sawBlockedCard = true;
+				this.report(`Card ${tag.uid} is blocked for this request. Remove it and place another card.`);
+				lastTag = null;
+				matchedReads = 0;
+				await this.delay(250);
+				continue;
+			}
+
+			if (lastTag && lastTag.uid === tag.uid && lastTag.tagType === tag.tagType) {
+				matchedReads++;
+			} else {
+				lastTag = tag;
+				matchedReads = 1;
+			}
+
+			if (matchedReads >= stableReads) {
+				this.report(`Detected ${tag.tagType === 'desfire-ev3' ? 'MIFARE DESFire EV3 / Type 4' : 'NTAG / Type 2'} card ${tag.uid}.`);
+				return tag;
+			}
+
+			await this.delay(150);
+		}
+
+		if (sawBlockedCard && blockedUid) {
+			throw new Error(`Card ${blockedUid} is still on the RD300 reader. Remove it and place another card.`);
+		}
+
+		throw new Error('No supported NFC card was detected. Supported cards: NTAG215 and preformatted MIFARE DESFire EV3 Type 4 tags.');
+	}
+
+	async waitForCardRemoval(cardUid: string, timeoutMs = 30000): Promise<void> {
+		await this.ensureConnected();
+		const blockedUid = this.normalizeUid(cardUid);
+		const startedAt = Date.now();
+
+		this.report(`Remove card ${cardUid} from the RD300 reader.`);
+		while (Date.now() - startedAt < timeoutMs) {
+			const tag = await this.tryDetectTagOnce();
+			if (!tag || this.normalizeUid(tag.uid) !== blockedUid) {
+				this.report('Card removed. Place the next card on the RD300 reader.');
+				return;
+			}
+
+			await this.delay(250);
+		}
+
+		throw new Error(`Card ${cardUid} is still on the RD300 reader. Remove it before continuing.`);
+	}
+
+	async writeMemberCardToDetectedTag(contactId: number, tag: Rd300DetectedTag, readerInfo = ''): Promise<Rd300WriteResult> {
+		await this.ensureConnected();
+		const payload = JSON.stringify({ IDBP: contactId });
+		const ndefMessage = this.buildNdefTextRecord(payload);
 
 		if (tag.tagType === 'desfire-ev3') {
 			await this.writeDesfireType4Ndef(ndefMessage);
@@ -131,22 +215,14 @@ export class Rd300WebSerialWriter {
 		return this.asciiFromBytes(response.data);
 	}
 
-	private async detectTag(): Promise<{ uid: string; tagType: Rd300TagType; uidSource: Rd300UidSource }> {
-		const startedAt = Date.now();
-		while (Date.now() - startedAt < 30000) {
-			const desfire = await this.trySelectDesfire();
-			if (desfire) return desfire;
+	private async tryDetectTagOnce(): Promise<Rd300DetectedTag | null> {
+		const ntag = await this.tryReadNtagUid();
+		if (ntag) return ntag;
 
-			const ntag = await this.tryReadNtagUid();
-			if (ntag) return ntag;
-
-			await this.delay(250);
-		}
-
-		throw new Error('No supported NFC card was detected. Supported cards: NTAG215 and preformatted MIFARE DESFire EV3 Type 4 tags.');
+		return await this.trySelectDesfire();
 	}
 
-	private async trySelectDesfire(): Promise<{ uid: string; tagType: Rd300TagType; uidSource: Rd300UidSource } | null> {
+	private async trySelectDesfire(): Promise<Rd300DetectedTag | null> {
 		try {
 			await this.sendCommand(0x30);
 			const response = await this.sendCommand(0x31);
@@ -162,7 +238,7 @@ export class Rd300WebSerialWriter {
 		}
 	}
 
-	private async tryReadNtagUid(): Promise<{ uid: string; tagType: Rd300TagType; uidSource: Rd300UidSource } | null> {
+	private async tryReadNtagUid(): Promise<Rd300DetectedTag | null> {
 		try {
 			const block0 = await this.readNtagBlock(0);
 			if (block0.length < 8) return null;
@@ -178,23 +254,17 @@ export class Rd300WebSerialWriter {
 	}
 
 	private async writeNtagType2Ndef(ndefMessage: number[]): Promise<void> {
-		this.report('Writing Type 2 NDEF data to NTAG.');
-		const tlv = this.buildType2Tlv(ndefMessage);
-		const writeBytes = this.padToBlockSize(tlv, 16);
-		const startPage = 4;
-
-		for (let offset = 0; offset < writeBytes.length; offset += 16) {
-			await this.writeNtagBlock(startPage + offset / 4, writeBytes.slice(offset, offset + 16));
-		}
-
-		this.report('Verifying NTAG NDEF data.');
-		const readBack: number[] = [];
-		for (let offset = 0; offset < writeBytes.length; offset += 16) {
-			readBack.push(...(await this.readNtagBlock(startPage + offset / 4)));
-		}
-
-		if (!this.bytesStartWith(readBack, tlv)) {
-			throw new Error('RD300 wrote the NTAG data but read-back verification failed.');
+		const lastAttempt = 2;
+		for (let attempt = 1; attempt <= lastAttempt; attempt++) {
+			try {
+				await this.writeNtagType2NdefOnce(ndefMessage);
+				return;
+			} catch (error) {
+				if (attempt === lastAttempt) throw error;
+				this.report('Retrying the NTAG write once more. Keep the card steady on the reader.');
+				await this.delay(180);
+				this.readBuffer = [];
+			}
 		}
 	}
 
@@ -272,9 +342,9 @@ export class Rd300WebSerialWriter {
 	}
 
 	private buildNdefTextRecord(text: string): number[] {
-		const lang = this.textEncoder.encode('en');
 		const textBytes = this.textEncoder.encode(text);
-		const payload = [lang.length, ...Array.from(lang), ...Array.from(textBytes)];
+		// Keep the Text Record format but omit the language code so scanners read only the JSON payload.
+		const payload = [0x00, ...Array.from(textBytes)];
 		if (payload.length > 255) {
 			throw new Error('NDEF text payload is too large for the short-record encoder.');
 		}
@@ -370,6 +440,28 @@ export class Rd300WebSerialWriter {
 		return `RD300 command failed with status ${this.toHex([status])}.`;
 	}
 
+	private async writeNtagType2NdefOnce(ndefMessage: number[]): Promise<void> {
+		this.report('Writing Type 2 NDEF data to NTAG.');
+		const tlv = this.buildType2Tlv(ndefMessage);
+		const writeBytes = this.padToBlockSize(tlv, 16);
+		const startPage = 4;
+
+		for (let offset = 0; offset < writeBytes.length; offset += 16) {
+			await this.writeNtagBlock(startPage + offset / 4, writeBytes.slice(offset, offset + 16));
+		}
+
+		await this.delay(120);
+		this.report('Verifying NTAG NDEF data.');
+		const readBack: number[] = [];
+		for (let offset = 0; offset < writeBytes.length; offset += 16) {
+			readBack.push(...(await this.readNtagBlock(startPage + offset / 4)));
+		}
+
+		if (!this.bytesStartWith(readBack, tlv)) {
+			throw new Error('RD300 wrote the NTAG data but read-back verification failed.');
+		}
+	}
+
 	private padToBlockSize(data: number[], blockSize: number): number[] {
 		const output = [...data];
 		while (output.length % blockSize !== 0) {
@@ -401,5 +493,9 @@ export class Rd300WebSerialWriter {
 
 	private delay(ms: number): Promise<void> {
 		return new Promise((resolve) => setTimeout(resolve, ms));
+	}
+
+	private normalizeUid(uid: string): string {
+		return `${uid || ''}`.trim().toUpperCase();
 	}
 }

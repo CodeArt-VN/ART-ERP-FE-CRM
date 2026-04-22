@@ -9,7 +9,7 @@ import { environment } from 'src/environments/environment';
 import { PageBase } from 'src/app/page-base';
 import { EnvService } from 'src/app/services/core/env.service';
 import { CRM_ContactProvider, CRM_MemberCardProvider } from 'src/app/services/static/services.service';
-import { Rd300WebSerialWriter } from './serial-writer/rd300-web-serial-writer';
+import { Rd300DetectedTag, Rd300WebSerialWriter } from './serial-writer/rd300-web-serial-writer';
 
 type RequestMode = 'Insert' | 'Update';
 type StepKey = 1 | 2;
@@ -100,6 +100,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 	private removeReadListener?: () => void;
 	private hasWrittenPayload = false;
 	private rd300Writer?: Rd300WebSerialWriter;
+	private blockedRd300CardCode = '';
 
 	constructor(
 		public pageProvider: CRM_MemberCardProvider,
@@ -546,27 +547,84 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		if (token !== this.writeToken) return;
 
 		await this.cleanupNfc();
-		this.runInZone(() => {
-			if (token !== this.writeToken) return;
-			this.writePhase = 'waitingForCard';
-			this.statusMessage = `Place an NFC card on the RD300 reader to write member ${this.selectedRequest.displayName}.`;
-			this.errorMessage = '';
-		});
-
 		try {
 			const writer = this.getRd300Writer();
-			const result = await writer.writeMemberCard(this.selectedContactId);
-			if (token !== this.writeToken) return;
+			while (token === this.writeToken) {
+				this.runInZone(() => {
+					if (token !== this.writeToken) return;
+					this.writePhase = 'waitingForCard';
+					this.statusMessage = this.blockedRd300CardCode
+						? 'Remove the current card from RD300, then place another NFC card.'
+						: `Place an NFC card on the RD300 reader to write member ${this.selectedRequest.displayName}.`;
+					this.errorMessage = '';
+				});
 
-			this.runInZone(() => {
+				const tag = await writer.waitForStableCard({
+					blockedUid: this.blockedRd300CardCode,
+					stableReads: 1,
+				});
 				if (token !== this.writeToken) return;
-				this.lastDetectedSerial = result.cardCode;
-				this.writePhase = 'validatingCard';
-				this.statusMessage = `RD300 wrote ${result.tagType === 'desfire-ev3' ? 'DESFire EV3' : 'NTAG'} data. Checking the card before saving.`;
-				this.errorMessage = '';
-			});
 
-			await this.validateWrittenCardAndSave(result.cardCode, token, 'RD300 write completed. Saving to the database.');
+				this.runInZone(() => {
+					if (token !== this.writeToken) return;
+					this.lastDetectedSerial = tag.uid;
+					this.writePhase = 'validatingCard';
+					this.statusMessage = `Checking card ${tag.uid} before writing.`;
+					this.errorMessage = '';
+				});
+
+				const validationMessage = await this.validateCardBeforeWrite(tag, token);
+				if (token !== this.writeToken) return;
+
+				if (validationMessage) {
+					this.blockedRd300CardCode = tag.uid;
+					this.hasWrittenPayload = false;
+					this.runInZone(() => {
+						if (token !== this.writeToken) return;
+						this.writePhase = 'waitingForCard';
+						this.errorMessage = validationMessage;
+						this.statusMessage = 'Remove the current card and place another NFC card.';
+					});
+					this.env.showMessage(validationMessage, 'warning');
+					const removed = await writer
+						.waitForCardRemoval(tag.uid)
+						.then(() => true)
+						.catch(() => false);
+					if (token !== this.writeToken) return;
+					if (removed) {
+						this.blockedRd300CardCode = '';
+						this.runInZone(() => {
+							if (token !== this.writeToken) return;
+							this.writePhase = 'waitingForCard';
+							this.statusMessage = `Place an NFC card on the RD300 reader to write member ${this.selectedRequest.displayName}.`;
+						});
+					}
+					continue;
+				}
+
+				this.blockedRd300CardCode = '';
+				this.runInZone(() => {
+					if (token !== this.writeToken) return;
+					this.writePhase = 'writing';
+					this.statusMessage = `Writing ${tag.tagType === 'desfire-ev3' ? 'DESFire EV3' : 'NTAG'} data to card ${tag.uid}.`;
+					this.errorMessage = '';
+				});
+
+				const result = await writer.writeMemberCardToDetectedTag(this.selectedContactId, tag);
+				if (token !== this.writeToken) return;
+
+				this.runInZone(() => {
+					if (token !== this.writeToken) return;
+					this.hasWrittenPayload = true;
+					this.lastDetectedSerial = result.cardCode;
+					this.writePhase = 'saving';
+					this.statusMessage = 'RD300 write completed. Saving to the database.';
+					this.errorMessage = '';
+				});
+
+				await this.saveToDatabase(result.cardCode);
+				return;
+			}
 		} catch (error) {
 			if (token !== this.writeToken) return;
 			this.runInZone(() => {
@@ -633,6 +691,27 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		});
 
 		await this.validateWrittenCardAndSave(rawSerialNumber, token, 'NFC write completed. Saving to the database.');
+	}
+
+	private async validateCardBeforeWrite(tag: Rd300DetectedTag, token: number): Promise<string | null> {
+		if (token !== this.writeToken) return 'The current write session is no longer active.';
+
+		const duplicatedRequest = this.findRequestByCardCode(tag.uid, this.selectedRequest?.requestId);
+		if (duplicatedRequest) {
+			return `Card ${tag.uid} is already assigned in the current queue. Please place another card.`;
+		}
+
+		try {
+			const existsInDatabase = await this.checkCardCodeExistsInDatabase(tag.uid, this.selectedRequest?.memberCardId);
+			if (token !== this.writeToken) return 'The current write session is no longer active.';
+			if (existsInDatabase) {
+				return `Card ${tag.uid} has already been used in the system. Please place another card.`;
+			}
+		} catch (error) {
+			throw new Error(this.resolveErrorMessage(error, 'Cannot validate the card code in the database.'));
+		}
+
+		return null;
 	}
 
 	private async validateWrittenCardAndSave(serialNumber: string, token: number, successMessage: string): Promise<void> {
@@ -1151,6 +1230,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		this.lastDetectedSerial = '';
 		this.hasWrittenPayload = false;
 		this.lastSavedItem = null;
+		this.blockedRd300CardCode = '';
 	}
 
 	private async retryCurrentRequestWithAnotherCard(message: string): Promise<void> {
