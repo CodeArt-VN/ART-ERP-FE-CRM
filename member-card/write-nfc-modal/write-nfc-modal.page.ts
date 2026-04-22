@@ -9,6 +9,7 @@ import { environment } from 'src/environments/environment';
 import { PageBase } from 'src/app/page-base';
 import { EnvService } from 'src/app/services/core/env.service';
 import { CRM_ContactProvider, CRM_MemberCardProvider } from 'src/app/services/static/services.service';
+import { Rd300WebSerialWriter } from './serial-writer/rd300-web-serial-writer';
 
 type RequestMode = 'Insert' | 'Update';
 type StepKey = 1 | 2;
@@ -98,6 +99,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 	private removeErrorListener?: () => void;
 	private removeReadListener?: () => void;
 	private hasWrittenPayload = false;
+	private rd300Writer?: Rd300WebSerialWriter;
 
 	constructor(
 		public pageProvider: CRM_MemberCardProvider,
@@ -118,7 +120,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		super.ngOnDestroy();
 		this.writeToken++;
 		this.contactListInput$.complete();
-		void this.cleanupNfc();
+		void this.cleanupReaders();
 	}
 
 	preLoadData(event?: any): void {
@@ -258,6 +260,10 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		return !!this.importSummary;
 	}
 
+	get activeWriterLabel(): string {
+		return this.isNativeNfcPlatform() ? 'Native NFC' : 'RD300 Web Serial';
+	}
+
 	trackByRequest(_: number, item: WriteRequestViewModel): string {
 		return item.requestId;
 	}
@@ -295,7 +301,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 
 	async closeModal(role: 'cancel' | 'confirm' = 'cancel'): Promise<void> {
 		this.writeToken++;
-		await this.cleanupNfc();
+		await this.cleanupReaders();
 		await this.modalController.dismiss(
 			{
 				savedItem: this.lastSavedItem,
@@ -458,7 +464,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		if (this.currentStep === 1 || this.isBusy) return;
 
 		this.writeToken++;
-		void this.cleanupNfc();
+		void this.cleanupReaders();
 		this.resetBatchState(true);
 		this.goToStep(1);
 	}
@@ -510,6 +516,12 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		const token = ++this.writeToken;
 		this.resetBatchState(false);
 		this.writePhase = 'waitingForCard';
+
+		if (!this.isNativeNfcPlatform()) {
+			await this.startRd300WriteFlow(token);
+			return;
+		}
+
 		this.statusMessage = `Place an NFC card near the phone to write member ${this.selectedRequest.displayName}.`;
 
 		const pluginReady = await this.ensureNfcReady();
@@ -528,6 +540,42 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		});
 
 		await this.writeCardData(token);
+	}
+
+	private async startRd300WriteFlow(token: number): Promise<void> {
+		if (token !== this.writeToken) return;
+
+		await this.cleanupNfc();
+		this.runInZone(() => {
+			if (token !== this.writeToken) return;
+			this.writePhase = 'waitingForCard';
+			this.statusMessage = `Place an NFC card on the RD300 reader to write member ${this.selectedRequest.displayName}.`;
+			this.errorMessage = '';
+		});
+
+		try {
+			const writer = this.getRd300Writer();
+			const result = await writer.writeMemberCard(this.selectedContactId);
+			if (token !== this.writeToken) return;
+
+			this.runInZone(() => {
+				if (token !== this.writeToken) return;
+				this.lastDetectedSerial = result.cardCode;
+				this.writePhase = 'validatingCard';
+				this.statusMessage = `RD300 wrote ${result.tagType === 'desfire-ev3' ? 'DESFire EV3' : 'NTAG'} data. Checking the card before saving.`;
+				this.errorMessage = '';
+			});
+
+			await this.validateWrittenCardAndSave(result.cardCode, token, 'RD300 write completed. Saving to the database.');
+		} catch (error) {
+			if (token !== this.writeToken) return;
+			this.runInZone(() => {
+				if (token !== this.writeToken) return;
+				this.writePhase = 'error';
+				this.errorMessage = this.resolveErrorMessage(error, 'Cannot write the NFC card with RD300.');
+				this.statusMessage = '';
+			});
+		}
 	}
 
 	private async writeCardData(token: number): Promise<void> {
@@ -584,17 +632,23 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 			this.errorMessage = '';
 		});
 
-		const duplicatedRequest = this.findRequestByCardCode(normalizedSerialNumber, this.selectedRequest?.requestId);
+		await this.validateWrittenCardAndSave(rawSerialNumber, token, 'NFC write completed. Saving to the database.');
+	}
+
+	private async validateWrittenCardAndSave(serialNumber: string, token: number, successMessage: string): Promise<void> {
+		if (token !== this.writeToken) return;
+
+		const duplicatedRequest = this.findRequestByCardCode(serialNumber, this.selectedRequest?.requestId);
 		if (duplicatedRequest) {
-			await this.retryCurrentRequestWithAnotherCard(`Card ${this.lastDetectedSerial} is already assigned in the current queue. Please place another card.`);
+			await this.retryCurrentRequestWithAnotherCard(`Card ${serialNumber} is already assigned in the current queue. Please place another card.`);
 			return;
 		}
 
 		try {
-			const existsInDatabase = await this.checkCardCodeExistsInDatabase(rawSerialNumber, this.selectedRequest?.memberCardId);
+			const existsInDatabase = await this.checkCardCodeExistsInDatabase(serialNumber, this.selectedRequest?.memberCardId);
 			if (token !== this.writeToken) return;
 			if (existsInDatabase) {
-				await this.retryCurrentRequestWithAnotherCard(`Card ${this.lastDetectedSerial} has already been used in the system. Please place another card.`);
+				await this.retryCurrentRequestWithAnotherCard(`Card ${serialNumber} has already been used in the system. Please place another card.`);
 				return;
 			}
 		} catch (error) {
@@ -604,8 +658,8 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 			return;
 		}
 
-		this.statusMessage = 'NFC write completed. Saving to the database.';
-		await this.saveToDatabase(this.lastDetectedSerial);
+		this.statusMessage = successMessage;
+		await this.saveToDatabase(serialNumber);
 	}
 
 	private async saveToDatabase(serialNumber: string): Promise<void> {
@@ -704,7 +758,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 	}
 
 	private async ensureNfcReady(): Promise<boolean> {
-		if (Capacitor.getPlatform() === 'web') {
+		if (!this.isNativeNfcPlatform()) {
 			this.writePhase = 'error';
 			this.errorMessage = 'NFC is not supported on the web platform.';
 			return false;
@@ -1154,6 +1208,30 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 
 		await NFC.cancelScan().catch(() => undefined);
 		await NFC.cancelWriteAndroid().catch(() => undefined);
+	}
+
+	private async cleanupReaders(): Promise<void> {
+		await this.cleanupNfc();
+		await this.rd300Writer?.disconnect().catch(() => undefined);
+		this.rd300Writer = undefined;
+	}
+
+	private getRd300Writer(): Rd300WebSerialWriter {
+		if (!this.rd300Writer) {
+			this.rd300Writer = new Rd300WebSerialWriter((message) => {
+				this.runInZone(() => {
+					this.statusMessage = message;
+					this.cdr.detectChanges();
+				});
+			});
+		}
+
+		return this.rd300Writer;
+	}
+
+	private isNativeNfcPlatform(): boolean {
+		const platform = Capacitor.getPlatform();
+		return platform === 'ios' || platform === 'android';
 	}
 
 	private resolveErrorMessage(error: any, fallback: string): string {

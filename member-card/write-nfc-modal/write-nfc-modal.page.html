@@ -173,7 +173,7 @@
 					<ion-card class="summary-card">
 						<ion-card-header>
 							<ion-card-title>{{ 'Batch Write Session' | translate }}</ion-card-title>
-							<ion-card-subtitle>{{ 'Keep placing cards on the phone. The modal advances to the next request automatically.' | translate }}</ion-card-subtitle>
+							<ion-card-subtitle>{{ 'Keep placing cards on the active NFC writer. The modal advances to the next request automatically.' | translate }}</ion-card-subtitle>
 						</ion-card-header>
 
 						<ion-card-content>
@@ -206,6 +206,13 @@
 									<ion-label>
 										<h3>{{ 'Mode' | translate }}</h3>
 										<p>{{ (selectedRequest?.mode || 'N/A') | translate }}</p>
+									</ion-label>
+								</ion-item>
+
+								<ion-item>
+									<ion-label>
+										<h3>{{ 'NFC Writer' | translate }}</h3>
+										<p>{{ activeWriterLabel | translate }}</p>
 									</ion-label>
 								</ion-item>
 
