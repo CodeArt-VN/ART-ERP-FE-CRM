@@ -214,7 +214,7 @@ export class BPItemsComponent extends PageBase {
 		if (data && data.length) {
 			let postDTO = {
 				IDVendor: this.id,
-				Items: data,
+				Items: data.map(i => ({ Id: i.Id }))
 			};
 
 			this.env
