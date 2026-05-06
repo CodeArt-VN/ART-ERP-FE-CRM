@@ -1,0 +1,398 @@
+<ion-header [translucent]="true">
+	<ion-toolbar>
+		<ion-buttons slot="end">
+			<ion-button color="primary" fill="clear" [disabled]="isBusy" (click)="openImportFilePicker()">
+				<ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
+			</ion-button>
+			<ion-button color="medium" (click)="closeModal()">
+				<ion-icon slot="icon-only" name="close-outline"></ion-icon>
+			</ion-button>
+		</ion-buttons>
+
+		<ion-title>{{ title | translate }}</ion-title>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" appScrollbarTheme class="left scrollx" forceOverscroll="false">
+	<div class="write-nfc-modal">
+		<section class="step-summary">
+			<ion-progress-bar [value]="currentStep / 2"></ion-progress-bar>
+
+			<div class="step-chips">
+				<ion-chip [outline]="currentStep !== 1" [color]="currentStep === 1 ? 'primary' : 'medium'">
+					<ion-label>{{ '1. Prepare Queue' | translate }}</ion-label>
+				</ion-chip>
+				<ion-chip [outline]="currentStep !== 2" [color]="currentStep === 2 ? 'primary' : 'medium'">
+					<ion-label>{{ '2. Batch Write' | translate }}</ion-label>
+				</ion-chip>
+			</div>
+		</section>
+
+		<div class="step-slider">
+			<div class="step-track" [style.transform]="stepOffset">
+				<section class="step-pane">
+					<ion-card class="summary-card">
+						<ion-card-header>
+							<ion-card-title>{{ 'Batch Preparation' | translate }}</ion-card-title>
+							<ion-card-subtitle>{{ 'Prepare the queue before opening the NFC write session.' | translate }}</ion-card-subtitle>
+						</ion-card-header>
+
+						<ion-card-content>
+							<div class="stats-grid">
+								<div class="stat-item">
+									<span>{{ 'Total' | translate }}</span>
+									<strong>{{ totalRequestCount }}</strong>
+								</div>
+								<div class="stat-item">
+									<span>{{ 'Ready' | translate }}</span>
+									<strong>{{ readyRequestCount }}</strong>
+								</div>
+								<div class="stat-item">
+									<span>{{ 'Missing Contact' | translate }}</span>
+									<strong>{{ pendingWithoutContactCount }}</strong>
+								</div>
+								<div class="stat-item">
+									<span>{{ 'Completed' | translate }}</span>
+									<strong>{{ completedRequestCount }}</strong>
+								</div>
+							</div>
+
+							<p class="summary-note">
+								{{ 'Every pending request must have a contact before the batch session can start.' | translate }}
+							</p>
+
+							<ion-card *ngIf="hasImportSummary" class="import-summary-card">
+								<ion-card-content>
+									<div class="import-summary-head">
+										<div>
+											<h3>{{ 'Last Import Result' | translate }}</h3>
+											<p>{{ 'The backend import has already filtered contacts and prepared the checklist file.' | translate }}</p>
+										</div>
+										<ion-button fill="outline" size="small" color="primary" *ngIf="importChecklistUrl" (click)="downloadImportChecklist()">
+											<ion-icon slot="start" name="download-outline"></ion-icon>
+											{{ 'Download Checklist' | translate }}
+										</ion-button>
+									</div>
+
+									<div class="stats-grid compact">
+										<div class="stat-item">
+											<span>{{ 'Imported' | translate }}</span>
+											<strong>{{ importSummary?.TotalRows || 0 }}</strong>
+										</div>
+										<div class="stat-item">
+											<span>{{ 'Queued' | translate }}</span>
+											<strong>{{ lastImportedQueueCount }}</strong>
+										</div>
+										<div class="stat-item">
+											<span>{{ 'Created Contact' | translate }}</span>
+											<strong>{{ importSummary?.CreatedContactCount || 0 }}</strong>
+										</div>
+										<div class="stat-item">
+											<span>{{ 'Invalid' | translate }}</span>
+											<strong>{{ importSummary?.InvalidRowCount || 0 }}</strong>
+										</div>
+									</div>
+								</ion-card-content>
+							</ion-card>
+						</ion-card-content>
+					</ion-card>
+
+					<ion-card>
+						<ion-card-header>
+							<ion-card-title>{{ 'Prepare Member Card Requests' | translate }}</ion-card-title>
+							<ion-card-subtitle>{{ 'Add contacts to the queue first, then start the batch write loop.' | translate }}</ion-card-subtitle>
+						</ion-card-header>
+
+						<ion-card-content>
+							<div class="step1-toolbar">
+								<ion-searchbar
+									[(ngModel)]="requestKeyword"
+									(ionInput)="onRequestSearch($event)"
+									[placeholder]="'Search by member, code, or contact' | translate"
+									debounce="250"
+									animated="true"
+								></ion-searchbar>
+
+								<ion-button class="step1-add-btn" color="primary" fill="outline" (click)="addNewRequest()">
+									<ion-icon slot="start" name="add-outline"></ion-icon>
+									{{ 'Add Contacts' | translate }}
+								</ion-button>
+							</div>
+
+							<ion-list *ngIf="filteredRequestList.length; else emptyRequestState" lines="full">
+								<div
+									class="request-row"
+									*ngFor="let request of filteredRequestList; trackBy: trackByRequest"
+									[class.is-selected]="selectedRequest?.requestId === request.requestId"
+								>
+									<ion-item [button]="true" [detail]="false" (click)="selectRequest(request)">
+										<ion-label>
+											<h2>{{ request.displayName }}</h2>
+											<p *ngIf="request.displayCode">{{ 'Card Code' | translate }}: {{ request.displayCode }}</p>
+											<p>{{ (request.mode === 'Insert' ? 'Insert MemberCard' : 'Update MemberCard') | translate }}</p>
+											<p *ngIf="request.selectedContactId">
+												{{ 'Contact' | translate }}:
+												#{{ request.selectedContactId }}<span *ngIf="request.selectedContact?.Name"> - {{ request.selectedContact?.Name }}</span>
+											</p>
+											<p *ngIf="!request.selectedContactId">{{ 'Contact is not assigned yet.' | translate }}</p>
+											<p *ngIf="request.remark">{{ request.remark | translate }}</p>
+										</ion-label>
+
+										<ion-badge slot="end" [color]="request.requestStatus === 'Completed' ? 'success' : request.requestStatus === 'Failed' ? 'danger' : request.selectedContactId ? 'primary' : 'warning'">
+											{{ request.requestStatus === 'Pending' && !request.selectedContactId ? ('Needs Contact' | translate) : (request.requestStatus | translate) }}
+										</ion-badge>
+										<ion-button
+											slot="end"
+											fill="clear"
+											color="medium"
+											class="queue-remove-btn"
+											(click)="removeQueuedRequest(request, $event)"
+											[disabled]="isBusy"
+										>
+											<ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+										</ion-button>
+									</ion-item>
+
+								</div>
+							</ion-list>
+
+							<ng-template #emptyRequestState>
+								<ion-card class="empty-state">
+									<ion-card-content>
+										<ion-icon name="albums-outline"></ion-icon>
+										<p>{{ requestEmptyMessage | translate }}</p>
+									</ion-card-content>
+								</ion-card>
+							</ng-template>
+						</ion-card-content>
+					</ion-card>
+
+				</section>
+
+				<section class="step-pane">
+					<ion-card class="summary-card">
+						<ion-card-header>
+							<ion-card-title>{{ 'Batch Write Session' | translate }}</ion-card-title>
+							<ion-card-subtitle>{{ 'Keep placing cards on the active NFC writer. The modal advances to the next request automatically.' | translate }}</ion-card-subtitle>
+						</ion-card-header>
+
+						<ion-card-content>
+							<div class="batch-progress-head">
+								<div>
+									<div class="progress-caption">{{ 'Completed' | translate }}</div>
+									<div class="progress-value">{{ completedRequestCount }}/{{ totalRequestCount }}</div>
+								</div>
+
+								<div *ngIf="currentBatchSequence" class="queue-marker">
+									{{ 'Queue' | translate }} {{ currentBatchSequence }}
+								</div>
+							</div>
+
+							<ion-progress-bar [value]="batchProgressValue"></ion-progress-bar>
+						</ion-card-content>
+					</ion-card>
+
+					<ion-card class="current-request-card">
+						<ion-card-header>
+							<ion-card-title>{{ 'Current Request' | translate }}</ion-card-title>
+							<ion-card-subtitle *ngIf="selectedRequest">
+								{{ selectedRequest.displayName }}
+							</ion-card-subtitle>
+						</ion-card-header>
+
+						<ion-card-content>
+							<ion-list lines="none" class="summary-list">
+								<ion-item>
+									<ion-label>
+										<h3>{{ 'Mode' | translate }}</h3>
+										<p>{{ (selectedRequest?.mode || 'N/A') | translate }}</p>
+									</ion-label>
+								</ion-item>
+
+								<ion-item>
+									<ion-label>
+										<h3>{{ 'NFC Writer' | translate }}</h3>
+										<p>{{ activeWriterLabel | translate }}</p>
+									</ion-label>
+								</ion-item>
+
+								<ion-item>
+									<ion-label>
+										<h3>{{ 'Contact ID' | translate }}</h3>
+										<p>{{ selectedContactId || ('Not assigned' | translate) }}</p>
+									</ion-label>
+									<ion-note slot="end">{{ selectedContact?.Name || '' }}</ion-note>
+								</ion-item>
+
+								<ion-item *ngIf="lastDetectedSerial">
+									<ion-label>
+										<h3>{{ 'Last Serial' | translate }}</h3>
+										<p>{{ lastDetectedSerial }}</p>
+									</ion-label>
+								</ion-item>
+							</ion-list>
+						</ion-card-content>
+					</ion-card>
+
+					<ion-card class="status-card" [class.is-error]="writePhase === 'error'" [class.is-success]="writePhase === 'success' || writePhase === 'completed'">
+						<ion-card-content>
+							<div class="status-topline">
+								<ion-icon
+									[name]="writePhase === 'completed' || writePhase === 'success' ? 'checkmark-circle' : writePhase === 'error' ? 'alert-circle' : 'radio-outline'"
+								></ion-icon>
+								<div>
+									<h2>{{ writeStateLabel | translate }}</h2>
+									<p *ngIf="statusMessage">{{ statusMessage | translate }}</p>
+									<p *ngIf="errorMessage" class="error-text">{{ errorMessage | translate }}</p>
+								</div>
+							</div>
+
+							<div class="status-spinner" *ngIf="isBusy">
+								<ion-spinner name="crescent"></ion-spinner>
+							</div>
+						</ion-card-content>
+					</ion-card>
+
+					<ion-card>
+						<ion-card-header>
+							<ion-card-title>{{ 'Queue Snapshot' | translate }}</ion-card-title>
+							<ion-card-subtitle>{{ 'A quick view of current request statuses.' | translate }}</ion-card-subtitle>
+						</ion-card-header>
+
+						<ion-card-content>
+							<ion-list lines="full" class="queue-list">
+								<ion-item *ngFor="let request of batchQueuePreview; trackBy: trackByRequest" [class.is-selected]="selectedRequest?.requestId === request.requestId">
+									<ion-label>
+										<h3>{{ request.displayName }}</h3>
+										<p *ngIf="request.selectedContactId">
+											#{{ request.selectedContactId }}<span *ngIf="request.selectedContact?.Name"> - {{ request.selectedContact?.Name }}</span>
+										</p>
+									</ion-label>
+									<ion-badge slot="end" [color]="request.requestStatus === 'Completed' ? 'success' : request.requestStatus === 'Failed' ? 'danger' : 'warning'">
+										{{ request.requestStatus | translate }}
+									</ion-badge>
+									<ion-button
+										slot="end"
+										fill="clear"
+										color="medium"
+										class="queue-remove-btn"
+										(click)="removeQueuedRequest(request, $event)"
+										[disabled]="isBusy || currentStep !== 1"
+									>
+										<ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+									</ion-button>
+								</ion-item>
+							</ion-list>
+						</ion-card-content>
+					</ion-card>
+				</section>
+			</div>
+		</div>
+	</div>
+
+	<ion-infinite-scroll [disabled]="currentStep !== 1 || pageConfig.isEndOfData" (ionInfinite)="loadMoreRequests($event)">
+		<ion-infinite-scroll-content loadingSpinner="bubbles" [loadingText]="'Loading more...' | translate"></ion-infinite-scroll-content>
+	</ion-infinite-scroll>
+</ion-content>
+
+<input #importFileInput type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden (change)="onImportFileSelected($event)" />
+
+<div class="contact-picker-backdrop" *ngIf="contactPickerOpen" (click)="closeContactPicker()"></div>
+<section class="contact-picker-sheet" *ngIf="contactPickerOpen">
+	<div class="sheet-handle"></div>
+	<div class="sheet-header">
+		<div>
+			<h2>{{ 'Select Contacts' | translate }}</h2>
+			<p>{{ 'Choose multiple contacts, then add them to the batch queue in one action.' | translate }}</p>
+		</div>
+		<ion-button fill="clear" color="medium" (click)="closeContactPicker()">
+			<ion-icon slot="icon-only" name="close-outline"></ion-icon>
+		</ion-button>
+	</div>
+
+	<div class="sheet-body">
+		<ion-searchbar
+			[value]="contactPickerKeyword"
+			(ionInput)="onContactPickerSearch($event)"
+			[placeholder]="'Search contacts by name, code, or phone number' | translate"
+			debounce="250"
+			animated="true"
+		></ion-searchbar>
+
+		<div class="sheet-selection-bar">
+			<ion-chip color="primary" outline="true">
+				<ion-label>{{ selectedContactCount }} {{ 'selected' | translate }}</ion-label>
+			</ion-chip>
+			<ion-note>{{ 'Contacts already in the queue are disabled.' | translate }}</ion-note>
+		</div>
+
+		<div class="contact-picker-list" *ngIf="!contactPickerLoading; else loadingContacts">
+				<ion-list lines="full" *ngIf="contactPickerOptions.length; else emptyContactPicker">
+				<ion-item
+					*ngFor="let contact of contactPickerOptions; trackBy: trackByContact"
+					[button]="!isContactQueued(contact.Id)"
+					(click)="toggleContactPickerSelection(contact)"
+					[class.is-disabled]="isContactQueued(contact.Id)"
+					[class.is-checked]="isContactPickerSelected(contact.Id)"
+				>
+					<ion-checkbox
+						slot="start"
+						[checked]="isContactPickerSelected(contact.Id)"
+						[disabled]="isContactQueued(contact.Id)"
+						(click)="$event.stopPropagation()"
+						(ionChange)="toggleContactPickerSelection(contact)"
+					></ion-checkbox>
+					<ion-label>
+						<h3>{{ contact.Name || ('Contact #' + contact.Id) }}</h3>
+						<p>#{{ contact.Id }}<span *ngIf="contact.Code"> - {{ contact.Code }}</span></p>
+						<p *ngIf="contact.Phone1">{{ contact.Phone1 }}</p>
+					</ion-label>
+					<ion-badge slot="end" *ngIf="isContactQueued(contact.Id)" color="medium">{{ 'Queued' | translate }}</ion-badge>
+				</ion-item>
+			</ion-list>
+		</div>
+
+		<ng-template #loadingContacts>
+			<div class="contact-picker-state">
+				<ion-spinner name="crescent"></ion-spinner>
+				<p>{{ 'Loading contacts...' | translate }}</p>
+			</div>
+		</ng-template>
+
+		<ng-template #emptyContactPicker>
+			<div class="contact-picker-state">
+				<ion-icon name="people-outline"></ion-icon>
+				<p>{{ 'No contacts found for the current filter.' | translate }}</p>
+			</div>
+		</ng-template>
+	</div>
+
+	<div class="sheet-footer">
+		<ion-button fill="outline" color="medium" (click)="closeContactPicker()">
+			{{ 'Cancel' | translate }}
+		</ion-button>
+		<ion-button color="primary" [disabled]="contactPickerLoading || !selectedContactCount" (click)="addSelectedContactsToQueue()">
+			{{ 'Add Selected To Queue' | translate }}
+		</ion-button>
+	</div>
+</section>
+
+<ion-footer>
+	<ion-toolbar>
+		<ion-buttons slot="start">
+			<ion-button color="medium" [disabled]="isBusy" (click)="closeModal()">
+				{{ 'Close' | translate }}
+			</ion-button>
+		</ion-buttons>
+
+		<ion-buttons slot="end">
+			<ion-button fill="outline" [disabled]="currentStep === 1 || isBusy" (click)="goToPreviousStep()">
+				{{ 'Back To Preparation' | translate }}
+			</ion-button>
+
+			<ion-button color="primary" [disabled]="isPrimaryDisabled" (click)="handlePrimaryAction()">
+				{{ footerPrimaryLabel | translate }}
+			</ion-button>
+		</ion-buttons>
+	</ion-toolbar>
+</ion-footer>
