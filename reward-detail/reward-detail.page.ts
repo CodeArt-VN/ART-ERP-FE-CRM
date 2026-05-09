@@ -80,20 +80,22 @@ export class RewardDetailPage extends PageBase {
 	}
 
 	preLoadData(event?: any): void {
-		Promise.all([this.brandProvider.read(), this.programProvider.read(), this.rewardCategoryProvider.read(), this.env.getStatus('Reward')]).then((values: any) => {
+		Promise.all([this.brandProvider.read(), this.programProvider.read({IgnoredBranch: true}), this.rewardCategoryProvider.read(), this.env.getStatus('Reward'),this.env.getType('PromotionType')]).then((values: any) => {
 			this.brandList = values[0].data;
 			this.programList = values[1].data;
 			this.rewardCategoryList = values[2].data;
 			this.statusList = values[3];
+			this.typeList = values[4];
 			super.preLoadData();
 		});
 	}
 
 	loadedData(event?: any, ignoredFromGroup?: boolean): void {
+		super.loadedData();
 		if (!this.item?.Id) {
 			this.formGroup.controls.Status.markAsDirty();
+			this.formGroup.controls.Type.markAsDirty();
 		}
-		super.loadedData();
 	}
 
 	segmentView = 's1';
