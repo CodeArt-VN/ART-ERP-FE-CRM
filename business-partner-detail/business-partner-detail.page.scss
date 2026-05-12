@@ -27,6 +27,30 @@
 		margin-top: -75px;
 		--border-radius: 50px;
 	}
+
+	.member-rank-badge {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+		margin-top: 4px;
+
+		ion-chip {
+			width: 100%;
+			max-width: 210px;
+			height: auto;
+			min-height: 32px;
+			white-space: normal;
+			justify-content: center;
+		}
+
+		ion-note {
+			margin-left: 6px;
+			font-size: 12px;
+			font-weight: 600;
+		}
+	}
 }
 
 .full-screen {

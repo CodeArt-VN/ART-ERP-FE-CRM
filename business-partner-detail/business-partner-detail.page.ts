@@ -180,6 +180,12 @@ export class BusinessPartnerDetailPage extends PageBase {
 			Icon: 'receipt-outline',
 		},
 		{
+			Code: 'bp-membership-loyalty-history',
+			Name: 'Point history',
+			Remark: 'Point history',
+			Icon: 'time-outline',
+		},
+		{
 			Code: 'bp-outlet-info',
 			Name: 'Outlet info',
 			Remark: 'Outlet info',

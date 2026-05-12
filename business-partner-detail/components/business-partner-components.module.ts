@@ -20,6 +20,7 @@ import { ItemPickerPage } from 'src/app/pages/WMS/item-picker/item-picker.page';
 import { TaxInfoComponent } from './tax-info/tax-info.component';
 import { BpMasterCoveragePlanComponent } from './bp-master-coverage-plan/bp-master-coverage-plan.component';
 import { BpRecentOrderComponent } from './bp-recent-order/bp-recent-order.component';
+import { BpMembershipLoyaltyHistoryComponent } from './bp-membership-loyalty-history/bp-membership-loyalty-history.component';
 
 @NgModule({
 	imports: [IonicModule, CommonModule, ShareModule, RouterModule, FormsModule, MapCompsModule, ReactiveFormsModule, GoogleMapsModule],
@@ -38,6 +39,7 @@ import { BpRecentOrderComponent } from './bp-recent-order/bp-recent-order.compon
 		ItemPickerPage,
 		BpMasterCoveragePlanComponent,
 		BpRecentOrderComponent,
+		BpMembershipLoyaltyHistoryComponent,
 	],
 	exports: [
 		BpPersonInfoComponent,
@@ -54,6 +56,7 @@ import { BpRecentOrderComponent } from './bp-recent-order/bp-recent-order.compon
 		ItemPickerPage,
 		BpMasterCoveragePlanComponent,
 		BpRecentOrderComponent,
+		BpMembershipLoyaltyHistoryComponent,
 	],
 })
 export class BusinessPartnerComponentsModule {}

@@ -1,0 +1,27 @@
+<div class="main-view">
+	<div class="row-full shadow full-screen ion-padding">
+		<ion-col size="12" size-sm size-xl="8">
+			<div class="table-contain">
+				<app-data-table class="box-shadow responsive" [rows]="items" [trackBy]="'Id'"
+					[showSpinner]="pageConfig.showSpinner" [showFilter]="false">
+					<datatable-column class="col-id" name="#" property="Id"></datatable-column>
+					<datatable-column class="col-name" name="Membership" property="IDMembershipLoyalty">
+						<ng-template let-i="row" datatable-cell-template>
+							<ion-text>{{i._MembershipLoyalty?._PolLevel?.Name }}</ion-text>
+						</ng-template>
+					</datatable-column>
+					<datatable-column class="col-code" name="Event type" property="EventType"></datatable-column>
+					<datatable-column class="col-number" name="Point" property="Point">
+						<ng-template let-i="row" datatable-cell-template>
+							<ion-text [color]="i.Point >= 0 ? 'success' : 'danger'">{{i.Point |
+								number:'1.0-0'}}</ion-text>
+						</ng-template>
+					</datatable-column>
+					<datatable-column class="col-date" name="Point date" property="PointDate"
+						format="dd/MM/yyyy HH:mm"></datatable-column>
+					<datatable-column class="col-name" name="Remark" property="Remark"></datatable-column>
+				</app-data-table>
+			</div>
+		</ion-col>
+	</div>
+</div>
