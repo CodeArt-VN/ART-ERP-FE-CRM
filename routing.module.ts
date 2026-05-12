@@ -40,6 +40,10 @@ export const CRMRoutes: Routes = [
 
      { path: 'level-policy', loadChildren: () => import('./level-policy/level-policy.module').then(m => m.LevelPolicyPageModule), canActivate: [AuthGuard] },
     { path: 'level-policy/:id', loadChildren: () => import('./level-policy-detail/level-policy-detail.module').then(m => m.LevelPolicyDetailPageModule), canActivate: [AuthGuard] },
+    { path: 'level-policy-group', loadChildren: () => import('./level-policy-group/level-policy-group.module').then(m => m.LevelPolicyGroupPageModule), canActivate: [AuthGuard] },
+    { path: 'level-policy-group/:id', loadChildren: () => import('./level-policy-group-detail/level-policy-group-detail.module').then(m => m.LevelPolicyGroupDetailPageModule), canActivate: [AuthGuard] },
+    { path: 'level-policy-group-brand', loadChildren: () => import('./level-policy-group-brand/level-policy-group-brand.module').then(m => m.LevelPolicyGroupBrandPageModule), canActivate: [AuthGuard] },
+    { path: 'level-policy-group-brand/:id', loadChildren: () => import('./level-policy-group-brand-detail/level-policy-group-brand-detail.module').then(m => m.LevelPolicyGroupBrandDetailPageModule), canActivate: [AuthGuard] },
   
      { path: 'crm-benefit-policy', loadChildren: () => import('./benefit-policy/benefit-policy.module').then(m => m.BenefitPolicyPageModule), canActivate: [AuthGuard] },
     { path: 'crm-benefit-policy/:id', loadChildren: () => import('./benefit-policy-detail/benefit-policy-detail.module').then(m => m.BenefitPolicyDetailPageModule), canActivate: [AuthGuard] },

@@ -65,6 +65,9 @@
 					<ion-segment-button value="s1">
 						<ion-label>{{'Content' | translate}}</ion-label>
 					</ion-segment-button>
+					<ion-segment-button value="s3">
+						<ion-label>{{'Level policy groups' | translate}}</ion-label>
+					</ion-segment-button>
 					<ion-segment-button value="s2">
 						<ion-label>{{'Other information' | translate}}</ion-label>
 					</ion-segment-button>
@@ -90,12 +93,17 @@
 								<div *ngIf="!isEdit" [innerHtml]="item.Remark| safeHtml" class="ql-editor"></div>
 								<form *ngIf="isEdit" [formGroup]="formGroup" id="screenEditor">
 									<!-- Create the editor container -->
-									<div
-										#quillEditor
-										style="min-height: calc(100vh - 400px)"
-										id="editor"
-										[innerHTML]="item.Remark ?? '' | safeHtml"
-									></div>
+									<app-input-control
+										[field]="{
+											form: formGroup,
+											type: 'editor',
+											id: 'Remark',
+											label: 'Template content',
+											placeholder: 'Enter template content...'
+										}"
+										(change)="onTemplateChange($event)"
+									>
+						</app-input-control>
 								</form>
 								<div class="c-control ion-text-right">
 									<label class="c-label" for=""></label>
@@ -105,6 +113,47 @@
 						</ion-row>
 					</form></ion-grid
 				>
+			</div>
+
+			<div *ngIf="segmentView == 's3'">
+				<ion-grid fixed>
+					<ion-row class="hr-group">
+						<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
+							<ion-list-header class="ion-no-padding">
+								<ion-label color="primary">{{'Level policy groups' | translate}}</ion-label>
+							</ion-list-header>
+						</ion-col>
+						<ion-col size="12" size-sm size-xl="8">
+							<ion-text color="medium" *ngIf="!item?.Id">
+								<p>{{'Please save brand before selecting level policy groups.' | translate}}</p>
+							</ion-text>
+
+							<ion-list *ngIf="item?.Id && !isLoadingPolLevelGroups" lines="full">
+								<ion-item *ngFor="let group of polLevelGroupList">
+									<ion-label>
+										<h3>{{group.Name}}</h3>
+										<p *ngIf="group.Code">{{group.Code}}</p>
+									</ion-label>
+									<ion-checkbox
+										slot="end"
+										[checked]="isPolLevelGroupSelected(group)"
+										[disabled]="!pageConfig.canEdit || isSyncingPolLevelGroups"
+										(ionChange)="onPolLevelGroupChanged(group, $event)"
+									></ion-checkbox>
+								</ion-item>
+							</ion-list>
+
+							<ion-item *ngIf="item?.Id && !isLoadingPolLevelGroups && polLevelGroupList.length == 0" lines="none">
+								<ion-label color="medium">{{'No level policy group found' | translate}}</ion-label>
+							</ion-item>
+
+							<ion-item *ngIf="item?.Id && isLoadingPolLevelGroups" lines="none">
+								<ion-spinner name="crescent" slot="start"></ion-spinner>
+								<ion-label>{{'Loading' | translate}}</ion-label>
+							</ion-item>
+						</ion-col>
+					</ion-row>
+				</ion-grid>
 			</div>
 
 			<!-- Order information -->
