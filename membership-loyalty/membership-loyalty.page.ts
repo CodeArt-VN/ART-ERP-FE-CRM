@@ -2,9 +2,10 @@ import { Component } from '@angular/core';
 import { NavController, ModalController, AlertController, LoadingController, PopoverController } from '@ionic/angular';
 import { EnvService } from 'src/app/services/core/env.service';
 import { PageBase } from 'src/app/page-base';
-import { BRA_BranchProvider, CRM_MembershipLoyaltyProvider, SYS_ActionProvider, SYS_IntegrationProviderProvider } from 'src/app/services/static/services.service';
+import { BRA_BranchProvider, CRM_MembershipLoyaltyProvider, CRM_PolLevelProvider, SYS_ActionProvider, SYS_IntegrationProviderProvider } from 'src/app/services/static/services.service';
 import { Location } from '@angular/common';
 import { SortConfig } from 'src/app/interfaces/options-interface';
+import { CRM_PolLevel } from 'src/app/models/model-list-interface';
 
 @Component({
 	selector: 'app-membership-loyalty',
@@ -13,9 +14,10 @@ import { SortConfig } from 'src/app/interfaces/options-interface';
 	standalone: false,
 })
 export class MembershipLoyaltyPage extends PageBase {
-
+	polLevelList = [];
 	constructor(
 		public pageProvider: CRM_MembershipLoyaltyProvider,
+		public polLevelProvider: CRM_PolLevelProvider,
 		public modalController: ModalController,
 		public popoverCtrl: PopoverController,
 		public alertCtrl: AlertController,
@@ -28,8 +30,12 @@ export class MembershipLoyaltyPage extends PageBase {
 	}
 
 	preLoadData(event?: any): void {
-		super.preLoadData(event);
+		Promise.all([this.polLevelProvider.read()]).then(([polLevelResult]: any[]) => {
+			this.polLevelList = polLevelResult.data;
+			super.preLoadData(event);
+		});
 	}
+
 	loadedData(event) {
 		super.loadedData(event);
 	}

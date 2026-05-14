@@ -20,6 +20,9 @@ export class LoyaltyPolicyDetailPage extends PageBase {
 	eventTypeList = [];
 	calculationMethodList = [];
 	CalculationByList = [];
+	_isValue = true;
+	_isConversionRate = true;
+	conversionRateValue = 0;
 	constructor(
 		public pageProvider: CRM_PolLoyaltyProvider,
 		public polLevelProvider: CRM_PolLevelProvider,
@@ -49,7 +52,7 @@ export class LoyaltyPolicyDetailPage extends PageBase {
 			CreatedDate: new FormControl({ value: '', disabled: true }),
 			ModifiedBy: new FormControl({ value: '', disabled: true }),
 			ModifiedDate: new FormControl({ value: '', disabled: true }),
-			Status:new FormControl({ value: 'Draft', disabled: true }),
+			Status: new FormControl({ value: 'Draft', disabled: true }),
 			StartDate: ['', Validators.required],
 			EndDate: [null],
 			EventType: ['', Validators.required],
@@ -78,9 +81,18 @@ export class LoyaltyPolicyDetailPage extends PageBase {
 	}
 
 	loadedData(event?: any, ignoredFromGroup?: boolean): void {
-		if(!this.item?.Id){
+		if (!this.item?.Id) {
 			this.formGroup.controls.Status.markAsDirty();
 		}
+		if (this.item?.CalculationMethod == 'ByCount') {
+			this._isValue = true;
+			this._isConversionRate = false;
+		}
+		else {
+			this._isValue = false;
+			this._isConversionRate = true;
+		}
+		this.conversionRateValue = this.item?.ConversionRate || 0;
 		super.loadedData();
 	}
 
@@ -98,5 +110,26 @@ export class LoyaltyPolicyDetailPage extends PageBase {
 			this.formGroup.controls.EndDate.setValue(null);
 			this.formGroup.controls.EndDate.markAsDirty();
 		}
+	}
+
+	changeCalculationMethod() {
+		if (this.formGroup.controls.CalculationMethod.value === 'ByCount') {
+			this._isValue = true;
+			this._isConversionRate = false;
+			this.formGroup.controls.ConversionRate.setValue(null);
+			this.formGroup.controls.Value.markAsDirty();
+		} else {
+			this._isValue = false;
+			this._isConversionRate = true;
+			this.formGroup.controls.Value.setValue(null);
+			this.conversionRateValue = this.formGroup.controls.ConversionRate.value || 0;
+			this.formGroup.controls.ConversionRate.markAsDirty();
+		}
+		this.saveChange();
+	}
+
+	changeConversionRate() {
+		this.conversionRateValue = this.formGroup.controls.ConversionRate.value || 0;
+		this.saveChange();
 	}
 }
