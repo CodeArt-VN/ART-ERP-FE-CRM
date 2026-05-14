@@ -29,6 +29,14 @@
 							<h1 class="bold">{{formGroup.get('Name').value}}</h1>
 						</ion-label>
 
+						<div class="member-rank-badge" *ngIf="item._MembershipLoyalty?.length">
+							<ion-chip *ngFor="let m of item._MembershipLoyalty" [color]="m._PolLevel?.Color || 'primary'">
+								<ion-icon [name]="m._PolLevel?.Icon || 'ribbon-outline'"></ion-icon>
+								<ion-label>{{m._PolLevel?.Name || m.Name}}</ion-label>
+								<ion-note color="dark">{{(m.Point || 0) | number:'1.0-0'}} {{'Point' | translate}}</ion-note>
+							</ion-chip>
+						</div>
+
 						<ion-label class="ion-text-wrap ion-text-center" style="padding-top: 8px">
 							<ion-chip color="primary" *ngIf="formGroup.get('Code').value">
 								<ion-icon name="barcode-outline"></ion-icon>
@@ -38,6 +46,9 @@
 							<ion-chip color="danger" *ngIf="formGroup.get('WorkPhone').value">
 								<ion-icon name="call-outline"></ion-icon>
 								<ion-label>{{formGroup.get('WorkPhone').value }}</ion-label>
+								<ion-button *ngIf="formGroup.get('WorkPhone').value" href="https://zalo.me/{{formGroup.get('WorkPhone').value}}" target="_blank" fill="clear" color="primary" size="medium">
+									<ion-icon slot="icon-only" name="zalo"></ion-icon>
+								</ion-button>
 							</ion-chip>
 						</ion-label>
 					</div>
@@ -518,6 +529,11 @@
 			[canEdit]="pageConfig.canEdit"
 			*ngIf="pageConfig.showSpinner == false && segmentView.Page == 'bp-recent-order' &&item.Id"
 		></app-bp-recent-order>
+
+		<app-bp-membership-loyalty-history
+			[membershipLoyalty]="item._MembershipLoyalty"
+			*ngIf="pageConfig.showSpinner == false && segmentView.Page == 'bp-membership-loyalty-history'"
+		></app-bp-membership-loyalty-history>
 
 		<!-- Địa chỉ -->
 		<ng-container *ngIf="pageConfig.showSpinner == false && segmentView.Page == 'bp-address'">
