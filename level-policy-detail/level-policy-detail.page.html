@@ -34,10 +34,29 @@
 							<ion-col size="12" size-sm size-xl="4">
 								<app-form-control [field]="{id: 'Code', label: 'Code', type: 'text', form: formGroup }" (change)="saveChange()"> </app-form-control>
 								<app-form-control [field]="{id: 'Name', label: 'Name', type: 'text', form: formGroup }" (change)="saveChange()"> </app-form-control>
+								<app-form-control
+									[field]="{id: 'IDPolLevelGroup', label: 'Level policy group', type: 'ng-select', dataSource: polLevelGroupList, bindLabel:'Name', bindValue: 'Id', form: formGroup }"
+									(change)="saveChange()"
+								></app-form-control>
 								<app-form-control [field]="{id: 'Level', label: 'Level', type: 'number', form: formGroup }" (change)="saveChange()"> </app-form-control>
+								<app-form-control [field]="{id: 'Amount', label: 'Amount', type: 'number', form: formGroup }" (change)="saveChange()"> </app-form-control>
+								<app-form-control
+									[field]="{id: 'RetainThresholdAmount', label: 'Retain threshold amount', type: 'number', form: formGroup }"
+									(change)="saveChange()"
+								>
+								</app-form-control>
 							</ion-col>
 							<ion-col size="12" size-sm size-xl="4">
-								<app-form-control [field]="{id: 'Amount', label: 'Amount', type: 'number', form: formGroup }" (change)="saveChange()"> </app-form-control>
+								<app-form-control
+									[field]="{id: 'TriggerMode', label: 'Trigger mode', type: 'select', dataSource: triggerModeList, form: formGroup }"
+									(change)="saveChange()"
+								>
+								</app-form-control>
+								<app-form-control [field]="{id: 'EvalPeriod', label: 'Evaluation period', type: 'number', form: formGroup }" (change)="saveChange()">
+								</app-form-control>
+								<app-form-control [field]="{id: 'NextRun', label: 'Next run', type: 'datetime-local', form: formGroup }" (change)="saveChange()">
+								</app-form-control>
+
 								<app-form-control
 									[field]="{id:'Icon', secondaryId: 'Color', label: 'Icon', type: 'icon-color', form: formGroup }"
 									(change)="saveChange()"
@@ -53,8 +72,7 @@
 												(ionError)="img.src = noImage"
 											/>
 											<div class="image-upload">
-												<ion-icon color="primary" size="large" slot="icon-only" name="cloud-upload-outline" (click)="onClickUpload()">
-												</ion-icon>
+												<ion-icon color="primary" size="large" slot="icon-only" name="cloud-upload-outline" (click)="onClickUpload()"> </ion-icon>
 												<ion-label> {{'Upload image' | translate}}</ion-label>
 											</div>
 										</div>

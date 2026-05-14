@@ -26,6 +26,10 @@ export class BrandDetailPage extends PageBase {
 	editor: any;
 	remarkBeforeChange = '';
 	isEdit = true;
+	polLevelGroupList = [];
+	selectedPolLevelGroupIds = [];
+	isLoadingPolLevelGroups = false;
+	isSyncingPolLevelGroups = false;
 	@ViewChildren('quillEditor') quillElement: QueryList<ElementRef>;
 
 	constructor(
@@ -65,12 +69,17 @@ export class BrandDetailPage extends PageBase {
 
 	loadedData(event?: any, ignoredFromGroup?: boolean): void {
 		super.loadedData();
-		console.log(this.item);
+		if (this.segmentView == 's3') {
+			this.loadPolLevelGroups();
+		}
 	}
 
 	segmentView = 's1';
 	segmentChanged(ev: any) {
 		this.segmentView = ev.detail.value;
+		if (this.segmentView == 's3') {
+			this.loadPolLevelGroups();
+		}
 	}
 
 	saveChange() {
@@ -115,162 +124,90 @@ export class BrandDetailPage extends PageBase {
 			}
 		});
 	};
-
-	ngAfterViewInit() {
-		this.subscriptions.push(
-			this.quillElement.changes.subscribe((elements) => {
-				if (typeof elements.first !== 'undefined') {
-					this.loadQuillEditor();
-				}
-			})
-		);
+	onTemplateChange(value: string) {
+		this.formGroup.get('Remark')?.setValue(value);
+		this.formGroup.get('Remark')?.markAsDirty();
 	}
 
-	loadQuillEditor() {
-		if (typeof Quill !== 'undefined') {
-			this.initQuill();
-		} else {
-			this.dynamicScriptLoaderService
-				.loadResources(thirdPartyLibs.quill.source)
-				.then(() => {
-					this.initQuill();
-				})
-				.catch((error) => console.error('Error loading script', error));
-		}
-	}
-
-	initQuill() {
-		if (typeof Quill !== 'undefined') {
-			const existingToolbar = document.querySelector('.ql-toolbar');
-			if (existingToolbar) {
-				existingToolbar.parentNode.removeChild(existingToolbar);
-			}
-			this.editor = new Quill('#editor', {
-				modules: {
-					toolbar: {
-						container: [
-							['bold', 'italic', 'underline', 'strike'], // toggled buttons
-							['blockquote', 'code-block'],
-
-							[{ header: 1 }, { header: 2 }], // custom button values
-							[{ list: 'ordered' }, { list: 'bullet' }],
-							[{ script: 'sub' }, { script: 'super' }], // superscript/subscript
-							[{ indent: '-1' }, { indent: '+1' }], // outdent/indent
-							[{ direction: 'rtl' }], // text direction
-
-							[{ size: ['small', false, 'large', 'huge'] }], // custom dropdown
-							[{ header: [1, 2, 3, 4, 5, 6, false] }],
-
-							[{ color: [] }, { background: [] }], // dropdown with defaults from theme
-							[{ font: [] }],
-							[{ align: [] }],
-							['image', 'code-block'],
-
-							['clean'], // remove formatting button
-							['fullscreen'],
-							['showhtml'],
-						],
-						handlers: {
-							image: this.imageHandler.bind(this),
-							// fullscreen: () => this.toggleFullscreen(),
-							showhtml: () => this.showHtml(),
-						},
-					},
-				},
-				theme: 'snow',
-				placeholder: 'Typing ...',
-			});
-
-			// Set default background color to white for the editor area
-			const editorContainer = document.querySelector('#editor .ql-editor') as HTMLElement;
-			if (editorContainer) {
-				editorContainer.style.backgroundColor = '#ffffff';
-				editorContainer.style.height = '100%';
-				editorContainer.style.width = '100%';
-				editorContainer.style.minHeight = 'calc(-400px + 100vh)';
-			}
-			const editorParent = document.querySelector('#editor') as HTMLElement;
-			if (editorParent) {
-				editorParent.style.height = '100%';
-				editorParent.style.width = '100%';
-			}
-			//choose image
-			//this.editor.getModule("toolbar").addHandler("image", this.imageHandler.bind(this));
-
-			this.editor.on('text-change', (delta, oldDelta, source) => {
-				if (typeof this.editor.root.innerHTML !== 'undefined' && this.formGroup.controls.Remark.value !== this.editor.root.innerHTML) {
-					this.formGroup.controls.Remark.setValue(this.editor.root.innerHTML, { emitEvent: false });
-					this.formGroup.controls.Remark.markAsDirty();
-				}
-				if (this.editor.root.innerHTML == '<p><br></p>') {
-					this.formGroup.controls.Remark.setValue(null, { emitEvent: false });
-				}
-			});
-
-			// icon fullscreen
-			const toolbarCustom = this.editor.getModule('toolbar');
-			const fullscreenButton = toolbarCustom.container.querySelector('button.ql-fullscreen');
-			if (fullscreenButton) {
-				const fullscreenIcon = document.createElement('ion-icon');
-				fullscreenIcon.setAttribute('name', 'resize');
-				fullscreenIcon.setAttribute('color', 'dark');
-				fullscreenButton.innerHTML = '';
-				fullscreenButton.appendChild(fullscreenIcon);
-			}
-
-			// icon show HTML
-			const showHtmlButton = toolbarCustom.container.querySelector('button.ql-showhtml');
-			if (showHtmlButton) {
-				const showHtmlIcon = document.createElement('ion-icon');
-				showHtmlIcon.setAttribute('name', 'logo-html5');
-				showHtmlIcon.setAttribute('color', 'dark');
-				showHtmlButton.innerHTML = '';
-				showHtmlButton.appendChild(showHtmlIcon);
-			}
-			const toolbar = document.querySelector('.ql-toolbar');
-			toolbar.addEventListener('mousedown', (event) => {
-				event.preventDefault();
-			});
-		}
-	}
-
-	imageHandler() {
-		const imageUrl = prompt('Please enter the image URL:');
-		if (imageUrl) {
-			const range = this.editor.getSelection();
-			this.editor.insertEmbed(range.index, 'image', imageUrl);
-		}
-	}
-
-	showHtml() {
-		const editorContent = this.editor.root;
-		const isHtmlMode = /&lt;|&gt;|&amp;|&quot;|&#39;/.test(editorContent.innerHTML);
-		if (isHtmlMode) {
-			const htmlContent = editorContent.textContent || '';
-			this.editor.root.innerHTML = htmlContent;
-		} else {
-			const richTextContent = this.editor.root.innerHTML;
-			this.editor.root.textContent = richTextContent;
-		}
-
-		this.formGroup.controls.Remark.setValue(this.editor.root.innerHTML);
-		if (this.editor.root.innerHTML == '<p><br></p>') {
-			this.formGroup.controls.Remark.setValue(this.editor.root.innerHTML);
-		}
+	edit() {
+		this.isEdit = true;
+		this.remarkBeforeChange = this.item.Remark;
 	}
 
 	preView() {
 		this.isEdit = false;
 		this.remarkBeforeChange = this.item.Remark;
-		this.item.Remark = this.item.Remark ?? this.editor?.root?.innerHTML ?? '';
-	}
-	edit() {
-		this.isEdit = true;
-		this.item.Remark = this.item.Remark ?? this.editor?.root?.innerHTML ?? '';
-		this.remarkBeforeChange = this.item.Remark;
+		this.item.Remark = this.formGroup.get('Remark')?.value ?? '';
 	}
 
 	saveContent() {
 		this.saveChange();
+	}
+
+	loadPolLevelGroups() {
+		if (!this.item?.Id || this.isLoadingPolLevelGroups) {
+			return;
+		}
+
+		this.isLoadingPolLevelGroups = true;
+		this.commonService
+			.connect('GET', 'CRM/PolLevelGroupBrand/OptionsByBrand/' + this.item.Id, null)
+			.toPromise()
+			.then((resp: any) => {
+				this.polLevelGroupList = resp || [];
+				this.selectedPolLevelGroupIds = this.polLevelGroupList.filter((d) => d.Selected).map((d) => d.Id);
+			})
+			.catch((err) => {
+				this.env.showMessage('Cannot load level policy groups', 'danger');
+				console.error(err);
+			})
+			.finally(() => {
+				this.isLoadingPolLevelGroups = false;
+			});
+	}
+
+	isPolLevelGroupSelected(group: any) {
+		return this.selectedPolLevelGroupIds.indexOf(group.Id) > -1;
+	}
+
+	onPolLevelGroupChanged(group: any, ev: any) {
+		if (!this.pageConfig.canEdit || !this.item?.Id || this.isSyncingPolLevelGroups) {
+			return;
+		}
+
+		const checked = ev?.detail?.checked == true;
+		if (checked == this.isPolLevelGroupSelected(group)) {
+			return;
+		}
+
+		let ids = this.selectedPolLevelGroupIds.filter((id) => id != group.Id);
+		if (checked) {
+			ids.push(group.Id);
+		}
+
+		this.syncPolLevelGroups(ids);
+	}
+
+	syncPolLevelGroups(ids: number[]) {
+		this.isSyncingPolLevelGroups = true;
+		this.commonService
+			.connect('POST', 'CRM/PolLevelGroupBrand/SetByBrand', {
+				IDBrand: this.item.Id,
+				IDsPolLevelGroup: ids,
+			})
+			.toPromise()
+			.then((resp: any) => {
+				this.polLevelGroupList = resp?.Items || this.polLevelGroupList;
+				this.selectedPolLevelGroupIds = resp?.IDsPolLevelGroup || ids;
+				this.env.showMessage('Saved', 'success');
+			})
+			.catch((err) => {
+				this.env.showMessage('Cannot save level policy groups', 'danger');
+				this.loadPolLevelGroups();
+				console.error(err);
+			})
+			.finally(() => {
+				this.isSyncingPolLevelGroups = false;
+			});
 	}
 }

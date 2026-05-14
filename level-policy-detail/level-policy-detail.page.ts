@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { EnvService } from 'src/app/services/core/env.service';
 import { FormBuilder, Validators, FormControl, FormArray } from '@angular/forms';
 import { CommonService } from 'src/app/services/core/common.service';
-import { CRM_BrandProvider, CRM_PolLevelProvider } from 'src/app/services/static/services.service';
+import { CRM_PolLevelGroupProvider, CRM_PolLevelProvider } from 'src/app/services/static/services.service';
 import { ApiSetting } from 'src/app/services/static/api-setting';
 import { environment } from 'src/environments/environment';
 import { DynamicScriptLoaderService } from 'src/app/services/custom/custom.service';
@@ -23,9 +23,12 @@ export class LevelPolicyDetailPage extends PageBase {
 	Image: any;
 	noImage = 'assets/avartar-empty.jpg';
 	imageServer = environment.posImagesServer;
+	triggerModeList = [];
+	polLevelGroupList = [];
 
 	constructor(
 		public pageProvider: CRM_PolLevelProvider,
+		public polLevelGroupProvider: CRM_PolLevelGroupProvider,
 		public env: EnvService,
 		public navCtrl: NavController,
 		public route: ActivatedRoute,
@@ -41,6 +44,7 @@ export class LevelPolicyDetailPage extends PageBase {
 
 		this.formGroup = formBuilder.group({
 			// IDBranch: [this.env.selectedBranch],
+			IDPolLevelGroup: [''],
 			Id: new FormControl({ value: '', disabled: true }),
 			Code: [''],
 			Name: ['', Validators.required],
@@ -57,6 +61,18 @@ export class LevelPolicyDetailPage extends PageBase {
 			Image: [null],
 			Icon: [''],
 			Color: [''],
+			TriggerMode: [''],
+			NextRun: [''],
+			EvalPeriod: [''],
+			RetainThresholdAmount: [''],
+		});
+	}
+
+	preLoadData(event?: any): void {
+		Promise.all([this.env.getType('TriggerMode'), this.polLevelGroupProvider.read()]).then((values: any) => {
+			this.triggerModeList = values[0];
+			this.polLevelGroupList = values[1].data;
+			super.preLoadData(event);
 		});
 	}
 
