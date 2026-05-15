@@ -49,8 +49,9 @@
 									(change)="saveChange()"> </app-form-control>
 
 								<app-form-control *ngIf="_isConversionRate"
-									[field]="{id: 'ConversionRate', label: 'Conversion rate', remark: conversionRateValue + ' VND = 1 point', type: 'number', form: formGroup }"
+									[field]="{id: 'ConversionRate', label: 'Conversion rate', type: 'number', form: formGroup }"
 									(change)="changeConversionRate()">
+									<small label>{{conversionRateValue}} VND = 1 point</small>
 								</app-form-control>
 							</ion-col>
 							<ion-col size="12" size-sm size-xl="4">
