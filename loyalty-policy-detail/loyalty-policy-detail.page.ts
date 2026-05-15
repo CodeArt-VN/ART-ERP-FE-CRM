@@ -59,6 +59,7 @@ export class LoyaltyPolicyDetailPage extends PageBase {
 			CalculationMethod: [''],
 			CalculationBy: [''],
 			ConversionRate: [''],
+			PointConversionRate:[''],
 			Value: [''],
 		});
 	}
@@ -117,13 +118,20 @@ export class LoyaltyPolicyDetailPage extends PageBase {
 			this._isValue = true;
 			this._isConversionRate = false;
 			this.formGroup.controls.ConversionRate.setValue(null);
-			this.formGroup.controls.Value.markAsDirty();
+			this.formGroup.controls.ConversionRate.clearAsyncValidators();
+			this.formGroup.controls.ConversionRate.updateValueAndValidity();
+			this.formGroup.controls.ConversionRate.markAsDirty();
+			this.formGroup.controls.Value.setValidators([Validators.required]);
+			this.formGroup.controls.Value.updateValueAndValidity();
 		} else {
 			this._isValue = false;
 			this._isConversionRate = true;
 			this.formGroup.controls.Value.setValue(null);
-			this.conversionRateValue = this.formGroup.controls.ConversionRate.value || 0;
-			this.formGroup.controls.ConversionRate.markAsDirty();
+			this.formGroup.controls.Value.clearAsyncValidators();
+			this.formGroup.controls.Value.updateValueAndValidity();
+			this.formGroup.controls.Value.markAsDirty();
+			this.formGroup.controls.ConversionRate.setValidators([Validators.required]);
+			this.formGroup.controls.ConversionRate.updateValueAndValidity();
 		}
 		this.saveChange();
 	}
