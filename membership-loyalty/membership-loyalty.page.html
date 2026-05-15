@@ -26,18 +26,18 @@
 					</div>
 				</ng-template>
 			</datatable-column>
-			<datatable-column class="col-name" name="Contact" property="Id">
+			<datatable-column class="col-name" name="Contact" property="_Contact.Name">
 				<ng-template let-i="row" datatable-cell-template>
-					<span *ngIf="i.ContactName" class="bold">{{i.ContactName}}</span>
+					<span *ngIf="i._Contact.Name" class="bold">{{i._Contact.Name}}</span>
 				</ng-template>
 			</datatable-column>
-			<datatable-column class="col-name" name="Policy Level" property="IDPolLevel" filterControlType="ng-select"
+			<datatable-column class="col-name" name="Policy Level" property="_PolLevel.ID" filterControlType="ng-select"
 				[filterDataSource]="polLevelList" filterBindValue="Id" filterBindLabel="Name">
 				<ng-template let-i="row" datatable-cell-template>
-					<span *ngIf="i.PolLevelName" class="bold">{{i.PolLevelName}}</span>
+					<span *ngIf="i._PolLevel.Name" class="bold">{{i._PolLevel.Name}}</span>
 				</ng-template>
 			</datatable-column>
-			<datatable-column class="col-name" name="Point" property="Point"></datatable-column>
+			<datatable-column class="col-name" format="1.0-0" name="Point" property="Point"></datatable-column>
 		</app-data-table>
 	</div>
 

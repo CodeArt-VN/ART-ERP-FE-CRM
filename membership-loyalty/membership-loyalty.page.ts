@@ -30,8 +30,8 @@ export class MembershipLoyaltyPage extends PageBase {
 	}
 
 	preLoadData(event?: any): void {
-		Promise.all([this.polLevelProvider.read()]).then(([polLevelResult]: any[]) => {
-			this.polLevelList = polLevelResult.data;
+		Promise.all([this.polLevelProvider.read()]).then(([value]: any[]) => {
+			this.polLevelList = value.data;
 			super.preLoadData(event);
 		});
 	}
