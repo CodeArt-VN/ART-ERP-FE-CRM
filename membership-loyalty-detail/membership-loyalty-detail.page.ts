@@ -21,9 +21,9 @@ export class MembershipLoyaltyDetailPage extends PageBase {
 			Take: 20,
 			Skip: 0,
 			IsCustomer: true,
-			SkipMCP:true,
+			SkipMCP: true,
 			SkipAddress: true,
-			Keyword: term
+			Keyword: term,
 		});
 	});
 	constructor(
@@ -84,5 +84,14 @@ export class MembershipLoyaltyDetailPage extends PageBase {
 
 	async saveChange() {
 		super.saveChange2();
+	}
+
+	LevelEvaluation() {
+		this.env
+			.showLoading('Evaluating levels...', this.pageProvider.commonService.connect('POST', 'CRM/MembershipLoyalty/LevelEvaluation', [this.id]).toPromise())
+			.then((res: any) => {
+				this.env.showMessage('Level evaluation completed', 'success');
+				this.refresh();
+			});
 	}
 }

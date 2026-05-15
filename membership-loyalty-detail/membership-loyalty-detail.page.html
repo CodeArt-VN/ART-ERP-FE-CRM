@@ -1,5 +1,9 @@
 <ion-header [translucent]="true">
-	<app-toolbar [page]="this"></app-toolbar>
+	<app-toolbar [page]="this">
+		<ion-button class="clickable" title="{{'Evaluate Levels' | translate}}" (click)="LevelEvaluation()">
+			<ion-icon name="calculator-outline" color="success" slot="icon-only"></ion-icon>
+		</ion-button>
+	</app-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" appScrollbarTheme class="ion-padding">
