@@ -1,5 +1,11 @@
 <ion-header [translucent]="true">
-	<app-toolbar [page]="this"></app-toolbar>
+	<app-toolbar [page]="this">
+		<ng-container tollbarSelected>
+			<ion-button class="clickable" title="{{'Evaluate Levels' | translate}}" (click)="LevelEvaluation()">
+				<ion-icon name="calculator-outline" color="success" slot="icon-only"></ion-icon>
+			</ion-button>
+		</ng-container>
+	</app-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" appScrollbarTheme class="left scrollx" [ngClass]="{withFeature: pageConfig.isShowFeature}" forceOverscroll="false">
@@ -34,7 +40,18 @@
 					</div>
 				</ng-template>
 			</datatable-column>
-
+			<datatable-column class="col-name" name="Contact" property="_Contact.Name">
+				<ng-template let-i="row" datatable-cell-template>
+					<span *ngIf="i._Contact.Name" class="bold">{{i._Contact.Name}}</span>
+				</ng-template>
+			</datatable-column>
+			<datatable-column class="col-name" name="Policy Level" property="_PolLevel.ID" filterControlType="ng-select"
+				[filterDataSource]="polLevelList" filterBindValue="Id" filterBindLabel="Name">
+				<ng-template let-i="row" datatable-cell-template>
+					<span *ngIf="i._PolLevel.Name" class="bold">{{i._PolLevel.Name}}</span>
+				</ng-template>
+			</datatable-column>
+			<datatable-column class="col-name" format="1.0-0" name="Point" property="Point"></datatable-column>
 		</app-data-table>
 	</div>
 

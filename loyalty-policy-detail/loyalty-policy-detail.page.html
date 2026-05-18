@@ -40,34 +40,39 @@
 
 								<app-form-control
 									[field]="{id: 'CalculationMethod', label: 'Calculation method', type: 'ng-select',  dataSource: calculationMethodList, bindLabel:'Name',  bindValue: 'Code' ,form: formGroup }"
-									(change)="saveChange()"
+									(change)="changeCalculationMethod()"
 								>
 								</app-form-control>
+
+								<app-form-control *ngIf="_isValue" [field]="{id: 'Value', label: 'Value', type: 'number', form: formGroup }" (change)="saveChange()">
+								</app-form-control>
+
 								<app-form-control
-									[field]="{id: 'Status', label: 'Status', type: 'ng-select-status',  dataSource: statusList, bindLabel:'Name',  bindValue: 'Code' ,form: formGroup }"
-									(change)="saveChange()"
+									*ngIf="_isConversionRate"
+									[field]="{id: 'ConversionRate', label: 'Conversion rate', type: 'number', form: formGroup }"
+									(change)="changeConversionRate()"
 								>
+									<small label>{{conversionRateValue}} VND = 1 point</small>
 								</app-form-control>
 							</ion-col>
 							<ion-col size="12" size-sm size-xl="4">
+								<app-form-control [field]="{id: 'PointConversionRate', label: 'Point conversion rate', type: 'number', form: formGroup }" (change)="saveChange()">
+								</app-form-control>
 								<app-form-control
 									[field]="{id: 'CalculationBy', label: 'Calculation by', type: 'ng-select',  dataSource: CalculationByList, bindLabel:'Name',  bindValue: 'Code' ,form: formGroup }"
 									(change)="saveChange()"
 								>
 								</app-form-control>
-								<app-form-control [field]="{id: 'StartDate', label: 'Start date', type: 'datetime-local',form: formGroup }" (change)="saveChange()">
-								</app-form-control>
+
 								<app-form-control
-									*ngIf="!_isNeverExpired"
-									[field]="{id: 'EndDate', label: 'End date', type: 'datetime-local',form: formGroup }"
+									[field]="{id: 'Status', label: 'Status', type: 'ng-select-status',  dataSource: statusList, bindLabel:'Name',  bindValue: 'Code' ,form: formGroup }"
 									(change)="saveChange()"
 								>
 								</app-form-control>
 
-								<app-form-control [field]="{id: 'ConversionRate', label: 'Conversion rate', type: 'number', form: formGroup }" (change)="saveChange()">
+								<app-form-control [field]="{id: 'StartDate', label: 'Start date', type: 'datetime-local',form: formGroup }" (change)="saveChange()">
 								</app-form-control>
 
-								<app-form-control [field]="{id: 'Value', label: 'Value', type: 'number', form: formGroup }" (change)="saveChange()"> </app-form-control>
 								<div class="c-control">
 									<input
 										type="checkbox"
@@ -79,6 +84,13 @@
 									/>
 									<label class="c-label checkbox">{{'Never expired' | translate}} </label>
 								</div>
+
+								<app-form-control
+									*ngIf="!_isNeverExpired"
+									[field]="{id: 'EndDate', label: 'End date', type: 'datetime-local',form: formGroup }"
+									(change)="saveChange()"
+								>
+								</app-form-control>
 							</ion-col>
 						</ion-row>
 
