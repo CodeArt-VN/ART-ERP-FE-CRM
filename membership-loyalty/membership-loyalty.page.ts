@@ -47,6 +47,7 @@ export class MembershipLoyaltyPage extends PageBase {
 	}
 
 	LevelEvaluation() {
+		const postDTO = { IDsMembershipLoyalty: this.selectedItems.map((d) => d.Id),  IDsContact: null,force: true };
 		this.env
 			.showLoading(
 				'Evaluating levels...',
@@ -54,7 +55,7 @@ export class MembershipLoyaltyPage extends PageBase {
 					.connect(
 						'POST',
 						'CRM/MembershipLoyalty/LevelEvaluation',
-						this.selectedItems.map((d) => d.Id)
+						postDTO
 					)
 					.toPromise()
 			)
