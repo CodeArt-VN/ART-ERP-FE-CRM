@@ -907,8 +907,10 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 				this.contactProvider.search({
 					SkipAddress: true,
 					SortBy: ['Id_desc'],
-					Take: 30,
+					Take: 20,
 					Skip: 0,
+					IsCustomer: true,
+					SkipMCP:true,
 					Keyword: keyword || '',
 				})
 			);
