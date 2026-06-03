@@ -87,8 +87,10 @@ export class MembershipLoyaltyDetailPage extends PageBase {
 	}
 
 	LevelEvaluation() {
+		const postDTO = { IDsMembershipLoyalty: [this.id],  IDsContact: [this.item?._Contact.Id],force: true };
+
 		this.env
-			.showLoading('Evaluating levels...', this.pageProvider.commonService.connect('POST', 'CRM/MembershipLoyalty/LevelEvaluation', [this.id]).toPromise())
+			.showLoading('Evaluating levels...', this.pageProvider.commonService.connect('POST', 'CRM/MembershipLoyalty/LevelEvaluation', postDTO).toPromise())
 			.then((res: any) => {
 				this.env.showMessage('Level evaluation completed', 'success');
 				this.refresh();
