@@ -6,6 +6,7 @@ import { EnvService } from 'src/app/services/core/env.service';
 import { BRA_BranchProvider, CRM_PolLevelProvider, CRM_PolLoyaltyProvider } from 'src/app/services/static/services.service';
 import { FormBuilder, Validators, FormControl } from '@angular/forms';
 import { CommonService } from 'src/app/services/core/common.service';
+import { ApiSetting } from 'src/app/services/static/api-setting';
 
 @Component({
 	selector: 'app-loyalty-policy-detail',
@@ -59,7 +60,7 @@ export class LoyaltyPolicyDetailPage extends PageBase {
 			CalculationMethod: [''],
 			CalculationBy: [''],
 			ConversionRate: [''],
-			PointConversionRate:[''],
+			PointConversionRate: [''],
 			Value: [''],
 		});
 	}
@@ -139,5 +140,76 @@ export class LoyaltyPolicyDetailPage extends PageBase {
 	changeConversionRate() {
 		this.conversionRateValue = this.formGroup.controls.ConversionRate.value || 0;
 		this.saveChange();
+	}
+
+	approve(): void {
+		let text = 'Duyệt';
+		let message = 'Bạn có chắc chắn duyệt các đối tượng này?';
+		this.changeStatus(text, message, 'Approved');
+	}
+
+	disapprove(): void {
+		let text = 'Không duyệt';
+		let message = 'Bạn có chắc chắn từ chối các đối tượng này?';
+		this.changeStatus(text, message, 'Unapproved');
+	}
+
+	changeStatus(text, message, Status) {
+		this.alertCtrl
+			.create({
+				header: text,
+				//subHeader: '---',
+				message: message,
+				buttons: [
+					{
+						text: 'Hủy',
+						role: 'cancel',
+						handler: () => {
+							//console.log('Không xóa');
+						},
+					},
+					{
+						text: 'Xác nhận',
+						cssClass: 'danger-btn',
+						handler: () => {
+							let publishEventCode = this.pageConfig.pageName;
+							let apiPath = {
+								method: 'POST',
+								url: function () {
+									return ApiSetting.apiDomain('CRM/PolLoyalty/ChangeStatus/');
+								},
+							};
+
+							if (this.submitAttempt == false) {
+								this.submitAttempt = true;
+								let postDTO = {
+									Ids: [this.id],
+									Status: Status,
+								};
+								this.pageProvider.commonService
+									.connect(apiPath.method, apiPath.url(), postDTO)
+									.toPromise()
+									.then((savedItem: any) => {
+										if (publishEventCode) {
+											this.env.publishEvent({
+												Code: publishEventCode,
+											});
+										}
+										this.env.showMessage('Saving completed!', 'success');
+										this.submitAttempt = false;
+										this.refresh();
+									})
+									.catch((err) => {
+										this.submitAttempt = false;
+										//console.log(err);
+									});
+							}
+						},
+					},
+				],
+			})
+			.then((alert) => {
+				alert.present();
+			});
 	}
 }
