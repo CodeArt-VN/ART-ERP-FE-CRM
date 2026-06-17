@@ -13,7 +13,7 @@
 					<datatable-column class="col-code" name="Sales staff" property="_Saleman.FullName"></datatable-column>
 					<datatable-column class="col-code" name="Customers payable" property="TotalAfterTax">
 						<ng-template let-i="row" datatable-cell-template>
-							{{ i.CalcTotalOriginal | number }}<small>/{{ i.OriginalTotalAfterDiscount | number }}</small>
+							{{ i.CalcTotal | number }}<small>/{{ i.TotalAfterDiscount | number }}</small>
 						</ng-template>
 					</datatable-column>
 					<datatable-column class="col-code" name="Vendor code" property="Code"></datatable-column>
