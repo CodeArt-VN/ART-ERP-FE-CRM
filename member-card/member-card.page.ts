@@ -52,7 +52,7 @@ export class MemberCardPage extends PageBase {
 			component: WriteNfcModalPage,
 			canDismiss: true,
 			componentProps: {
-				title: 'Ghi thẻ NFC',
+				title: 'Membership cards',
 			},
 		});
 

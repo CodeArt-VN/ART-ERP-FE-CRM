@@ -5,7 +5,6 @@ import { Capacitor } from '@capacitor/core';
 import { concat, firstValueFrom, Observable, of, Subject } from 'rxjs';
 import { catchError, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
 import { NFC, NDEFWriteOptions } from '@exxili/capacitor-nfc';
-import { environment } from 'src/environments/environment';
 import { PageBase } from 'src/app/page-base';
 import { EnvService } from 'src/app/services/core/env.service';
 import { CRM_ContactProvider, CRM_MemberCardProvider } from 'src/app/services/static/services.service';
@@ -19,6 +18,7 @@ interface ContactOption {
 	Id: number;
 	Name?: string;
 	Code?: string;
+	CompanyName?: string;
 	Phone1?: string;
 	Email?: string;
 }
@@ -61,7 +61,7 @@ interface WriteRequestViewModel {
 	standalone: false,
 })
 export class WriteNfcModalPage extends PageBase implements OnDestroy {
-	@Input() title = 'Write NFC Card';
+	@Input() title = 'Membership cards';
 	@ViewChild('importFileInput') importFileInput?: ElementRef<HTMLInputElement>;
 
 	currentStep: StepKey = 1;
@@ -81,6 +81,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 	contactPickerKeyword = '';
 	contactPickerOptions: ContactOption[] = [];
 	contactPickerLoading = false;
+	contactPickerLoadPending = false;
 	contactPickerSelection: { [contactId: number]: ContactOption } = {};
 	selectedContactId: number = null;
 	selectedContact: ContactOption = null;
@@ -127,31 +128,41 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 	preLoadData(event?: any): void {
 		Promise.all([this.env.getStatus('StandardApprovalStatus')]).then((values: any) => {
 			this.statusList = values[0] || [];
-			super.preLoadData(event);
+			this.pageConfig.showSpinner = false;
+			this.pageConfig.isEndOfData = true;
+			this.items = [];
+			this.initContactSearch();
+			this.contactListInput$.next('');
+			this.rebuildRequestList();
+			super.loadedData(event);
 		});
 	}
 
-	loadData(event = null, forceReload = false) {
-		this.query.Take = this.query.Take || 20;
-		this.query.SortBy = this.query.SortBy || '[Id_desc]';
-		super.loadData(event, forceReload);
+	loadData(event = null, _forceReload = false) {
+		// Write queue is built only from contacts the user adds/imports — do not preload MemberCards.
+		if (event?.target?.complete) {
+			event.target.complete();
+		}
 	}
 
 	loadedData(event = null) {
-		this.items.forEach((item) => {
-			item._Status = this.statusList.find((status) => status.Code == item.Status);
-			item.Avatar = item._Member?.Code ? environment.staffAvatarsServer + item._Staff?.Code + '.jpg' : 'assets/avartar-empty.jpg';
-			item.Email = item._Member?.Email ? item._Staff?.Email.replace(environment.loginEmail, '') : '';
+		this.localRequestList = this.localRequestList.map((request) => {
+			const selectedContact = request.selectedContact ? this.normalizeContactOption(request.selectedContact) : request.selectedContact;
+			return {
+				...request,
+				selectedContact,
+				displayName: selectedContact?.Name || request.displayName,
+			};
 		});
-
+		this.contactOptions = (this.contactOptions || []).map((contact) => this.normalizeContactOption(contact));
+		this.contactPickerOptions = (this.contactPickerOptions || []).map((contact) => this.normalizeContactOption(contact));
+		if (this.selectedContact) {
+			this.selectedContact = this.normalizeContactOption(this.selectedContact);
+		}
 		this.initContactSearch();
 		this.contactListInput$.next('');
 		this.rebuildRequestList();
 		super.loadedData(event);
-	}
-
-	get stepOffset(): string {
-		return `translateX(-${(this.currentStep - 1) * 100}%)`;
 	}
 
 	get isBusy(): boolean {
@@ -164,7 +175,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 	}
 
 	get footerPrimaryLabel(): string {
-		if (this.currentStep === 1) return 'Start Batch Write';
+		if (this.currentStep === 1) return 'Start writing';
 		if (this.writePhase === 'completed') return 'Finish';
 		if (this.writePhase === 'error' && this.hasWrittenPayload && this.lastDetectedSerial) return 'Save To Database';
 		return 'Retry Current Request';
@@ -173,40 +184,76 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 	get writeStateLabel(): string {
 		switch (this.writePhase) {
 			case 'waitingForCard':
-				return 'Waiting For Card';
+				return 'Waiting for membership card';
 			case 'validatingCard':
-				return 'Validating Card';
+				return 'Validating card';
 			case 'writing':
-				return 'Writing Data';
+				return 'Writing card data';
 			case 'saving':
-				return 'Saving To Database';
+				return 'Saving membership card';
 			case 'success':
-				return 'Request Completed';
+				return 'Card written successfully';
 			case 'completed':
-				return 'Batch Completed';
+				return 'All cards written';
 			case 'error':
-				return 'Action Required';
+				return 'Action required';
 			default:
-				return 'Preparation';
+				return 'Ready to write';
 		}
 	}
 
 	get requestEmptyMessage(): string {
-		if (this.pageConfig.showSpinner) return 'Loading card write requests.';
-		return 'No card write requests available.';
+		if (this.pageConfig.showSpinner) return 'Loading...';
+		return 'No customers in the queue';
+	}
+
+	requestStatusLabel(status: WriteRequestViewModel['requestStatus']): string {
+		switch (status) {
+			case 'Completed':
+				return 'Completed';
+			case 'Failed':
+				return 'Failed';
+			default:
+				return 'Pending';
+		}
+	}
+
+	queueBadgeLabel(request: WriteRequestViewModel): string {
+		if (this.isRequestWriting(request)) return 'Writing';
+		return this.requestStatusLabel(request.requestStatus);
+	}
+
+	queueBadgeColor(request: WriteRequestViewModel): string {
+		if (this.isRequestWriting(request)) return 'danger';
+		switch (request.requestStatus) {
+			case 'Completed':
+				return 'success';
+			case 'Failed':
+				return 'danger';
+			default:
+				return 'warning';
+		}
+	}
+
+	isRequestWriting(request: WriteRequestViewModel): boolean {
+		return this.currentStep === 2 && this.isBusy && this.selectedRequest?.requestId === request.requestId;
+	}
+
+	onStepSegmentChange(event: CustomEvent): void {
+		const nextStep = Number((event as any)?.detail?.value) as StepKey;
+		if (nextStep === this.currentStep) return;
+
+		if (nextStep === 1) {
+			this.goToPreviousStep();
+			return;
+		}
+
+		// Step 2 is entered via "Start writing" only
+		this.cdr.detectChanges();
 	}
 
 	get filteredRequestList(): WriteRequestViewModel[] {
-		const keyword = `${this.requestKeyword || ''}`.trim().toLowerCase();
-		if (!keyword) return this.requestList;
-
-		return this.requestList.filter((item) => {
-			const searchSource = [item.displayName, item.displayCode, item.selectedContact?.Name, item.selectedContact?.Code, item.selectedContactId]
-				.filter(Boolean)
-				.join(' ')
-				.toLowerCase();
-			return searchSource.includes(keyword);
-		});
+		return this.requestList;
 	}
 
 	get totalRequestCount(): number {
@@ -280,24 +327,32 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 	};
 
 	onRequestSearch(event: any): void {
-		const keyword = `${event?.detail?.value ?? event?.target?.value ?? ''}`;
-		this.requestKeyword = keyword;
-
-		if (keyword.length > 2 || keyword === '') {
-			this.query.Keyword = keyword;
-			this.query.Skip = 0;
-			this.pageConfig.isEndOfData = false;
-			this.loadData('search', true);
-		}
+		this.requestKeyword = `${event?.detail?.value ?? event?.target?.value ?? ''}`;
 	}
 
 	loadMoreRequests(event: any): void {
-		if (this.currentStep !== 1 || this.pageConfig.isEndOfData) {
-			event?.target?.complete();
-			return;
-		}
+		event?.target?.complete();
+	}
 
-		this.loadData(event);
+	clearQueue(): void {
+		if (this.isBusy) return;
+
+		this.writeToken++;
+		void this.cleanupReaders();
+
+		this.localRequestList = [];
+		this.requestList = [];
+		this.removedRequestIds.clear();
+		this.selectedRequest = null;
+		this.selectedContact = null;
+		this.selectedContactId = null;
+		this.importSummary = null;
+		this.importChecklistUrl = '';
+		this.lastImportedQueueCount = 0;
+		this.requestKeyword = '';
+		this.resetBatchState(true);
+		this.currentStep = 1;
+		this.cdr.detectChanges();
 	}
 
 	async closeModal(role: 'cancel' | 'confirm' = 'cancel'): Promise<void> {
@@ -341,23 +396,56 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		this.downloadURLContent(this.importChecklistUrl);
 	}
 
-	async addNewRequest(): Promise<void> {
-		this.contactPickerOpen = true;
+	addNewRequest(): void {
 		this.contactPickerKeyword = '';
 		this.contactPickerSelection = {};
-		await this.loadContactPickerOptions();
+		this.contactPickerOptions = [];
+		this.contactPickerLoading = true;
+		this.contactPickerLoadPending = true;
+		this.contactPickerOpen = true;
 	}
 
 	closeContactPicker(): void {
 		this.contactPickerOpen = false;
+	}
+
+	onContactPickerDidPresent(): void {
+		if (!this.contactPickerLoadPending) return;
+		this.contactPickerLoadPending = false;
+		void this.loadContactPickerOptions(this.contactPickerKeyword?.trim() || '');
+	}
+
+	onContactPickerDismiss(): void {
+		this.contactPickerOpen = false;
 		this.contactPickerKeyword = '';
 		this.contactPickerLoading = false;
+		this.contactPickerLoadPending = false;
 		this.contactPickerSelection = {};
 	}
 
-	onContactPickerSearch(event: any): void {
+	onContactPickerKeywordInput(event: any): void {
 		this.contactPickerKeyword = `${event?.detail?.value ?? event?.target?.value ?? ''}`;
-		void this.loadContactPickerOptions(this.contactPickerKeyword);
+	}
+
+	searchContactPicker(): void {
+		void this.loadContactPickerOptions(this.contactPickerKeyword?.trim() || '');
+	}
+
+	onContactCheckboxChange(contact: ContactOption, event: CustomEvent): void {
+		if (!contact?.Id || this.isContactQueued(contact.Id)) return;
+
+		const checked = !!(event as any)?.detail?.checked;
+		if (checked) {
+			this.contactPickerSelection = {
+				...this.contactPickerSelection,
+				[contact.Id]: contact,
+			};
+			return;
+		}
+
+		const nextSelection = { ...this.contactPickerSelection };
+		delete nextSelection[contact.Id];
+		this.contactPickerSelection = nextSelection;
 	}
 
 	toggleContactPickerSelection(contact: ContactOption): void {
@@ -365,6 +453,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 
 		if (this.contactPickerSelection[contact.Id]) {
 			delete this.contactPickerSelection[contact.Id];
+			this.contactPickerSelection = { ...this.contactPickerSelection };
 		} else {
 			this.contactPickerSelection = {
 				...this.contactPickerSelection,
@@ -396,11 +485,10 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 				return;
 			}
 
-			this.localRequestList = [...nextRequests, ...this.localRequestList];
+			this.localRequestList = [...this.localRequestList, ...nextRequests];
 			this.rebuildRequestList();
 			this.selectRequest(nextRequests[0]);
 			this.closeContactPicker();
-			this.env.showMessage(`${nextRequests.length} contact(s) were added to the queue.`, 'success');
 		} catch (error) {
 			this.env.showMessage(this.resolveErrorMessage(error, 'Cannot prepare the selected contacts.'), 'danger');
 		} finally {
@@ -427,8 +515,6 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 				this.resetBatchState(true);
 			}
 		}
-
-		this.env.showMessage(`Removed ${request.displayName} from the queue.`, 'primary');
 	}
 
 	selectRequest(request: WriteRequestViewModel): void {
@@ -468,6 +554,22 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		void this.cleanupReaders();
 		this.resetBatchState(true);
 		this.goToStep(1);
+	}
+
+	private async abortCurrentWrite(message = 'NFC write was canceled. Tap Retry to continue.'): Promise<void> {
+		if (this.currentStep !== 2) return;
+		// Already handled (validation error, previous cancel, etc.) — don't stack another alert.
+		if (['error', 'success', 'completed'].includes(this.writePhase)) return;
+
+		this.writeToken++;
+		await this.cleanupReaders();
+		this.runInZone(() => {
+			this.writePhase = 'error';
+			this.errorMessage = message;
+			this.statusMessage = '';
+			this.hasWrittenPayload = false;
+			this.showStickyWriteMessage(this.errorMessage, 'warning');
+		});
 	}
 
 	async handlePrimaryAction(): Promise<void> {
@@ -532,11 +634,26 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		if (token !== this.writeToken) return;
 
 		this.removeErrorListener = NFC.onError((error) => {
+			if (token !== this.writeToken) return;
+
+			// Ignore cancel after write progressed, or when UI already shows another error (e.g. card already used).
+			if (this.isCancelError(error)) {
+				if (this.hasWrittenPayload || ['validatingCard', 'saving', 'success', 'completed', 'error'].includes(this.writePhase)) {
+					return;
+				}
+				void this.abortCurrentWrite('NFC write was canceled. Tap Retry to continue.');
+				return;
+			}
+
+			if (!this.isBusy || this.writePhase === 'error') return;
+
 			this.runInZone(() => {
 				if (token !== this.writeToken) return;
 				this.writePhase = 'error';
-				this.errorMessage = this.resolveErrorMessage(error, 'Cannot continue the NFC batch write session.');
+				this.errorMessage = this.resolveErrorMessage(error, 'Cannot continue the NFC write session.');
 				this.statusMessage = '';
+				this.showStickyWriteMessage(this.errorMessage, 'danger');
+				void this.cleanupNfc();
 			});
 		});
 
@@ -585,7 +702,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 						this.errorMessage = validationMessage;
 						this.statusMessage = 'Remove the current card and place another NFC card.';
 					});
-					this.env.showMessage(validationMessage, 'warning');
+					this.env.showMessage(validationMessage, 'warning', null, 0, true);
 					const removed = await writer
 						.waitForCardRemoval(tag.uid)
 						.then(() => true)
@@ -632,6 +749,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 				this.writePhase = 'error';
 				this.errorMessage = this.resolveErrorMessage(error, 'Cannot write the NFC card with RD300.');
 				this.statusMessage = '';
+				this.showStickyWriteMessage(this.errorMessage, 'danger');
 			});
 		}
 	}
@@ -647,7 +765,10 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		});
 
 		this.removeWriteListener?.();
+		let writeHandled = false;
 		this.removeWriteListener = NFC.onWrite((result?: any) => {
+			if (writeHandled || token !== this.writeToken) return;
+			writeHandled = true;
 			void this.handleWriteSuccess(result, token);
 		});
 
@@ -657,12 +778,35 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 				this.writePhase = 'writing';
 				this.statusMessage = 'Ready to write. Place the NFC card near the phone now.';
 			});
-			await NFC.writeNDEF(this.buildWritePayload());
+
+			// iOS keeps this promise open until the system NFC sheet finishes (success or cancel).
+			// Android may resolve immediately and then emit nfcWriteSuccess via onWrite.
+			const result: any = await NFC.writeNDEF(this.buildWritePayload());
+			if (token !== this.writeToken) return;
+
+			if (!writeHandled && (result?.tagInfo || result?.success)) {
+				writeHandled = true;
+				this.removeWriteListener?.();
+				this.removeWriteListener = undefined;
+				await this.handleWriteSuccess(result, token);
+			}
 		} catch (error) {
 			if (token !== this.writeToken) return;
-			this.writePhase = 'error';
-			this.errorMessage = this.resolveErrorMessage(error, 'Cannot initialize the NFC write session.');
-			this.statusMessage = '';
+			if (this.isCancelError(error)) {
+				if (this.hasWrittenPayload || ['validatingCard', 'saving', 'success', 'completed', 'error'].includes(this.writePhase)) {
+					return;
+				}
+				await this.abortCurrentWrite('NFC write was canceled. Tap Retry to continue.');
+				return;
+			}
+
+			this.runInZone(() => {
+				if (token !== this.writeToken) return;
+				this.writePhase = 'error';
+				this.errorMessage = this.resolveErrorMessage(error, 'Cannot initialize the NFC write session.');
+				this.statusMessage = '';
+				this.showStickyWriteMessage(this.errorMessage, 'danger');
+			});
 		}
 	}
 
@@ -677,6 +821,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 				this.writePhase = 'error';
 				this.errorMessage = 'The NFC write completed but the card serial number was not returned by the device.';
 				this.statusMessage = '';
+				this.showStickyWriteMessage(this.errorMessage, 'danger');
 			});
 			return;
 		}
@@ -734,6 +879,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 			this.writePhase = 'error';
 			this.errorMessage = this.resolveErrorMessage(error, 'Cannot validate the card code in the database.');
 			this.statusMessage = '';
+			this.showStickyWriteMessage(this.errorMessage, 'danger');
 			return;
 		}
 
@@ -792,6 +938,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 			this.writePhase = 'error';
 			this.errorMessage = this.resolveErrorMessage(error, 'Cannot save MemberCard data to the database.');
 			this.statusMessage = '';
+			this.showStickyWriteMessage(this.errorMessage, 'danger');
 		}
 	}
 
@@ -840,12 +987,14 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		if (!this.isNativeNfcPlatform()) {
 			this.writePhase = 'error';
 			this.errorMessage = 'NFC is not supported on the web platform.';
+			this.showStickyWriteMessage(this.errorMessage, 'danger');
 			return false;
 		}
 
 		if (!Capacitor.isPluginAvailable('NFC')) {
 			this.writePhase = 'error';
 			this.errorMessage = 'The NFC plugin is not available in the current build.';
+			this.showStickyWriteMessage(this.errorMessage, 'danger');
 			return false;
 		}
 
@@ -854,11 +1003,13 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 			if (!support?.supported) {
 				this.writePhase = 'error';
 				this.errorMessage = 'This device does not support NFC or NFC is turned off.';
+				this.showStickyWriteMessage(this.errorMessage, 'danger');
 				return false;
 			}
 		} catch (error) {
 			this.writePhase = 'error';
 			this.errorMessage = this.resolveErrorMessage(error, 'Cannot determine the NFC status of this device.');
+			this.showStickyWriteMessage(this.errorMessage, 'danger');
 			return false;
 		}
 
@@ -881,7 +1032,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 							Keyword: term || '',
 						})
 						.pipe(
-							map((result: any) => (Array.isArray(result) ? result : result?.data || [])),
+							map((result: any) => (Array.isArray(result) ? result : result?.data || []).map((item) => this.normalizeContactOption(item))),
 							tap((contacts: ContactOption[]) => {
 								this.contactOptions = contacts || [];
 								this.syncSelectedContactIntoOptions();
@@ -900,21 +1051,21 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		);
 	}
 
-	private async loadContactPickerOptions(keyword = ''): Promise<void> {
+	async loadContactPickerOptions(keyword = ''): Promise<void> {
 		this.contactPickerLoading = true;
 		try {
 			const result: any = await firstValueFrom(
 				this.contactProvider.search({
 					SkipAddress: true,
 					SortBy: ['Id_desc'],
-					Take: 20,
+					Take: 200,
 					Skip: 0,
 					IsCustomer: true,
-					SkipMCP:true,
+					SkipMCP: true,
 					Keyword: keyword || '',
 				})
 			);
-			this.contactPickerOptions = Array.isArray(result) ? result : result?.data || [];
+			this.contactPickerOptions = (Array.isArray(result) ? result : result?.data || []).map((item) => this.normalizeContactOption(item));
 		} catch (error) {
 			this.contactPickerOptions = [];
 			this.env.showMessage(this.resolveErrorMessage(error, 'Cannot load contacts for the picker.'), 'danger');
@@ -930,7 +1081,7 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		const nextRequests = await this.buildRequestsFromContacts(importedContacts);
 
 		if (nextRequests.length) {
-			this.localRequestList = [...nextRequests, ...this.localRequestList];
+			this.localRequestList = [...this.localRequestList, ...nextRequests];
 			this.rebuildRequestList();
 			this.selectRequest(nextRequests[0]);
 		}
@@ -991,7 +1142,9 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 	}
 
 	private async buildRequestsFromContacts(contacts: ContactOption[]): Promise<WriteRequestViewModel[]> {
-		const dedupedContacts = contacts.filter((contact, index, source) => source.findIndex((item) => item.Id === contact.Id) === index && !this.isContactQueued(contact.Id));
+		const dedupedContacts = contacts
+			.map((contact) => this.normalizeContactOption(contact))
+			.filter((contact, index, source) => source.findIndex((item) => item.Id === contact.Id) === index && !this.isContactQueued(contact.Id));
 		if (!dedupedContacts.length) return [];
 
 		const existingCardsByContactId = await this.resolveExistingMemberCards(dedupedContacts.map((item) => item.Id));
@@ -1073,17 +1226,18 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 				(this.looksLikeMemberCard(raw) ? raw?.Id : null);
 			const mode: RequestMode = explicitMode === 'insert' ? 'Insert' : memberCardId ? 'Update' : 'Insert';
 			const preselectedContact = raw?._Member || raw?.Contact || raw?._Contact || null;
-			const selectedContactId = raw?.IDMember || raw?.IDContact || preselectedContact?.Id || null;
+			const selectedContact = preselectedContact ? this.normalizeContactOption(preselectedContact) : null;
+			const selectedContactId = raw?.IDMember || raw?.IDContact || selectedContact?.Id || null;
 
 			return {
 				requestId: `${memberCardId || raw?.Id || raw?.Code || raw?.SerialNumber || index}`,
 				mode,
 				memberCardId,
-				displayName: raw?.Name || raw?.Title || preselectedContact?.Name || `Card Write Request #${index + 1}`,
+				displayName: raw?.Name || raw?.Title || selectedContact?.Name || `Card Write Request #${index + 1}`,
 				displayCode: raw?.Code || raw?.RequestCode || raw?.MemberCardCode || '',
 				remark: raw?.Remark || raw?.Description || '',
 				selectedContactId,
-				selectedContact: preselectedContact,
+				selectedContact,
 				memberCardPayload,
 				requestStatus: this.normalizeRequestStatus(raw),
 				serialNumber: raw?.SerialNumber || raw?.Code || '',
@@ -1094,8 +1248,9 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 
 	private rebuildRequestList(): void {
 		const existingRequests = new Map(this.requestList.map((item) => [item.requestId, item]));
-		const remoteRequests = this.normalizeRequests(this.items).map((item) => this.mergeRequestState(item, existingRequests.get(item.requestId)));
-		const nextRequestList = this.mergeUniqueRequests([...this.localRequestList, ...remoteRequests]).filter((item) => !this.removedRequestIds.has(item.requestId));
+		const nextRequestList = this.mergeUniqueRequests(this.localRequestList.map((item) => this.mergeRequestState(item, existingRequests.get(item.requestId)))).filter(
+			(item) => !this.removedRequestIds.has(item.requestId)
+		);
 		this.requestList = nextRequestList;
 		this.syncSelectedRequestReference();
 	}
@@ -1210,6 +1365,22 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		});
 	}
 
+	private normalizeContactOption(contact: any): ContactOption {
+		const name = `${contact?.Name || ''}`.trim();
+		const companyName = `${contact?.CompanyName || ''}`.trim();
+		const isSameName = !!name && !!companyName && name.localeCompare(companyName, undefined, { sensitivity: 'accent' }) === 0;
+
+		return {
+			Id: contact?.Id,
+			Name: name || undefined,
+			Code: contact?.Code ? `${contact.Code}`.trim() : undefined,
+			// Hide company when it duplicates the display name (tên gọi).
+			CompanyName: companyName && !isSameName ? companyName : undefined,
+			Phone1: contact?.Phone1,
+			Email: contact?.Email,
+		};
+	}
+
 	private normalizeCardCode(value: any): string {
 		return `${value || ''}`.trim().toLowerCase();
 	}
@@ -1226,8 +1397,8 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		this.statusMessage = resetForPreparation
 			? 'Prepare the request queue to start batch write.'
 			: this.currentStep === 2 && this.selectedRequest
-			? `Ready to process ${this.selectedRequest.displayName}.`
-			: 'Prepare the request queue to start batch write.';
+				? `Ready to process ${this.selectedRequest.displayName}.`
+				: 'Prepare the request queue to start batch write.';
 		this.errorMessage = '';
 		this.lastDetectedSerial = '';
 		this.hasWrittenPayload = false;
@@ -1236,6 +1407,8 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 	}
 
 	private async retryCurrentRequestWithAnotherCard(message: string): Promise<void> {
+		// Invalidate the current NFC session token first so late iOS "canceled" events are ignored.
+		this.writeToken++;
 		this.hasWrittenPayload = false;
 		this.runInZone(() => {
 			this.writePhase = 'error';
@@ -1243,14 +1416,9 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 			this.statusMessage = 'Please place another NFC card for the current request.';
 		});
 
-		this.env.showMessage(message, 'warning');
+		this.env.showMessage(message, 'warning', null, 0, true);
 		await this.cleanupNfc();
-
-		setTimeout(() => {
-			if (this.currentStep !== 2 || !this.selectedRequest || this.selectedRequest.requestStatus !== 'Pending') return;
-			if (this.isBusy) return;
-			void this.startWriteFlow();
-		}, 450);
+		// Do not auto-restart write — opening a new NFC sheet while the alert is up causes a second "canceled" toast.
 	}
 
 	private syncSelectedContactIntoOptions(): void {
@@ -1316,12 +1484,34 @@ export class WriteNfcModalPage extends PageBase implements OnDestroy {
 		return platform === 'ios' || platform === 'android';
 	}
 
+	private showStickyWriteMessage(message: string, color: 'danger' | 'warning' = 'danger'): void {
+		if (!message) return;
+		this.env.showMessage(message, color, null, 0, true);
+	}
+
 	private resolveErrorMessage(error: any, fallback: string): string {
 		const message = `${error?.error || error?.message || error || fallback}`.trim();
 		if (!message) return fallback;
+		if (/entitlement/i.test(message)) {
+			return 'NFC write is not enabled in this iOS build. Rebuild the app with Near Field Communication Tag Reading (TAG) entitlement, then try again.';
+		}
 		if (/permission/i.test(message)) return 'The device has not granted the required NFC permission.';
 		if (/cancelled|canceled|cancel/i.test(message)) return 'The NFC session was canceled.';
+		if (/read-only|readonly/i.test(message)) return 'This NFC card is read-only and cannot be written.';
+		if (/not ndef|ndef compliant/i.test(message)) return 'This NFC card does not support NDEF writing.';
 		return message;
+	}
+
+	private isCancelError(error: any): boolean {
+		const message = `${error?.error || error?.message || error?.errorMessage || error || ''}`.toLowerCase();
+		return (
+			message.includes('cancelled') ||
+			message.includes('canceled') ||
+			message.includes('usercanceled') ||
+			message.includes('user canceled') ||
+			message.includes('user cancelled') ||
+			message.includes('session invalidated by user')
+		);
 	}
 
 	private runInZone(callback: () => void): void {
