@@ -92,7 +92,7 @@ export class TaxInfoComponent extends PageBase {
 		let value = this.formGroup.getRawValue();
 
 		this.env
-			.showPrompt('Bạn có chắc muốn xóa không?', null, 'Xóa')
+			.showPrompt('Are you sure you want to delete?', null, 'Delete')
 			.then((_) => {
 				this.onDelete.emit(value);
 			})
@@ -121,7 +121,7 @@ export class TaxInfoComponent extends PageBase {
 					}
 				})
 				.catch((err) => {
-					this.env.showMessage('Mã số thuế không hợp lệ!', 'danger');
+					this.env.showMessage('Invalid tax code!', 'danger');
 				});
 		}
 	}
