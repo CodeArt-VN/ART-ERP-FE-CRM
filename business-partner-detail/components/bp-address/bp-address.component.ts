@@ -145,7 +145,7 @@ export class BpAddressComponent extends PageBase {
 	removeAddress(index) {
 		this.alertCtrl
 			.create({
-				header: 'Xóa địa chỉ',
+				header: 'Delete address',
 				//subHeader: '---',
 				message: 'Bạn có chắc muốn xóa địa chỉ này?',
 				buttons: [

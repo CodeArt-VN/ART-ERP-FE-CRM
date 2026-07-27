@@ -138,7 +138,7 @@ export class BpTaxAddressComponent extends PageBase {
 								if (idx >= 0) groups.removeAt(idx);
 							});
 
-							this.env.showMessage('Đã xóa thành công!', 'success');
+							this.env.showMessage('Deleted successfully!', 'success');
 						});
 					}
 				}

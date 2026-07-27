@@ -332,7 +332,7 @@ export class MCPDetailPage extends PageBase {
 				});
 			});
 		} else {
-			this.env.showMessage('Bạn không có quyền chỉnh sửa, vui lòng kiểm tra lại', 'warning');
+			this.env.showMessage('You do not have permission to edit. Please check again', 'warning');
 			return;
 		}
 	}

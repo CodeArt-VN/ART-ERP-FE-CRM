@@ -401,7 +401,7 @@ export class OutletDetailPage extends PageBase {
 							this.taxInfoProvider.delete(ids).then(() => {
 								const deletingIds = ids.map((x) => x.Id);
 								this.setTaxInfos((this.item?.TaxInfos || []).filter((d) => !deletingIds.includes(d.Id)));
-								this.env.showMessage('Đã xóa thành công!', 'success');
+								this.env.showMessage('Deleted successfully!', 'success');
 							});
 						},
 					},
