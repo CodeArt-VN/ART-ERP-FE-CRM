@@ -16,7 +16,7 @@
 							</ion-col>
 							<ion-col size="12" size-sm size-xl="4">
 								<!-- <div class="c-control">
-              <label class="c-label" [for]="'Country'+i">{{'country' | translate}} <small>Country</small>
+              <label class="c-label" [for]="'Country'+i">{{'Country' | translate}} <small>Country</small>
                 <span *ngIf="!add.controls.Country.valid && !add.controls.Country.pending && (add.controls.Country.dirty || submitAttempt)" ion-text color="danger">(*)</span>
               </label>
 
@@ -97,7 +97,7 @@
 
 								<div class="c-control">
 									<label class="c-label" [for]="'Remark' + i"
-										>{{ 'remark' | translate }}
+										>{{ 'Remark' | translate }}
 										<span
 											*ngIf="!add.controls.Remark.valid && !add.controls.Remark.pending && (add.controls.Remark.dirty || submitAttempt)"
 											ion-text
@@ -150,7 +150,7 @@
 
 								<!-- <label class="c-label">{{'coordinates' | translate}}
 								<small>
-									{{add.controls.Lat.value || ('lat' | translate)}}
+									{{add.controls.Lat.value || ('Lat' | translate)}}
 									-
 									{{add.controls.Long.value || ('long' | translate)}}</small>
 									
@@ -168,7 +168,7 @@
 								></app-coordinate-picker>
 
 								<!-- <div class="c-control">
-              <label class="c-label" [for]="'Lat'+i">{{'latitude' | translate}}
+              <label class="c-label" [for]="'Lat'+i">{{'Latitude' | translate}}
                 <span *ngIf="!add.controls.Lat.valid && !add.controls.Lat.pending && (add.controls.Lat.dirty || submitAttempt)" ion-text color="danger">(*)</span>
               </label>
               <input (change)="saveAddress(add)" class="c-input" [attr.id]="'Lat'+i" formControlName="Lat">
@@ -180,7 +180,7 @@
               <input (change)="saveAddress(add)" class="c-input" [attr.id]="'Long'+i" formControlName="Long">
             </div>
             <div class="c-control">
-              <label class="c-label" [for]="'Remark'+i">{{'remark' | translate}}
+              <label class="c-label" [for]="'Remark'+i">{{'Remark' | translate}}
                 <span *ngIf="!add.controls.Remark.valid && !add.controls.Remark.pending && (add.controls.Remark.dirty || submitAttempt)" ion-text color="danger">(*)</span>
               </label>
               <textarea (change)="saveAddress(add)" rows="3" class="c-input" [attr.id]="'Remark'+i" formControlName="Remark" type="textarea"></textarea>
@@ -196,7 +196,7 @@
 									>) <br />
 									{{ add.controls.AddressLine1.value || ('House number, street name, quarter' | translate) }},
 									{{ add.controls.Ward.value || ('Ward' | translate) }}, {{ add.controls.District.value || ('District' | translate) }},
-									{{ add.controls.Province.value || ('Provinces' | translate) }}, {{ add.controls.Country.value || ('country' | translate) }}<br />
+									{{ add.controls.Province.value || ('Provinces' | translate) }}, {{ add.controls.Country.value || ('Country' | translate) }}<br />
 									{{ add.controls.AddressLine2.value || ('Apartment, Building, Unit…' | translate) }}
 									<br />
 								</div>
