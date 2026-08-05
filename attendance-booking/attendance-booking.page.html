@@ -18,11 +18,11 @@
 		(sort)="onSort($event)"
 		(selectedRowsChange)="showCommandBySelectedRows($event)"
 	>
-		<datatable-column [checkbox]="true" name=""></datatable-column>
-		<datatable-column class="col-date" format="dd/MM/yy hh:mm" name="Party date" property="PartyDate" filterControlType="date"></datatable-column>
+		<datatable-column [checkbox]="true" name="" [width]="35"></datatable-column>
+		<datatable-column class="col-date" format="dd/MM/yy hh:mm" name="Party date" property="PartyDate" filterControlType="time-frame" [width]="125"></datatable-column>
 		<!-- <datatable-column class="col-id" name="#" property="Id" [navLink]="pageConfig.pageName" [sticky]="true"></datatable-column> -->
-		<datatable-column class="col-name bold" name="Customer name" property="CustomerName" [navLink]="pageConfig.pageName" [sticky]="true"></datatable-column>
-		<datatable-column class="col-code phone" name="Telephone" property="Phone">
+		<datatable-column class="col-name bold" name="Customer name" property="CustomerName" [navLink]="pageConfig.pageName" [sticky]="true" [minWidth]="150"></datatable-column>
+		<datatable-column class="col-code phone" name="Telephone" property="Phone" [width]="145">
 			<ng-template let-i="row" datatable-cell-template>
 				<a *ngIf="i.Phone" href="tel:{{i.Phone}}">{{i.Phone}}</a>
 				<ion-button *ngIf="i.Phone" href="https://zalo.me/{{i.Phone}}" target="_blank" fill="clear" color="primary" size="small">
@@ -31,13 +31,13 @@
 			</ng-template>
 		</datatable-column>
 
-		<datatable-column class="col-code" name="Table" property="RegisteredTable">
+		<datatable-column class="col-code" name="Table" property="RegisteredTable" [minWidth]="94" [maxWidth]="115">
 			<ng-template let-i="row" datatable-cell-template>
 				<span *ngIf="i.RegisteredTable" class="regis">{{i.RegisteredTable}}</span>
 			</ng-template>
 		</datatable-column>
 
-		<datatable-column class="col-number kid" format="1.0-0" name="Dinner/Pax" property="DinnerPax">
+		<datatable-column class="col-number kid" format="1.0-0" name="Dinner/Pax" property="DinnerPax" [minWidth]="65" [maxWidth]="100">
 			<ng-template let-i="row" datatable-cell-template>
 				<ion-text color="primary" *ngIf="i.DinnerPax">
 					<b>{{i.DinnerPax}}</b>
@@ -45,7 +45,7 @@
 			</ng-template>
 		</datatable-column>
 
-		<datatable-column class="col-number" format="1.0-0" name="Real field" property="RealField">
+		<datatable-column class="col-number" format="1.0-0" name="Real field" property="RealField" [minWidth]="65" [maxWidth]="100">
 			<ng-template let-i="row" datatable-cell-template>
 				<ion-text color="success" *ngIf="i.RealField">
 					<b>{{i.RealField}}</b>
@@ -57,7 +57,7 @@
 			</ng-template>
 		</datatable-column>
 
-		<datatable-column class="col-number kid" name="Kids" property="Kids">
+		<datatable-column class="col-number kid" name="Kids" property="Kids" [minWidth]="65" [maxWidth]="100">
 			<ng-template let-i="row" datatable-cell-template>
 				<ion-text color="warning">
 					<b>{{i.Kids}}</b>
@@ -65,7 +65,7 @@
 			</ng-template>
 		</datatable-column>
 
-		<datatable-column class="col-number kid" name="Foreign" property="ForeignerNo">
+		<datatable-column class="col-number kid" name="Foreign" property="ForeignerNo" [minWidth]="74" [maxWidth]="100">
 			<ng-template let-i="row" datatable-cell-template>
 				<ion-text color="danger">
 					<b>{{i.ForeignerNo}}</b>
@@ -73,15 +73,15 @@
 			</ng-template>
 		</datatable-column>
 
-		<datatable-column class="col-code" name="Banquet type" property="TypeOfParty" filterControlType="ng-select" [filterDataSource]="PartyMenuList"></datatable-column>
+		<datatable-column class="col-code" name="Banquet type" property="TypeOfParty" filterControlType="ng-select" [filterDataSource]="PartyMenuList" [minWidth]="80" [maxWidth]="115"></datatable-column>
 
-		<datatable-column class="col-remark" name="Remark" property="Remark"></datatable-column>
-		<datatable-column class="col-code" name="DiningCard" property="DiningCard"></datatable-column>
-		<datatable-column class="col-code" name="Count" property="NoRecords"></datatable-column>
-		<datatable-column class="col-code" name="Group" property="CustomerGroup" filterControlType="ng-select" [filterDataSource]="AttendanceGroup"></datatable-column>
-		<datatable-column class="col-code" name="Customer type" property="CustomerType" filterControlType="ng-select" [filterDataSource]="AttendanceType"></datatable-column>
+		<datatable-column class="col-remark" name="Remark" property="Remark" [minWidth]="370" maxWidth="100%"></datatable-column>
+		<datatable-column class="col-code" name="DiningCard" property="DiningCard" [minWidth]="100" [maxWidth]="120"></datatable-column>
+		<datatable-column class="col-code" name="Count" property="NoRecords" [minWidth]="80" [maxWidth]="115"></datatable-column>
+		<datatable-column class="col-code" name="Group" property="CustomerGroup" filterControlType="ng-select" [filterDataSource]="AttendanceGroup" [minWidth]="80" [maxWidth]="115"></datatable-column>
+		<datatable-column class="col-code" name="Customer type" property="CustomerType" filterControlType="ng-select" [filterDataSource]="AttendanceType" [minWidth]="87" [maxWidth]="115"></datatable-column>
 
-		<datatable-column class="col-status" name="Status" property="Status" filterControlType="ng-select-status" [filterDataSource]="statusList">
+		<datatable-column class="col-status" name="Status" property="Status" filterControlType="ng-select-status" [filterDataSource]="statusList" [width]="95">
 			<ng-template let-i="row" datatable-cell-template>
 				<ion-badge [color]="i.StatusColor" [title]="i.StatusText"> {{i.StatusText | translate}} </ion-badge>
 			</ng-template>

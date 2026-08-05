@@ -27,6 +27,28 @@ export class AttendanceBookingPage extends PageBase {
 		this.pageConfig.ShowFeature = false;
 		this.pageConfig.ShowArchive = false;
 		this.pageConfig.ShowHelp = false;
+
+		this.pageConfig.dividers = [
+			{
+				fields: ['PartyDate'],
+				dividerFn: (record, recordIndex, records) => {
+					const toDay = (d) => lib.dateFormat(d, 'yyyy-mm-dd');
+					if (recordIndex === 0) {
+						const days = new Set(records.map((r) => toDay(r.PartyDate)));
+						(records as any).__partyDateMultiDay = days.size >= 2;
+					}
+					if (!(records as any).__partyDateMultiDay) {
+						return null;
+					}
+					const a = recordIndex == 0 ? '' : toDay(records[recordIndex - 1].PartyDate);
+					const b = toDay(record.PartyDate);
+					if (a === b) {
+						return null;
+					}
+					return lib.dateFormat(record.PartyDate, 'dd/mm/yyyy');
+				},
+			},
+		];
 	}
 
 	statusList = [];
@@ -41,12 +63,13 @@ export class AttendanceBookingPage extends PageBase {
 	numberOfForeigner = 0;
 
 	preLoadData(event) {
-		let today = lib.dateFormat(new Date(), 'yyyy-mm-dd');
-		// if (!this.sort.Id) {
-		//     this.sort.Id = 'Id';
-		//     this.sortToggle('Id', true);
-		// }
-		this.query.PartyDate = today;
+		// Default time-frame = Relative "Today" (same as quick-pick Today)
+		const relativeToday = { Type: 'Relative', IsPastDate: true, Period: 'Day', Amount: 0, IsNull: false };
+		this.query.PartyDateTimeFrame = {
+			From: { ...relativeToday },
+			To: { ...relativeToday },
+		};
+		this.pageConfig.sort = [{ Dimension: 'PartyDate', Order: 'DESC' }];
 		this.query.Status = '';
 		this.query.TypeOfParty = '';
 		this.query.CustomerGroup = '';
@@ -67,33 +90,43 @@ export class AttendanceBookingPage extends PageBase {
 	}
 
 	loadedData(event) {
+		this.recomputeAttendanceAggregates();
+		super.loadedData(event);
+	}
+
+	enrichListItem(row: any) {
+		if (!row) {
+			return row;
+		}
+		const i = { ...row };
+		i.StatusText = lib.getAttrib(i.Status, this.statusList, 'Name', '', 'Code');
+		i.StatusColor = lib.getAttrib(i.Status, this.statusList, 'Color', '', 'Code');
+		i.TypeOfPartyText = lib.getAttrib(i.TypeOfParty, this.PartyMenuList, 'Name', '', 'Code');
+		return i;
+	}
+
+	onListItemsPatched() {
+		this.recomputeAttendanceAggregates();
+	}
+
+	private recomputeAttendanceAggregates() {
 		this.numberOfBooking = 0;
 		this.numberOfDinnerPax = 0;
 		this.numberOfReal = 0;
 		this.numberOfKid = 0;
 		this.numberOfForeigner = 0;
 
-		//this.numberOfBooking = this.items.filter(d=>d.Status != 'CANCELED').length;
 		this.numberOfBooking = this.items.length;
 
 		this.items.forEach((i) => {
-			// if(i.Status != 'CANCELED'){
-			//     this.numberOfDinnerPax+=i.DinnerPax;
-			//     this.numberOfReal+=i.RealField;
-			//     this.numberOfKid+=i.Kids;
-			//     this.numberOfForeigner += i.ForeignerNo;
-			// }
-
-			this.numberOfDinnerPax += i.DinnerPax;
-			this.numberOfReal += i.RealField;
-			this.numberOfKid += i.Kids;
-			this.numberOfForeigner += i.ForeignerNo;
+			this.numberOfDinnerPax += i.DinnerPax || 0;
+			this.numberOfReal += i.RealField || 0;
+			this.numberOfKid += i.Kids || 0;
+			this.numberOfForeigner += i.ForeignerNo || 0;
 			i.StatusText = lib.getAttrib(i.Status, this.statusList, 'Name', '', 'Code');
 			i.StatusColor = lib.getAttrib(i.Status, this.statusList, 'Color', '', 'Code');
 			i.TypeOfPartyText = lib.getAttrib(i.TypeOfParty, this.PartyMenuList, 'Name', '', 'Code');
 		});
-
-		super.loadedData(event);
 	}
 
 	// async showModal(i) {

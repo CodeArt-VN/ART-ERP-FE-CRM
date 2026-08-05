@@ -1,39 +1,16 @@
 ::ng-deep {
-	app-data-table{
-
-		.col-remark {
-			min-width: 370px;
-			max-width: 100%;
-		}
-		.phone {
-			max-width: 140px !important;
-			min-width: 140px !important;
-		}
-		.col-code {
-			max-width: 115px;
-			min-width: 80px;
-		}
-		.col-status {
-			max-width: 95px;
-			min-width: 95px;
-		}
-		
+	app-data-table {
 		.cell {
 			white-space: normal !important;
 		}
 		.col-remark {
 			white-space: pre-line !important;
 		}
-		.col-number {
-			max-width: 100px;
-			min-width: 45px;
-		}
 		.small-kid {
 			display: none;
 		}
-		
+
 		@media screen and (max-width: calc(1164px)) {
-			//1610px
 			.empty,
 			.kid {
 				display: none;
@@ -41,7 +18,7 @@
 			.small-kid {
 				display: inline;
 			}
-		
+
 			.row {
 				.dinning-card {
 					order: 5;
@@ -49,25 +26,25 @@
 						margin-left: 5px;
 					}
 				}
-		
+
 				hr {
 					order: 3;
 				}
-		
+
 				.col-remark {
 					max-width: fit-content !important;
 					min-width: fit-content !important;
 					font-weight: bold;
 					order: 4;
 				}
-		
+
 				.remark {
 					font-weight: normal !important;
 					white-space: pre-line !important;
 					order: 7;
 					min-width: calc(100% + 110px) !important;
 				}
-		
+
 				.phone {
 					order: 4;
 					color: var(--ion-color-primary);
@@ -80,7 +57,6 @@
 				}
 			}
 		}
-		
 	}
 }
 .table {
