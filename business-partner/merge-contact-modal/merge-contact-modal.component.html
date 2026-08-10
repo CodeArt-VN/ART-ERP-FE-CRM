@@ -1,0 +1,215 @@
+<ion-header [translucent]="true">
+	<ion-toolbar>
+		<ion-title>{{'Merge contacts' | translate}}</ion-title>
+		<ion-buttons slot="end">
+			<ion-button title="{{'Close' | translate}}" color="secondary" (click)="dismiss()">
+				<ion-icon slot="icon-only" name="close"></ion-icon>
+			</ion-button>
+		</ion-buttons>
+	</ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true" appScrollbarTheme>
+	<div class="merge-loading" *ngIf="mergePreviewLoading">
+		<ion-spinner name="dots"></ion-spinner>
+	</div>
+
+	<div class="merge-panels" *ngIf="!mergePreviewLoading && mergePreview">
+		<section class="merge-panel merge-panel-master">
+			<div class="merge-panel-head">
+				<h3>{{'Master contact' | translate}}</h3>
+				<p>{{'Survivor record' | translate}}</p>
+			</div>
+			<ion-searchbar
+				[(ngModel)]="mergeMasterSearch"
+				(ionInput)="onMergeMasterSearch()"
+				[placeholder]="'Search' | translate"
+				debounce="200"
+			></ion-searchbar>
+			<ion-list lines="full" class="merge-master-list">
+				<ion-item
+					button
+					detail="false"
+					*ngFor="let c of filteredMergeContacts; trackBy: trackByContactId"
+					[class.merge-master-selected]="c.Id === mergeMasterId"
+					(click)="setMergeMaster(c.Id)"
+				>
+					<ion-label>
+						<h2>#{{c.Id}} · {{c.Name || c.Code}}</h2>
+						<p *ngIf="c.WorkPhone">{{c.WorkPhone}}</p>
+						<p *ngIf="c.Email">{{c.Email}}</p>
+						<p *ngIf="formatRelatedCounts(c.Related) as docs">{{docs}}</p>
+					</ion-label>
+					<ion-badge slot="end" color="primary">{{c.Score}}</ion-badge>
+					<div slot="end" class="merge-badges">
+						<ion-note *ngIf="c.Addresses?.length">#{{c.Addresses.length}} addr</ion-note>
+						<ion-note *ngIf="c.TaxInfos?.length">#{{c.TaxInfos.length}} MST</ion-note>
+					</div>
+				</ion-item>
+			</ion-list>
+		</section>
+
+		<section class="merge-panel merge-panel-fields">
+			<div class="merge-panel-head">
+				<h3>{{'Properties' | translate}}</h3>
+				<p>{{'Edit fields; select addresses & tax codes to keep' | translate}}</p>
+				<div class="merge-field-actions">
+					<ion-button size="small" fill="outline" (click)="applyMasterAllFields()">{{'Use master for all' | translate}}</ion-button>
+					<ion-button size="small" fill="outline" (click)="fillBlankMergeFields()">{{'Fill blanks' | translate}}</ion-button>
+					<ion-button size="small" fill="clear" (click)="toggleMergeShowAllFields()">
+						{{ mergeShowAllFields ? ('Show conflicts only' | translate) : ('Show all fields' | translate) }}
+					</ion-button>
+				</div>
+			</div>
+			<div class="merge-field-list">
+				<div
+					class="merge-field-row"
+					*ngFor="let field of visibleMergeFields; trackBy: trackByFieldKey"
+					[class.has-conflict]="field.HasConflict"
+				>
+					<div class="merge-field-label">
+						<strong>{{field.Key | translate}}</strong>
+						<ion-badge color="warning" *ngIf="field.HasConflict">{{'Conflict' | translate}}</ion-badge>
+					</div>
+
+					<ion-item lines="none" class="merge-field-edit" *ngIf="field.Key !== 'IsPersonal'">
+						<ion-input
+							[(ngModel)]="mergeFieldValues[field.Key]"
+							(ngModelChange)="onMergeFieldValueEdit()"
+							[placeholder]="field.Key"
+						></ion-input>
+					</ion-item>
+					<ion-item lines="none" class="merge-field-edit" *ngIf="field.Key === 'IsPersonal'">
+						<ion-select
+							[(ngModel)]="mergeFieldValues[field.Key]"
+							(ngModelChange)="onMergeFieldValueEdit()"
+							interface="popover"
+						>
+							<ion-select-option value="true">{{'Cá nhân' | translate}}</ion-select-option>
+							<ion-select-option value="false">{{'Tổ chức' | translate}}</ion-select-option>
+						</ion-select>
+					</ion-item>
+
+					<div class="merge-field-sources" *ngIf="field.Options?.length">
+						<button
+							type="button"
+							class="merge-source-chip"
+							*ngFor="let opt of field.Options"
+							[class.active]="mergeFieldValues[field.Key] === opt.Value"
+							(click)="pickMergeFieldOption(field.Key, opt.SourceIds[0], opt.Value)"
+						>
+							<span>{{formatMergeFieldOption(field.Key, opt.Value) || '—'}}</span>
+						</button>
+					</div>
+				</div>
+
+				<div class="merge-prop-block" *ngIf="mergeAddressOptions.length">
+					<div class="merge-prop-head">
+						<strong>{{'Addresses' | translate}}</strong>
+						<div>
+							<ion-button size="small" fill="clear" (click)="selectAllMergeAddresses(true)">{{'All' | translate}}</ion-button>
+							<ion-button size="small" fill="clear" (click)="selectAllMergeAddresses(false)">{{'None' | translate}}</ion-button>
+						</div>
+					</div>
+					<ion-list lines="full">
+						<ion-item *ngFor="let a of mergeAddressOptions; trackBy: trackByAddressId">
+							<ion-checkbox
+								slot="start"
+								[(ngModel)]="selectedAddressKeys[a.Key]"
+								(ngModelChange)="refreshMergeResultPreview()"
+							></ion-checkbox>
+							<ion-label>
+								<h3>{{formatAddressLine(a)}}</h3>
+							</ion-label>
+						</ion-item>
+					</ion-list>
+				</div>
+
+				<div class="merge-prop-block" *ngIf="mergeTaxOptions.length">
+					<div class="merge-prop-head">
+						<strong>{{'Tax info (MST)' | translate}}</strong>
+						<div>
+							<ion-button size="small" fill="clear" (click)="selectAllMergeTaxes(true)">{{'All' | translate}}</ion-button>
+							<ion-button size="small" fill="clear" (click)="selectAllMergeTaxes(false)">{{'None' | translate}}</ion-button>
+						</div>
+					</div>
+					<ion-list lines="full">
+						<ion-item *ngFor="let t of mergeTaxOptions; trackBy: trackByTaxId">
+							<ion-checkbox
+								slot="start"
+								[(ngModel)]="selectedTaxKeys[t.Key]"
+								(ngModelChange)="refreshMergeResultPreview()"
+							></ion-checkbox>
+							<ion-label>
+								<h3>{{t.TaxCode || '—'}}</h3>
+								<p *ngIf="t.CompanyName">{{t.CompanyName}}</p>
+							</ion-label>
+							<ion-badge *ngIf="t.IsDefault" slot="end" color="success">{{'Default' | translate}}</ion-badge>
+						</ion-item>
+					</ion-list>
+				</div>
+			</div>
+		</section>
+
+		<aside class="merge-panel merge-panel-preview">
+			<div class="merge-preview-sticky">
+				<div class="merge-panel-head">
+					<h3>{{'Final result' | translate}}</h3>
+					<p>{{'Master' | translate}} #{{mergeMasterId}} · {{'duplicates will be disabled' | translate}}</p>
+				</div>
+
+				<ion-list lines="none" class="merge-preview-scalar">
+					<ion-item *ngFor="let row of mergeScalarPreviewRows; trackBy: trackByFieldKey">
+						<ion-label>
+							<p>{{row.key | translate}}</p>
+							<h3>{{row.value}}</h3>
+						</ion-label>
+					</ion-item>
+				</ion-list>
+
+				<div class="merge-child-block" *ngIf="mergeSelectedAddressesPreview.length">
+					<h4>{{'Addresses' | translate}} ({{mergeSelectedAddressesPreview.length}})</h4>
+					<ul>
+						<li *ngFor="let a of mergeSelectedAddressesPreview; trackBy: trackByAddressId">
+							{{formatAddressLine(a)}}
+						</li>
+					</ul>
+				</div>
+
+				<div class="merge-child-block" *ngIf="mergeSelectedTaxPreview.length">
+					<h4>{{'Tax info (MST)' | translate}} ({{mergeSelectedTaxPreview.length}})</h4>
+					<ul>
+						<li *ngFor="let t of mergeSelectedTaxPreview; trackBy: trackByTaxId">
+							{{t.TaxCode || '—'}} <span *ngIf="t.CompanyName">· {{t.CompanyName}}</span>
+						</li>
+					</ul>
+				</div>
+
+				<div class="merge-related-block">
+					<h4>{{'Related documents → master' | translate}}</h4>
+					<ul>
+						<li *ngIf="mergeRelatedTotals.SaleOrders">{{mergeRelatedTotals.SaleOrders}} {{'Sale orders' | translate}}</li>
+						<li *ngIf="mergeRelatedTotals.PurchaseOrders">{{mergeRelatedTotals.PurchaseOrders}} {{'Purchase orders' | translate}}</li>
+						<li *ngIf="mergeRelatedTotals.Invoices">{{mergeRelatedTotals.Invoices}} {{'Invoices' | translate}}</li>
+						<li *ngIf="mergeRelatedTotals.Payments">{{mergeRelatedTotals.Payments}} {{'Payments' | translate}}</li>
+						<li *ngIf="mergeRelatedTotals.Documents"><strong>{{mergeRelatedTotals.Documents}}</strong> {{'total documents' | translate}}</li>
+						<li *ngIf="!mergeRelatedTotals.Documents">{{'No related documents' | translate}}</li>
+					</ul>
+					<div class="merge-by-contact" *ngFor="let entry of mergeRelatedByContactEntries">
+						<small *ngIf="entry.summary">#{{entry.id}}: {{entry.summary}}</small>
+					</div>
+				</div>
+			</div>
+		</aside>
+	</div>
+</ion-content>
+<ion-footer [translucent]="true" collapse="fade">
+	<ion-toolbar>
+		<div slot="start"></div>
+		<div slot="end">
+			<ion-button fill="outline" color="warning" (click)="dismiss()">{{'Cancel' | translate}}</ion-button>
+			<ion-button [strong]="true" (click)="mergeContact()" [disabled]="mergePreviewLoading || mergeSubmitting || !mergeMasterId">
+				{{'Merge' | translate}}
+			</ion-button>
+		</div>
+	</ion-toolbar>
+</ion-footer>
