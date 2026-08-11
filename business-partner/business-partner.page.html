@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
 	<app-toolbar [page]="this"></app-toolbar>
 </ion-header>
-<ion-content [fullscreen]="true" appScrollbarTheme>
+<ion-content appScrollbarTheme class="scrollx" [fullscreen]="true">
 	<app-page-title class="ion-padding safe-max-width" [pageConfig]="pageConfig"></app-page-title>
 
 	<ion-fab *ngIf="pageConfig.isShowFeature && pageConfig.canMerge " class="feature" vertical="top" horizontal="end"
@@ -64,10 +64,21 @@
 
 
 	<div class="safe-max-width">
-		<app-data-table class="box-shadow responsive padding-number-right" [rows]="items" [trackBy]="'Id'" [(selectedRows)]="selectedItems"
-			[showSpinner]="pageConfig.showSpinner" [showFilter]="pageConfig.isShowSearch" [(query)]="query"
-			(dataInfinite)="loadData($event)" (filter)="onDatatableFilter($event)" (sort)="onSort($event)"
-			(selectedRowsChange)="showCommandBySelectedRows($event)">
+		<app-data-table
+			class="box-shadow responsive padding-number-right"
+			[virtualScroll]="true"
+			[rows]="items"
+			[trackBy]="'Id'"
+			[(selectedRows)]="selectedItems"
+			[showSpinner]="pageConfig.showSpinner"
+			[showFilter]="pageConfig.isShowSearch"
+			[(query)]="query"
+			(dataInfinite)="loadData($event)"
+			(filter)="onDatatableFilter($event)"
+			(activate)="changeSelection($event)"
+			(sort)="onSort($event)"
+			(selectedRowsChange)="showCommandBySelectedRows($event)"
+		>
 			<datatable-column [checkbox]="true" name=""></datatable-column>
 			<datatable-column class="col-id" name="#" property="Id" [navLink]="pageConfig.pageName"></datatable-column>
 			<datatable-column class="col-icon large flag-filter" name="" property="Id">

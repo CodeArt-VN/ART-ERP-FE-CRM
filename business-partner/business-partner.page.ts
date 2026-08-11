@@ -49,7 +49,7 @@ export class BusinessPartnerPage extends PageBase {
 	}
 
 	departmentList = [];
-	preLoadData() {
+	preLoadData(event = null) {
 		if (!this.sort.Id) {
 			this.sort.Id = 'Id';
 			this.sortToggle('Id', true);
@@ -107,11 +107,10 @@ export class BusinessPartnerPage extends PageBase {
 					};
 					if (this.pageConfig.ContactUsedApprovalModule) {
 						this.pageConfig.canApprove = false;
-						this.pageConfig.canApprove = false;
 					}
 				}
+				super.preLoadData(event);
 			});
-			super.preLoadData(null);
 		});
 	}
 

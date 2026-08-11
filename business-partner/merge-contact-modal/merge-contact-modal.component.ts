@@ -145,12 +145,42 @@ export class MergeContactModalComponent implements OnInit {
 				this.rebuildMergeViewCache();
 			})
 			.catch((err) => {
-				this.env.showMessage(err, 'danger');
+				this.showMergeApiError(err);
 				this.dismiss('cancel');
 			})
 			.finally(() => {
 				this.mergePreviewLoading = false;
 			});
+	}
+
+	/** connect() không gọi checkError — phải tự hiện lỗi (404/CORS server cũ hay im lặng). */
+	showMergeApiError(err: any) {
+		const status = Number(err?.status);
+		const rawMsg = String(err?.message || '');
+		// Server cũ không có route → thường 404/405; IIS/CORS đôi khi trả status 0 (Http failure response).
+		if (status === 404 || status === 405 || status === 0) {
+			this.env.showMessage(
+				'Merge contacts is not available on this server. Please update the system.',
+				'danger',
+				null,
+				0,
+				true
+			);
+			return;
+		}
+		if (status === 401 || status === 417) {
+			this.pageProvider.commonService.checkError(err);
+			return;
+		}
+		let message =
+			err?.error?.ExceptionMessage ||
+			err?.error?.Message ||
+			(typeof err?.error === 'string' ? err.error : null) ||
+			rawMsg;
+		if (typeof message === 'string' && (message.includes('<html') || message.includes('<!DOCTYPE'))) {
+			message = null;
+		}
+		this.env.showMessage(message || 'Cannot save, please try again', 'danger', null, 0, true);
 	}
 
 	/** Rebuild list caches once per data/master/search/toggle change — stable refs for *ngFor. */
@@ -668,7 +698,7 @@ export class MergeContactModalComponent implements OnInit {
 				this.dismiss('merged', result);
 			})
 			.catch((err) => {
-				this.env.showMessage(err, 'danger');
+				this.showMergeApiError(err);
 			})
 			.finally(() => {
 				this.mergeSubmitting = false;
