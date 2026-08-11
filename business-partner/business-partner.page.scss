@@ -22,6 +22,34 @@ ion-list {
 	}
 }
 
+/* One scrollbar only: feature itself does not scroll; list viewport scrolls. */
+ion-fab.feature.duplicate-feature {
+	overflow: hidden;
+}
+
+.duplicate-feature-body {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+}
+
+.duplicate-feature-head {
+	flex: 0 0 auto;
+}
+
+ion-list.duplicate-list {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: hidden;
+	padding: 0;
+	margin: 0;
+
+	app-virtual-viewport.container-mode {
+		height: 100%;
+	}
+}
+
 @media screen and (max-width: calc(1164px + 0px)) {
 	::ng-deep {
 		app-data-table.responsive .row {

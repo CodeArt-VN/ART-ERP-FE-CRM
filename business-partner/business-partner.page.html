@@ -4,41 +4,43 @@
 <ion-content appScrollbarTheme class="scrollx" [fullscreen]="true">
 	<app-page-title class="ion-padding safe-max-width" [pageConfig]="pageConfig"></app-page-title>
 
-	<ion-fab *ngIf="pageConfig.isShowFeature && pageConfig.canMerge " class="feature" vertical="top" horizontal="end"
+	<ion-fab *ngIf="pageConfig.isShowFeature && pageConfig.canMerge " class="feature duplicate-feature" vertical="top" horizontal="end"
 		slot="fixed">
-		<div>
-			<ion-list-header lines="full">
-				<ion-label>{{'Find duplicates' | translate}}</ion-label>
-			</ion-list-header>
+		<div class="duplicate-feature-body">
+			<div class="duplicate-feature-head">
+				<ion-list-header lines="full">
+					<ion-label>{{'Find duplicates' | translate}}</ion-label>
+				</ion-list-header>
 
-			<ion-radio-group (ionChange)="changeDuplicateKeywork($event)" [value]="'WorkPhone'">
-				<ion-item>
-					<ion-radio slot="start" aria-label="Danger" [value]="'WorkPhone'" color="primary" class="radio-icon"
-						mode="md"></ion-radio>
-					<ion-label style="white-space: normal">{{'WorkPhone' | translate}}</ion-label>
-				</ion-item>
-				<ion-item>
-					<ion-radio slot="start" aria-label="Danger" [value]="'TaxCode'" color="primary" class="radio-icon"
-						mode="md"></ion-radio>
-					<ion-label style="white-space: normal">{{'TaxCode' | translate}}</ion-label>
-				</ion-item>
-			</ion-radio-group>
-			<div class="ion-padding">
-				<ion-button (click)="findByDuplicate()" expand="block">{{'Find...'| translate}}</ion-button>
+				<ion-radio-group (ionChange)="changeDuplicateKeywork($event)" [value]="'WorkPhone'">
+					<ion-item>
+						<ion-radio slot="start" aria-label="Danger" [value]="'WorkPhone'" color="primary" class="radio-icon"
+							mode="md"></ion-radio>
+						<ion-label style="white-space: normal">{{'WorkPhone' | translate}}</ion-label>
+					</ion-item>
+					<ion-item>
+						<ion-radio slot="start" aria-label="Danger" [value]="'TaxCode'" color="primary" class="radio-icon"
+							mode="md"></ion-radio>
+						<ion-label style="white-space: normal">{{'TaxCode' | translate}}</ion-label>
+					</ion-item>
+				</ion-radio-group>
+				<div class="ion-padding">
+					<ion-button (click)="findByDuplicate()" expand="block">{{'Find...'| translate}}</ion-button>
+				</div>
+
+				<ion-list-header lines="full" *ngIf="mergeFunction.items.length">
+					<ion-label>{{'Duplicate contacts' | translate}}</ion-label>
+				</ion-list-header>
+
+				<app-page-message [itemsLength]="mergeFunction.items.length"
+					[showSpinner]="mergeFunction.showSpinner"></app-page-message>
 			</div>
 
-			<ion-list-header lines="full" *ngIf="mergeFunction.items.length">
-				<ion-label>{{'Duplicate contacts' | translate}}</ion-label>
-			</ion-list-header>
-
-			<app-page-message [itemsLength]="mergeFunction.items.length"
-				[showSpinner]="mergeFunction.showSpinner"></app-page-message>
-
-			<ion-list *ngIf="mergeFunction.items.length && mergeFunction.showSpinner==false">
+			<ion-list *ngIf="mergeFunction.items.length && mergeFunction.showSpinner==false" class="duplicate-list">
 				<app-virtual-viewport
 					#dupVp="virtualViewport"
-					mode="page"
-					class="page-mode"
+					mode="container"
+					class="container-mode"
 					[items]="mergeFunction.items"
 					idKey="Value"
 					[defaultItemSize]="48"
