@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { ModalController } from '@ionic/angular';
 import { EnvService } from 'src/app/services/core/env.service';
 import { CRM_ContactProvider } from 'src/app/services/static/services.service';
@@ -14,14 +15,19 @@ export class MergeContactModalComponent implements OnInit {
 	/** Contact Ids selected on the list page. */
 	@Input() contactIds: number[] = [];
 
+	mergeForm: FormGroup;
 	mergePreview: any = null;
 	mergeMasterId = 0;
 	mergeFieldMap: Record<string, number> = {};
-	/** Editable final scalar values shown in middle + sticky preview. */
+	/** Editable final scalar values shown in sticky preview. */
 	mergeFieldValues: Record<string, string> = {};
+	/** Per-field free-text edit mode (default = pick from contacts). */
+	fieldEditMode: Record<string, boolean> = {};
 	/** Multi-select Address / Tax (MST) by distinct key (not every duplicate row). */
 	selectedAddressKeys: Record<string, boolean> = {};
 	selectedTaxKeys: Record<string, boolean> = {};
+	/** Exactly one selected tax key is default. */
+	defaultTaxKey = '';
 	mergeMasterSearch = '';
 	mergeShowAllFields = false;
 	mergePreviewLoading = false;
@@ -31,18 +37,28 @@ export class MergeContactModalComponent implements OnInit {
 	visibleMergeFields: any[] = [];
 	mergeAddressOptions: any[] = [];
 	mergeTaxOptions: any[] = [];
-	mergeRelatedByContactEntries: { id: string; summary: string }[] = [];
+	mergeRelatedByContactEntries: { id: string; name: string; summary: string }[] = [];
 	mergeRelatedTotals = {
 		SaleOrders: 0,
 		PurchaseOrders: 0,
 		Invoices: 0,
 		Payments: 0,
+		MemberCards: 0,
 		Documents: 0,
 	};
 	mergeScalarPreviewRows: { key: string; value: string }[] = [];
 	mergeSelectedAddressesPreview: any[] = [];
 	mergeSelectedTaxPreview: any[] = [];
-	mergeFields: { Key: string; HasConflict: boolean; Options: { Value: string; SourceIds: number[] }[] }[] = [];
+	mergeFields: {
+		Key: string;
+		HasConflict: boolean;
+		Options: { Value: string; SourceIds: number[] }[];
+		formField: any;
+	}[] = [];
+	isPersonalOptions = [
+		{ Value: 'true', Name: 'Individual' },
+		{ Value: 'false', Name: 'Organization' },
+	];
 	mergeScalarFieldKeys = [
 		'Code',
 		'Name',
@@ -60,8 +76,15 @@ export class MergeContactModalComponent implements OnInit {
 	constructor(
 		public modalController: ModalController,
 		public pageProvider: CRM_ContactProvider,
-		public env: EnvService
-	) {}
+		public env: EnvService,
+		public formBuilder: FormBuilder
+	) {
+		const controls: Record<string, any> = {};
+		for (const key of this.mergeScalarFieldKeys) {
+			controls[key] = [''];
+		}
+		this.mergeForm = this.formBuilder.group(controls);
+	}
 
 	ngOnInit(): void {
 		this.loadMergePreview();
@@ -78,18 +101,27 @@ export class MergeContactModalComponent implements OnInit {
 		this.mergeAddressOptions = [];
 		this.mergeTaxOptions = [];
 		this.mergeRelatedByContactEntries = [];
-		this.mergeRelatedTotals = { SaleOrders: 0, PurchaseOrders: 0, Invoices: 0, Payments: 0, Documents: 0 };
+		this.mergeRelatedTotals = {
+			SaleOrders: 0,
+			PurchaseOrders: 0,
+			Invoices: 0,
+			Payments: 0,
+			MemberCards: 0,
+			Documents: 0,
+		};
 		this.mergeScalarPreviewRows = [];
 		this.mergeSelectedAddressesPreview = [];
 		this.mergeSelectedTaxPreview = [];
 		this.mergeFieldMap = {};
 		this.mergeFieldValues = {};
+		this.fieldEditMode = {};
 		this.selectedAddressKeys = {};
 		this.selectedTaxKeys = {};
+		this.defaultTaxKey = '';
 	}
 
 	loadMergePreview() {
-		const ids = (this.contactIds || []).filter((id) => !!id);
+		const ids = (this.contactIds || []).filter((id) => !!id).map((id) => Number(id));
 		if (ids.length < 2) {
 			this.env.showMessage('Please select at least 2 contacts to merge', 'warning');
 			this.dismiss('cancel');
@@ -107,7 +139,7 @@ export class MergeContactModalComponent implements OnInit {
 			.toPromise()
 			.then((data: any) => {
 				this.mergePreview = data;
-				this.mergeMasterId = data?.SuggestedMasterId || ids[0];
+				this.mergeMasterId = Number(data?.SuggestedMasterId || ids[0]);
 				this.initMergeFieldMap();
 				this.initMergeChildSelections();
 				this.rebuildMergeViewCache();
@@ -136,6 +168,9 @@ export class MergeContactModalComponent implements OnInit {
 				});
 
 		this.mergeFields = this.buildMergeFieldsFromContacts(contacts);
+		this.syncFieldMapToOptionSourceIds();
+		this.openEditForEmptyOptionFields();
+		this.refreshFieldFormConfigs();
 		this.visibleMergeFields = this.mergeShowAllFields
 			? this.mergeFields
 			: this.mergeFields.filter((f) => f.HasConflict || (f.Options?.length ?? 0) > 0);
@@ -172,6 +207,7 @@ export class MergeContactModalComponent implements OnInit {
 						Ids: [t.Id],
 						SourceIds: [c.Id],
 						IdSources: [{ Id: t.Id, SourceId: c.Id }],
+						WasDefault: !!t.IsDefault,
 					});
 				} else {
 					const g = taxMap.get(key);
@@ -180,7 +216,7 @@ export class MergeContactModalComponent implements OnInit {
 						g.IdSources.push({ Id: t.Id, SourceId: c.Id });
 					}
 					if (!g.SourceIds.includes(c.Id)) g.SourceIds.push(c.Id);
-					if (t.IsDefault) g.IsDefault = true;
+					if (t.IsDefault) g.WasDefault = true;
 				}
 			}
 		}
@@ -193,7 +229,6 @@ export class MergeContactModalComponent implements OnInit {
 			KeepId: this.pickKeepIdForDistinctGroup(g),
 		}));
 
-		// Default-select new distinct keys; keep previous choices for keys that remain.
 		for (const a of this.mergeAddressOptions) {
 			if (this.selectedAddressKeys[a.Key] === undefined) {
 				this.selectedAddressKeys[a.Key] = true;
@@ -204,12 +239,14 @@ export class MergeContactModalComponent implements OnInit {
 				this.selectedTaxKeys[t.Key] = true;
 			}
 		}
+		this.ensureDefaultTaxSelection();
 
 		this.rebuildRelatedMovePreview(contacts);
+		this.syncFormFromFieldValues();
 		this.refreshMergeResultPreview();
 	}
 
-	/** FE derives field options/conflicts from Contacts scalars (API no longer returns Fields). */
+	/** FE derives field options/conflicts from Contacts scalars. */
 	buildMergeFieldsFromContacts(contacts: any[]) {
 		return this.mergeScalarFieldKeys.map((key) => {
 			const optionMap = new Map<string, { Value: string; SourceIds: number[] }>();
@@ -224,8 +261,55 @@ export class MergeContactModalComponent implements OnInit {
 				}
 			}
 			const Options = Array.from(optionMap.values()).sort((a, b) => b.SourceIds.length - a.SourceIds.length);
-			return { Key: key, HasConflict: Options.length > 1, Options };
+			return { Key: key, HasConflict: Options.length > 1, Options, formField: null as any };
 		});
+	}
+
+	buildFieldFormConfig(field: { Key: string }) {
+		// Only used in edit mode — free input / IsPersonal select.
+		if (field.Key === 'IsPersonal') {
+			return {
+				id: field.Key,
+				label: field.Key,
+				type: 'select',
+				form: this.mergeForm,
+				dataSource: this.isPersonalOptions,
+				bindValue: 'Value',
+				bindLabel: 'Name',
+			};
+		}
+		return {
+			id: field.Key,
+			label: field.Key,
+			type: field.Key === 'Remark' ? 'textarea' : 'text',
+			form: this.mergeForm,
+		};
+	}
+
+	refreshFieldFormConfigs() {
+		for (const field of this.mergeFields) {
+			field.formField = this.buildFieldFormConfig(field);
+		}
+	}
+
+	/** No contact values → open free input by default. */
+	openEditForEmptyOptionFields() {
+		for (const field of this.mergeFields) {
+			if (!(field.Options?.length > 0)) {
+				this.fieldEditMode[field.Key] = true;
+			}
+		}
+	}
+
+	/** Radio binds SourceIds[0]; align map so selected option highlights correctly. */
+	syncFieldMapToOptionSourceIds() {
+		for (const field of this.mergeFields) {
+			const val = this.normalizeScalar(this.mergeFieldValues[field.Key]);
+			const match = field.Options?.find((o) => o.Value === val);
+			if (match?.SourceIds?.length) {
+				this.mergeFieldMap[field.Key] = match.SourceIds[0];
+			}
+		}
 	}
 
 	normalizeScalar(val: any): string {
@@ -234,25 +318,43 @@ export class MergeContactModalComponent implements OnInit {
 		return String(val).trim();
 	}
 
+	getContactRelated(c: any) {
+		return c?.Related || c?.related || {};
+	}
+
 	/** Totals to move = sum Related of all non-master contacts (recomputed when Master changes). */
 	rebuildRelatedMovePreview(contacts: any[]) {
-		const totals = { SaleOrders: 0, PurchaseOrders: 0, Invoices: 0, Payments: 0, Documents: 0 };
+		const masterId = Number(this.mergeMasterId);
+		const totals = {
+			SaleOrders: 0,
+			PurchaseOrders: 0,
+			Invoices: 0,
+			Payments: 0,
+			MemberCards: 0,
+			Documents: 0,
+		};
 		const entries = [];
 		for (const c of contacts || []) {
-			if (c.Id === this.mergeMasterId) continue;
-			const related = c.Related || {};
+			if (Number(c.Id) === masterId) continue;
+			const related = this.getContactRelated(c);
 			const summary = this.formatRelatedCounts(related);
-			if (summary) {
-				entries.push({ id: String(c.Id), summary });
-			}
-			totals.SaleOrders += related.SaleOrders || 0;
-			totals.PurchaseOrders += related.PurchaseOrders || 0;
-			totals.Invoices += related.Invoices || 0;
-			totals.Payments += (related.IncomingPayments || 0) + (related.OutgoingPayments || 0);
+			entries.push({
+				id: String(c.Id),
+				name: c.Name || c.Code || '',
+				summary: summary || '',
+			});
+			totals.SaleOrders += Number(related.SaleOrders || related.saleOrders || 0);
+			totals.PurchaseOrders += Number(related.PurchaseOrders || related.purchaseOrders || 0);
+			totals.Invoices += Number(related.Invoices || related.invoices || 0);
+			totals.Payments +=
+				Number(related.IncomingPayments || related.incomingPayments || 0) +
+				Number(related.OutgoingPayments || related.outgoingPayments || 0);
+			totals.MemberCards += Number(related.MemberCards || related.memberCards || 0);
 		}
-		totals.Documents = totals.SaleOrders + totals.PurchaseOrders + totals.Invoices + totals.Payments;
-		this.mergeRelatedTotals = totals;
-		this.mergeRelatedByContactEntries = entries;
+		totals.Documents =
+			totals.SaleOrders + totals.PurchaseOrders + totals.Invoices + totals.Payments + totals.MemberCards;
+		this.mergeRelatedTotals = { ...totals };
+		this.mergeRelatedByContactEntries = [...entries];
 	}
 
 	addressDistinctKey(a: any) {
@@ -267,7 +369,8 @@ export class MergeContactModalComponent implements OnInit {
 
 	/** 1 distinct group → keep đúng 1 Id (ưu tiên bản của Master). */
 	pickKeepIdForDistinctGroup(group: { Ids?: number[]; IdSources?: { Id: number; SourceId: number }[]; Id?: number }) {
-		const fromMaster = (group.IdSources || []).find((x) => x.SourceId === this.mergeMasterId);
+		const masterId = Number(this.mergeMasterId);
+		const fromMaster = (group.IdSources || []).find((x) => Number(x.SourceId) === masterId);
 		if (fromMaster?.Id) {
 			return fromMaster.Id;
 		}
@@ -281,6 +384,11 @@ export class MergeContactModalComponent implements OnInit {
 		}));
 		this.mergeSelectedAddressesPreview = this.mergeAddressOptions.filter((a) => this.selectedAddressKeys[a.Key]);
 		this.mergeSelectedTaxPreview = this.mergeTaxOptions.filter((t) => this.selectedTaxKeys[t.Key]);
+	}
+
+	syncFormFromFieldValues() {
+		if (!this.mergeForm) return;
+		this.mergeForm.patchValue({ ...this.mergeFieldValues }, { emitEvent: false });
 	}
 
 	onMergeMasterSearch() {
@@ -311,22 +419,27 @@ export class MergeContactModalComponent implements OnInit {
 	initMergeFieldMap() {
 		this.mergeFieldMap = {};
 		this.mergeFieldValues = {};
+		this.fieldEditMode = {};
 		for (const key of this.mergeScalarFieldKeys) {
 			this.mergeFieldMap[key] = this.mergeMasterId;
 			this.mergeFieldValues[key] = this.getMergeScalarRawValue(this.mergeMasterId, key);
+			this.fieldEditMode[key] = false;
 		}
+		this.syncFormFromFieldValues();
 	}
 
 	initMergeChildSelections() {
 		this.selectedAddressKeys = {};
 		this.selectedTaxKeys = {};
+		this.defaultTaxKey = '';
 	}
 
 	setMergeMaster(id: number) {
-		if (this.mergeMasterId === id) {
+		const nextId = Number(id);
+		if (Number(this.mergeMasterId) === nextId) {
 			return;
 		}
-		this.mergeMasterId = id;
+		this.mergeMasterId = nextId;
 		this.initMergeFieldMap();
 		this.rebuildMergeViewCache();
 	}
@@ -335,7 +448,11 @@ export class MergeContactModalComponent implements OnInit {
 		for (const key of this.mergeScalarFieldKeys) {
 			this.mergeFieldMap[key] = this.mergeMasterId;
 			this.mergeFieldValues[key] = this.getMergeScalarRawValue(this.mergeMasterId, key);
+			this.fieldEditMode[key] = false;
 		}
+		this.openEditForEmptyOptionFields();
+		this.refreshFieldFormConfigs();
+		this.syncFormFromFieldValues();
 		this.refreshMergeResultPreview();
 	}
 
@@ -350,6 +467,7 @@ export class MergeContactModalComponent implements OnInit {
 					if (raw) {
 						this.mergeFieldMap[field.Key] = sourceId;
 						this.mergeFieldValues[field.Key] = raw;
+						this.fieldEditMode[field.Key] = false;
 						break;
 					}
 				}
@@ -358,16 +476,46 @@ export class MergeContactModalComponent implements OnInit {
 				}
 			}
 		}
+		this.openEditForEmptyOptionFields();
+		this.refreshFieldFormConfigs();
+		this.syncFormFromFieldValues();
+		this.refreshMergeResultPreview();
+	}
+
+	enableFieldEdit(fieldKey: string) {
+		this.fieldEditMode = { ...this.fieldEditMode, [fieldKey]: true };
+		this.refreshFieldFormConfigs();
+		this.syncFormFromFieldValues();
+	}
+
+	disableFieldEdit(fieldKey: string) {
+		this.fieldEditMode = { ...this.fieldEditMode, [fieldKey]: false };
+		const field = this.mergeFields.find((f) => f.Key === fieldKey);
+		const current = this.normalizeScalar(this.mergeForm?.get(fieldKey)?.value);
+		const match = field?.Options?.find((o) => o.Value === current);
+		if (match) {
+			this.mergeFieldMap[fieldKey] = match.SourceIds[0];
+			this.mergeFieldValues[fieldKey] = match.Value;
+		} else {
+			this.mergeFieldValues[fieldKey] = current;
+			this.mergeFieldMap[fieldKey] = this.mergeMasterId;
+		}
+		this.refreshFieldFormConfigs();
+		this.syncFormFromFieldValues();
 		this.refreshMergeResultPreview();
 	}
 
 	pickMergeFieldOption(fieldKey: string, sourceId: number, value: string) {
+		this.fieldEditMode = { ...this.fieldEditMode, [fieldKey]: false };
 		this.mergeFieldMap[fieldKey] = sourceId;
 		this.mergeFieldValues[fieldKey] = value ?? this.getMergeScalarRawValue(sourceId, fieldKey);
 		this.refreshMergeResultPreview();
 	}
 
-	onMergeFieldValueEdit() {
+	onMergeFieldControlChange(fieldKey: string) {
+		const raw = this.normalizeScalar(this.mergeForm?.get(fieldKey)?.value);
+		this.mergeFieldValues[fieldKey] = raw;
+		this.mergeFieldMap[fieldKey] = this.mergeMasterId;
 		this.refreshMergeResultPreview();
 	}
 
@@ -382,11 +530,47 @@ export class MergeContactModalComponent implements OnInit {
 		for (const t of this.mergeTaxOptions) {
 			this.selectedTaxKeys[t.Key] = selected;
 		}
+		this.ensureDefaultTaxSelection();
 		this.refreshMergeResultPreview();
 	}
 
+	onTaxSelectionChange(key: string) {
+		if (!this.selectedTaxKeys[key] && this.defaultTaxKey === key) {
+			this.defaultTaxKey = '';
+		}
+		this.ensureDefaultTaxSelection();
+		this.refreshMergeResultPreview();
+	}
+
+	setDefaultTaxKey(key: string) {
+		if (!key) return;
+		this.selectedTaxKeys[key] = true;
+		this.defaultTaxKey = key;
+		this.refreshMergeResultPreview();
+	}
+
+	/** Exactly one default among currently selected taxes. */
+	ensureDefaultTaxSelection() {
+		const selected = this.mergeTaxOptions.filter((t) => this.selectedTaxKeys[t.Key]);
+		if (!selected.length) {
+			this.defaultTaxKey = '';
+			return;
+		}
+		if (selected.some((t) => t.Key === this.defaultTaxKey)) {
+			return;
+		}
+		const prefer = selected.find((t) => t.WasDefault) || selected[0];
+		this.defaultTaxKey = prefer?.Key || '';
+	}
+
+	getDefaultTaxKeepId(): number | null {
+		const t = this.mergeTaxOptions.find((x) => x.Key === this.defaultTaxKey && this.selectedTaxKeys[x.Key]);
+		return t?.KeepId ? Number(t.KeepId) : null;
+	}
+
 	getMergeContactById(id: number) {
-		return (this.mergePreview?.Contacts || []).find((c) => c.Id === id);
+		const nid = Number(id);
+		return (this.mergePreview?.Contacts || []).find((c) => Number(c.Id) === nid);
 	}
 
 	getMergeScalarRawValue(contactId: number, fieldKey: string) {
@@ -399,8 +583,8 @@ export class MergeContactModalComponent implements OnInit {
 
 	formatMergeFieldOption(fieldKey: string, value: string) {
 		if (fieldKey === 'IsPersonal') {
-			if (value === 'true') return 'Cá nhân';
-			if (value === 'false') return 'Tổ chức';
+			if (value === 'true') return 'Individual';
+			if (value === 'false') return 'Organization';
 			return value || '';
 		}
 		return value;
@@ -414,13 +598,19 @@ export class MergeContactModalComponent implements OnInit {
 		if (!counts) {
 			return '';
 		}
+		const so = Number(counts.SaleOrders || counts.saleOrders || 0);
+		const po = Number(counts.PurchaseOrders || counts.purchaseOrders || 0);
+		const inv = Number(counts.Invoices || counts.invoices || 0);
+		const pay =
+			Number(counts.IncomingPayments || counts.incomingPayments || 0) +
+			Number(counts.OutgoingPayments || counts.outgoingPayments || 0);
+		const cards = Number(counts.MemberCards || counts.memberCards || 0);
 		const parts = [];
-		if (counts.SaleOrders) parts.push(`${counts.SaleOrders} SO`);
-		if (counts.PurchaseOrders) parts.push(`${counts.PurchaseOrders} PO`);
-		if (counts.Invoices) parts.push(`${counts.Invoices} inv`);
-		if (counts.IncomingPayments || counts.OutgoingPayments) {
-			parts.push(`${(counts.IncomingPayments || 0) + (counts.OutgoingPayments || 0)} pay`);
-		}
+		if (so) parts.push(`${so} SO`);
+		if (po) parts.push(`${po} PO`);
+		if (inv) parts.push(`${inv} inv`);
+		if (pay) parts.push(`${pay} pay`);
+		if (cards) parts.push(`${cards} card`);
 		return parts.join(', ');
 	}
 
@@ -429,11 +619,16 @@ export class MergeContactModalComponent implements OnInit {
 			this.env.showMessage('Please select the primary contact', 'warning');
 			return;
 		}
-		const ids = (this.contactIds || []).filter((id) => !!id);
-		const mergedIds = ids.filter((id) => id !== this.mergeMasterId);
+		const ids = (this.contactIds || []).filter((id) => !!id).map((id) => Number(id));
+		const mergedIds = ids.filter((id) => id !== Number(this.mergeMasterId));
 		if (mergedIds.length < 1) {
 			this.env.showMessage('Please select at least 2 contacts to merge', 'warning');
 			return;
+		}
+
+		// Pull latest values from form (edit mode may not have flushed yet).
+		for (const key of this.mergeScalarFieldKeys) {
+			this.mergeFieldValues[key] = this.normalizeScalar(this.mergeForm?.get(key)?.value);
 		}
 
 		const fieldMap: any = {};
@@ -445,7 +640,7 @@ export class MergeContactModalComponent implements OnInit {
 		}
 
 		const payload = {
-			MasterId: this.mergeMasterId,
+			MasterId: Number(this.mergeMasterId),
 			MergedIds: mergedIds,
 			FieldMap: fieldMap,
 			KeepAddressIds: this.mergeAddressOptions
@@ -456,6 +651,7 @@ export class MergeContactModalComponent implements OnInit {
 				.filter((t) => this.selectedTaxKeys[t.Key])
 				.map((t) => t.KeepId)
 				.filter((id) => !!id),
+			DefaultTaxInfoId: this.getDefaultTaxKeepId(),
 			Options: {
 				FillBlanksFromMerged: false,
 				ReparentChildren: true,

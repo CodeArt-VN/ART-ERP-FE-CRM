@@ -87,51 +87,6 @@
 .merge-field-row {
 	padding: 8px 12px;
 	border-bottom: 1px solid var(--ion-color-light, #f4f5f8);
-	&.has-conflict {
-		background: rgba(var(--ion-color-warning-rgb), 0.08);
-	}
-}
-
-.merge-field-label {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	margin-bottom: 4px;
-}
-
-.merge-field-edit {
-	--padding-start: 0;
-	--inner-padding-end: 0;
-	margin-bottom: 4px;
-}
-
-.merge-field-sources {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 6px;
-	margin-top: 4px;
-}
-
-.merge-source-chip {
-	border: 1px solid var(--ion-color-light-shade, #d7d8da);
-	background: var(--ion-background-color, #fff);
-	border-radius: 6px;
-	padding: 4px 8px;
-	cursor: pointer;
-	text-align: left;
-	max-width: 100%;
-	span {
-		display: block;
-		font-size: 0.85rem;
-		word-break: break-word;
-	}
-	small {
-		color: var(--ion-color-medium);
-	}
-	&.active {
-		border-color: var(--ion-color-primary);
-		background: rgba(var(--ion-color-primary-rgb), 0.08);
-	}
 }
 
 .merge-prop-block {
@@ -162,12 +117,6 @@
 			margin-bottom: 4px;
 			word-break: break-word;
 		}
-		small {
-			color: var(--ion-color-medium);
-		}
-	}
-	ion-list {
-		background: transparent;
 	}
 }
 
