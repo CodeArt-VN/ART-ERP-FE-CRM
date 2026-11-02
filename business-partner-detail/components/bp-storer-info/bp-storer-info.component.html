@@ -14,13 +14,9 @@
 						<app-form-control
 							(change)="loadPutawayAndAllocationStrategy(); saveChange()"
 							[field]="{
-								branchConfig: { showingType: 'Warehouse' },
 								id: 'IDWarehouse',
 								label: 'Warehouse',
-								type: 'ng-select-branch',
-								dataSource: branchList,
-								bindLabel: 'Name',
-								bindValue: 'Id',
+								type: 'ng-select-warehouse',
 								placeholder: 'Search',
 								form: formGroup,
 							}"
