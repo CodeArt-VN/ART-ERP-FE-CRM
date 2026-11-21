@@ -1,4 +1,4 @@
-import { daysInStage, indexById, isOverdue, missingIds, opportunityStatus, sortStages, serviceTypeIcon } from './opportunity-list.util';
+import { applyOpportunityRowViews, daysInStage, indexById, isOverdue, missingIds, opportunityStatus, sortStages, serviceTypeIcon } from './opportunity-list.util';
 
 describe('opportunity-list.util', () => {
 	const now = new Date(2026, 10, 19, 15, 0, 0);
@@ -86,6 +86,26 @@ describe('opportunity-list.util', () => {
 		});
 		it('handles empty input', () => {
 			expect(sortStages(null)).toEqual([]);
+		});
+	});
+
+	describe('applyOpportunityRowViews', () => {
+		it('fills customer, owner, type icon, stage and pipeline stages on each row', () => {
+			const stageA = { Id: 1, Name: 'Open', Sort: 1 };
+			const stageB = { Id: 2, Name: 'Won', Sort: 2 };
+			const row: any = { IDContact: 10, IDOwner: 20, IDType: 30, IDStage: 1, IDPipeline: 5 };
+			applyOpportunityRowViews([row], {
+				contactById: { 10: { Id: 10, Name: 'Lan' } },
+				ownerById: { 20: { Id: 20, Name: 'Hung' } },
+				serviceTypeById: { 30: { Id: 30, Code: 'SVC_WEDDING' } },
+				stageById: { 1: stageA },
+				stagesByPipeline: { 5: [stageA, stageB] },
+			});
+			expect(row._Customer).toBe('Lan');
+			expect(row._Owner).toBe('Hung');
+			expect(row._TypeIcon).toBe('heart-outline');
+			expect(row._Stage).toBe(stageA);
+			expect(row._Stages).toEqual([stageA, stageB]);
 		});
 	});
 });

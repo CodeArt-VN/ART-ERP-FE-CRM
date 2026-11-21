@@ -79,3 +79,23 @@ export function serviceTypeIcon(type: { Icon?: string; Code?: string }): string 
 export function sortStages<T extends { Sort?: number }>(stages: T[]): T[] {
 	return (stages || []).filter((s) => !!s).sort((a, b) => (a.Sort || 0) - (b.Sort || 0));
 }
+
+/** Fill list-row view fields from lookup maps (runs after the main list load, not inside showSpinner). */
+export function applyOpportunityRowViews(
+	rows: any[],
+	maps: {
+		contactById: { [id: number]: any };
+		ownerById: { [id: number]: any };
+		serviceTypeById: { [id: number]: any };
+		stageById: { [id: number]: any };
+		stagesByPipeline: { [id: number]: any[] };
+	}
+): void {
+	(rows || []).forEach((i) => {
+		i._Customer = maps.contactById[i.IDContact]?.Name || '';
+		i._Owner = maps.ownerById[i.IDOwner]?.Name || '';
+		i._TypeIcon = serviceTypeIcon(maps.serviceTypeById[i.IDType]);
+		i._Stage = maps.stageById[i.IDStage];
+		i._Stages = maps.stagesByPipeline[i.IDPipeline] || [];
+	});
+}

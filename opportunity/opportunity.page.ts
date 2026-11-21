@@ -4,7 +4,7 @@ import { Location } from '@angular/common';
 import { PageBase } from 'src/app/page-base';
 import { EnvService } from 'src/app/services/core/env.service';
 import { CRM_ContactProvider, CRM_OpportunityProvider, CRM_PipelineProvider, CRM_PipelineStageProvider, HRM_StaffProvider } from 'src/app/services/static/services.service';
-import { daysInStage, indexById, isOverdue, missingIds, opportunityStatus, sortStages, serviceTypeIcon } from './opportunity-list.util';
+import { applyOpportunityRowViews, daysInStage, indexById, isOverdue, missingIds, opportunityStatus, sortStages } from './opportunity-list.util';
 
 @Component({
 	selector: 'app-opportunity',
@@ -54,6 +54,7 @@ export class OpportunityPage extends PageBase {
 
 	preLoadData(event?: any): void {
 		this.pageConfig.sort = [{ Dimension: 'Id', Order: 'DESC' }];
+		// Lookups only here (ngOnInit / branch switch). Refresh, search, paging go through loadData.
 		// Pipeline config scope (company -> child branches) is decided by the BE, not by the client
 		Promise.all([
 			this.pipelineProvider.read({ Take: 100 }),
@@ -80,10 +81,14 @@ export class OpportunityPage extends PageBase {
 			.catch(() => super.preLoadData(event));
 	}
 
+	/** Main list spinner ends here; row name enrichment is background (same pattern as hall loadLineCounts). */
 	loadedData(event?: any) {
+		super.loadedData(event);
 		this.resolveNames()
 			.catch(() => {})
-			.then(() => super.loadedData(event));
+			.then(() => {
+				this.items = [...this.items];
+			});
 	}
 
 	/** The list API returns ids only: load the missing customers, then put the customer, owner, service type icon, current stage and the stages of its pipeline in order (for the status bar) on each row. */
@@ -93,12 +98,12 @@ export class OpportunityPage extends PageBase {
 			const result: any = await this.contactProvider.read({ Id: JSON.stringify(ids), Take: ids.length });
 			Object.assign(this.contactById, indexById(result.data));
 		}
-		this.items.forEach((i) => {
-			i._Customer = this.contactById[i.IDContact]?.Name || '';
-			i._Owner = this.ownerById[i.IDOwner]?.Name || '';
-			i._TypeIcon = serviceTypeIcon(this.serviceTypeById[i.IDType]);
-			i._Stage = this.stageById[i.IDStage];
-			i._Stages = this.stagesByPipeline[i.IDPipeline] || [];
+		applyOpportunityRowViews(this.items, {
+			contactById: this.contactById,
+			ownerById: this.ownerById,
+			serviceTypeById: this.serviceTypeById,
+			stageById: this.stageById,
+			stagesByPipeline: this.stagesByPipeline,
 		});
 	}
 
