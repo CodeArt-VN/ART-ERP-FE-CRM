@@ -1,0 +1,56 @@
+<ion-header [translucent]="true">
+	<app-toolbar [page]="this"></app-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" appScrollbarTheme class="left scrollx" forceOverscroll="false">
+	<ion-refresher [disabled]="!pageConfig.refresher" slot="fixed" (ionRefresh)="refresh($event)">
+		<ion-refresher-content></ion-refresher-content>
+	</ion-refresher>
+
+	<app-page-title class="ion-padding safe-max-width" [pageConfig]="pageConfig"></app-page-title>
+
+	<div class="safe-max-width">
+		<app-data-table
+			class="box-shadow responsive"
+			[rows]="items"
+			[trackBy]="'Id'"
+			[(selectedRows)]="selectedItems"
+			[showSpinner]="pageConfig.showSpinner"
+			[showFilter]="pageConfig.isShowSearch"
+			[(query)]="query"
+			(dataInfinite)="loadData($event)"
+			(filter)="onDatatableFilter($event)"
+			(sort)="onSort($event)"
+			(selectedRowsChange)="showCommandBySelectedRows($event)"
+		>
+			<datatable-column [checkbox]="true" name=""></datatable-column>
+			<datatable-column class="col-id" name="#" property="Id" [navLink]="pageConfig.pageName"></datatable-column>
+			<datatable-column class="col-icon large" name="" property="Id">
+				<ng-template let-i="row" datatable-cell-template>
+					<ion-icon class="clickable" [name]="i.Icon || 'git-branch-outline'" [color]="i.Color || 'primary'" [routerLink]="['/' + pageConfig.pageName + '/' + i.Id]"></ion-icon>
+				</ng-template>
+			</datatable-column>
+			<datatable-column class="col-name" name="Name" property="Name">
+				<ng-template let-i="row" datatable-cell-template>
+					<div class="clickable" [routerLink]="['/' + pageConfig.pageName + '/' + i.Id]">
+						<a class="bold">
+							<ion-text color="dark">{{ i.Name }}</ion-text>
+						</a>
+						<p *ngIf="i.Remark">{{ i.Remark }}</p>
+						<p>
+							<ion-chip outline [color]="i.PostSignMode == 'Close' ? 'success' : 'primary'" [title]="'After signing' | translate">
+								<ion-icon [name]="i.PostSignMode == 'Close' ? 'checkmark-done-outline' : 'pulse-outline'"></ion-icon>
+								<ion-label>{{ (i.PostSignMode == 'Close' ? 'End at signing' : 'Keep tracking until completion') | translate }}</ion-label>
+							</ion-chip>
+							<ion-chip *ngIf="i.IsDefault" color="success">
+								<ion-label>{{ 'Default' | translate }}</ion-label>
+							</ion-chip>
+						</p>
+					</div>
+				</ng-template>
+			</datatable-column>
+		</app-data-table>
+	</div>
+
+	<div class="ion-padding"></div>
+</ion-content>

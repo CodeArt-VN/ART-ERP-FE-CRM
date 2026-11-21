@@ -1,0 +1,232 @@
+// Pipeline option rows (list only — tree styles match pipeline-detail)
+.pipeline-option {
+	h3 {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 6px;
+		margin: 0;
+		font-size: 0.95rem;
+		font-weight: 500;
+	}
+
+	p {
+		margin: 2px 0 0;
+		font-size: 0.8rem;
+	}
+
+	ion-icon[slot='start'] {
+		font-size: 1.35rem;
+		margin-inline-end: 8px;
+	}
+
+	ion-icon[slot='end'] {
+		font-size: 1.25rem;
+		margin: 0;
+	}
+
+	.rec-chip {
+		margin: 0;
+		height: 22px;
+		min-height: 22px;
+		font-size: 0.72rem;
+		font-weight: 500;
+		--padding-start: 6px;
+		--padding-end: 6px;
+	}
+}
+
+.inline-tag {
+	margin: 0 8px 0 0;
+	vertical-align: middle;
+}
+
+.inline-tag.after {
+	margin: 0 0 0 8px;
+}
+
+// Chip label: one line, ellipsis when tight (same as pipeline-detail).
+:host ::ng-deep app-data-table.stage-tree ion-chip ion-label {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+// Same stage-tree mobile rules as pipeline-detail (no col-icon / row-actions in this preview).
+@media screen and (max-width: 1164px) {
+	:host ::ng-deep app-data-table.stage-tree {
+		padding-inline: 0;
+		gap: 0;
+
+		datatable-header.row.header {
+			display: flex !important;
+			flex-wrap: nowrap;
+			align-items: center;
+			width: 100%;
+			box-sizing: border-box;
+			padding: 0 0 0 8px !important;
+			background: var(--ion-color-light, #fff);
+			border-radius: 6px 6px 0 0;
+			border-bottom: 1px solid var(--ion-color-light-shade);
+
+			.col-name {
+				order: 1;
+				flex: 1 1 auto;
+				min-width: 0 !important;
+				max-width: 100% !important;
+				display: flex;
+				align-items: center;
+			}
+		}
+
+		.row:not(.header) {
+			position: relative;
+			padding: 0 8px !important;
+			border-radius: 0;
+			border-bottom: 1px solid var(--ion-color-light-shade);
+
+			.col-name {
+				min-width: 0 !important;
+				max-width: 100% !important;
+				flex: 1 1 100%;
+				display: flex;
+				flex-wrap: nowrap;
+				align-items: center;
+				white-space: nowrap;
+
+				.clickable:not(.min-btn) {
+					flex: 0 1 auto;
+					min-width: 0;
+					overflow: hidden;
+					text-overflow: ellipsis;
+				}
+				ion-icon.min-btn,
+				ion-chip,
+				ion-badge {
+					flex: none;
+				}
+			}
+		}
+
+		.inline-tag {
+			margin-top: 0;
+			margin-bottom: 0;
+			margin-right: 6px;
+		}
+		.inline-tag.after {
+			margin: 0 0 0 6px;
+		}
+		.tag-label {
+			display: none;
+		}
+		.inline-tag.req {
+			min-height: 0;
+			padding: 0 6px;
+			ion-label {
+				display: none;
+			}
+			&::before {
+				content: '*';
+				font-weight: bold;
+			}
+		}
+	}
+}
+
+@media screen and (max-width: 1164px) {
+	:host ::ng-deep app-data-table.stage-tree .row:not(.header) .col-name {
+		box-sizing: content-box;
+		min-height: 28px;
+		.clickable:not(.min-btn) {
+			flex: 0 1 auto !important;
+			max-width: none;
+			order: 2;
+		}
+		ion-chip.chip-type {
+			order: 1;
+			flex: 0 0 auto !important;
+			background: transparent !important;
+			box-shadow: none;
+			border-radius: 0;
+			overflow: visible;
+			padding: 0 !important;
+			width: 16px !important;
+			height: 28px !important;
+			min-height: 28px !important;
+			margin-right: 6px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			ion-icon {
+				margin-inline: 0 !important;
+				width: 16px;
+				height: 28px;
+				min-width: 16px;
+				font-size: 16px;
+				line-height: 28px;
+				flex: none;
+			}
+			ion-label {
+				display: none;
+			}
+		}
+		ion-chip.req {
+			order: 3;
+			background: transparent !important;
+			box-shadow: none;
+			border-radius: 0;
+			padding: 0 !important;
+			min-height: 0 !important;
+			margin-left: 4px;
+		}
+		ion-chip ion-label {
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+	}
+}
+
+:host ::ng-deep app-data-table.stage-tree .row.bold .col-name {
+	.chip-outcome,
+	.chip-prob {
+		order: 1;
+	}
+	.clickable:not(.min-btn) {
+		order: 2;
+	}
+}
+
+:host ::ng-deep app-data-table.stage-tree {
+	.row:not(.header) .cell {
+		padding-top: 2px !important;
+		padding-bottom: 2px !important;
+	}
+	.row.bold:not(.header) .cell {
+		padding-top: 8px !important;
+		padding-bottom: 8px !important;
+	}
+	.datatable-virtual-item:not(:last-child) {
+		padding-bottom: 0 !important;
+	}
+	datatable-body {
+		gap: 0 !important;
+		padding-bottom: 0 !important;
+	}
+	ion-chip {
+		margin-top: 0;
+		margin-bottom: 0;
+		min-height: 22px;
+		height: 22px;
+		border-radius: 8px;
+	}
+}
+
+@media screen and (max-width: 425px) {
+	:host ::ng-deep app-data-table.stage-tree {
+		.chip-type,
+		.chip-prob,
+		.chip-outcome {
+			display: none;
+		}
+	}
+}

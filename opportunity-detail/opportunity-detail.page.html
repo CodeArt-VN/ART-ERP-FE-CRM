@@ -1,0 +1,909 @@
+<ion-header [translucent]="true">
+	<app-toolbar [page]="this"></app-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" appScrollbarTheme class="ion-padding">
+	<div id="opportunity-detail-page" style="position: absolute; z-index: 30005"></div>
+
+	<ng-container *ngIf="item && pageConfig.showSpinner == false">
+		<app-page-title
+			class="ion-padding safe-max-width"
+			[icon]="pageConfig.pageIcon"
+			[color]="pageConfig.pageColor"
+			[pageName]="pageConfig.pageName"
+			[title]="formGroup.get('Name')?.value || item?.Name || contactPartner?.Name || pageConfig.pageTitle"
+			[remark]="formGroup.get('Remark')?.value ?? item?.Remark ?? ''"
+		></app-page-title>
+
+		<!-- One box: stage chain (single row of arrows) on top, checklist of the displayed stage below -->
+		<div class="safe-max-width stage-chain-shell" *ngIf="item.Id">
+			<ng-container *ngIf="hasPipeline && plan; else noPipelineBar">
+				<div class="stage-chain-head">
+					<div class="stage-chain-title">
+						<button
+							type="button"
+							class="clickable pipeline-title-hit"
+							*ngIf="!isClosed && pageConfig.canQualify; else pipelineTitleReadonly"
+							[disabled]="busy"
+							[attr.title]="'Change pipeline' | translate"
+							[attr.aria-label]="('Change pipeline' | translate) + ': ' + plan.PipelineName"
+							(click)="changePipeline()"
+						>
+							<b>{{ plan.PipelineName }}</b>
+							<ion-icon name="swap-horizontal-outline"></ion-icon>
+						</button>
+						<ng-template #pipelineTitleReadonly>
+							<span class="pipeline-title-text"><b>{{ plan.PipelineName }}</b></span>
+						</ng-template>
+					</div>
+					<div class="stage-chain-actions">
+						<ion-button size="small" color="success" *ngIf="canCloseManually && pageConfig.canClose" [disabled]="busy" (click)="closeDeal()">
+							<ion-icon [slot]="iconSlot(iconOnlyChrome)" name="flag-outline"></ion-icon>
+							<span class="btn-label" *ngIf="!iconOnlyChrome">{{ 'Close deal' | translate }}</span>
+						</ion-button>
+						<ion-button size="small" color="warning" *ngIf="isManualClosed && pageConfig.canReopen" [disabled]="busy" (click)="reopenDeal()">
+							<ion-icon [slot]="iconSlot(iconOnlyChrome)" name="refresh-outline"></ion-icon>
+							<span class="btn-label" *ngIf="!iconOnlyChrome">{{ 'Reopen deal' | translate }}</span>
+						</ion-button>
+						<ion-chip outline class="status-chip" [color]="statusView.color">
+							<ion-label>
+								<span class="status-prefix">{{ 'Status' | translate }}: </span>{{ statusView.label | translate }}
+							</ion-label>
+						</ion-chip>
+					</div>
+				</div>
+
+				<div class="stage-chain" role="list">
+					<button
+						type="button"
+						role="listitem"
+						*ngFor="let s of stageViews; trackBy: trackById"
+						class="stage-step"
+						[class.is-current]="s.chainState === 'current'"
+						[class.is-done]="s.chainState === 'done'"
+						[class.is-lost]="s.Outcome === 'Lost'"
+						[class.is-preview]="previewStage?.Id === s.Id"
+						[style.--stage-color]="s.colorVar"
+						[style.--stage-contrast]="s.contrastVar"
+						[attr.title]="s.Name"
+						(click)="selectPreviewStage(s)"
+					>
+						<span class="step-num">{{ s.order }}</span>
+						<span class="step-label">{{ s.Name }}</span>
+					</button>
+				</div>
+				<div
+					class="stage-chain-tab-line"
+					[class.is-on-current]="!isPreviewingOtherStage"
+					[style.--tab-underline-color]="activeChainColorVar"
+					aria-hidden="true"
+				></div>
+
+				<!-- Checklist under the chain: full stage-chain stays visible; on narrow screens tasks fade + Expand -->
+				<ng-container *ngIf="previewStage as ps">
+				<div class="stage-more-wrap" [class.is-collapsed]="!stageExpanded">
+					<div class="stage-more">
+						<div class="stage-tasks-block">
+						<div class="stage-tasks-head">
+							<div class="stage-tasks-meta">
+								<span class="stage-meta-chip" *ngIf="ps.Probability != null">
+									<span class="stage-meta-label">{{ 'Probability' | translate }}: </span>{{ ps.Probability }}%
+								</span>
+								<span class="stage-meta-chip" *ngIf="ps.ExpectedDays">
+									<span class="stage-meta-label">{{ 'Expected days' | translate }}: </span>{{ ps.ExpectedDays }} {{ 'days' | translate }}
+								</span>
+								<span class="stage-meta-chip" *ngIf="ps.SLAHours">
+									<span class="stage-meta-label">SLA: </span>{{ ps.SLAHours }}h
+								</span>
+								<ng-container *ngIf="!isPreviewingOtherStage && stageAge as age">
+									<span class="stage-meta-chip" [class.is-alert]="age.isOverExpected || age.isOverSla">
+										<span class="stage-meta-label">{{ 'Days in stage' | translate }}: </span>{{ age.days }}d
+									</span>
+								</ng-container>
+							</div>
+							<div class="stage-tasks-actions">
+								<ng-container *ngIf="isPreviewingOtherStage">
+									<ion-button
+										size="small"
+										[color]="ps.Outcome === 'Lost' ? 'danger' : 'primary'"
+										*ngIf="!isClosed && pageConfig.canMoveStage"
+										[disabled]="busy"
+										(click)="moveToStage(ps)"
+									>
+										<ion-icon [slot]="iconSlot(iconOnlyChrome)" [name]="ps.Outcome === 'Lost' ? 'close-circle-outline' : 'arrow-forward-outline'"></ion-icon>
+										<span class="btn-label" *ngIf="!iconOnlyChrome">{{ ps.Outcome === 'Lost' ? ('Close as lost' | translate) : ('Move to this stage' | translate) }}</span>
+									</ion-button>
+									<ion-button size="small" fill="outline" (click)="backToCurrentStage()">
+										<ion-icon [slot]="iconSlot(iconOnlyChrome)" name="return-up-back-outline"></ion-icon>
+										<span class="btn-label" *ngIf="!iconOnlyChrome">{{ 'Back to current stage' | translate }}</span>
+									</ion-button>
+								</ng-container>
+								<ion-button
+									size="small"
+									fill="outline"
+									*ngIf="!isPreviewingOtherStage && previewSummary.uninitializedCount > 0 && !isClosed && canManageActivities"
+									[disabled]="busy"
+									(click)="initializeStageTasks()"
+								>
+									<ion-icon slot="start" name="flash-outline"></ion-icon>
+									{{ 'Initialize stage tasks' | translate }} ({{ previewSummary.uninitializedCount }})
+								</ion-button>
+							</div>
+						</div>
+
+						<p class="stage-guide stage-guide-clamp ion-no-margin" *ngIf="ps.Guide" [attr.title]="ps.Guide">{{ ps.Guide }}</p>
+						<p class="req-fields ion-no-margin" *ngIf="isPreviewingOtherStage && ps.RequiredFields?.length">
+							<small>{{ 'Required fields' | translate }}: {{ ps.RequiredFields.join(', ') }}</small>
+						</p>
+
+						<div class="stage-body">
+						<ion-list lines="none" class="stage-task-list ion-no-padding">
+							<ion-item
+								*ngFor="let t of ps.Tasks; trackBy: trackById"
+								class="stage-task"
+								[class.task-finished]="isTaskFinished(t)"
+								[class.is-required]="t.IsRequired && !isTaskFinished(t)"
+								[class.is-overdue]="taskDueMap[t.Id] === 'overdue'"
+								[class.is-next]="!isPreviewingOtherStage && !isClosed && previewSummary.nextRequiredTask?.Id === t.Id"
+							>
+								<ion-checkbox
+									slot="start"
+									[checked]="t.Status === 'Done'"
+									[disabled]="isPreviewingOtherStage || !canManageActivities || isClosed || busy"
+									(ionChange)="onTaskCheckboxChange(t, $event.detail.checked)"
+								></ion-checkbox>
+								<ion-label class="ion-text-wrap" [class.task-done]="isTaskFinished(t)" [style.cursor]="isPreviewingOtherStage ? 'default' : 'pointer'" (click)="!isPreviewingOtherStage && openTaskActivityModal(t)">
+									<div class="task-line">
+										<ion-icon [name]="taskIcon(t)" class="task-type-icon"></ion-icon>
+										<span class="task-name">
+											{{ t.Name }}<span class="task-req-mark" *ngIf="t.IsRequired && !isTaskFinished(t)" aria-hidden="true">*</span>
+										</span>
+										<span class="task-doc-type" *ngIf="t.DocumentType">{{ t.DocumentType }}</span>
+										<span class="task-muted" *ngIf="!t.IDActivity && !isPreviewingOtherStage">{{ 'Not initialized' | translate }}</span>
+										<ng-container *ngIf="t.DueDate">
+											<span class="task-due-badge is-overdue" *ngIf="taskDueMap[t.Id] === 'overdue'">{{ 'Overdue' | translate }}</span>
+											<span class="task-due-badge is-today" *ngIf="taskDueMap[t.Id] === 'due-today'">{{ 'Due today' | translate }}</span>
+											<span class="task-due">{{ t.DueDate | date: 'dd/MM/yyyy' }}</span>
+										</ng-container>
+									</div>
+									<p class="task-guide" *ngIf="t.Guide">{{ t.Guide }}</p>
+								</ion-label>
+								<ng-container *ngIf="!isPreviewingOtherStage && taskActions[t.Id] as act">
+									<ion-button
+										slot="end"
+										size="small"
+										class="task-cta"
+										[fill]="previewSummary.nextRequiredTask?.Id === t.Id ? 'solid' : 'outline'"
+										*ngIf="canRunTaskAction(act)"
+										[disabled]="busy"
+										(click)="runTaskAction(t)"
+									>
+										<ion-icon [slot]="iconSlot(iconOnlyChrome)" [name]="act.icon"></ion-icon>
+										<span class="btn-label" *ngIf="!iconOnlyChrome">{{ act.label | translate }}</span>
+									</ion-button>
+								</ng-container>
+								<ion-button
+									slot="end"
+									size="small"
+									fill="clear"
+									*ngIf="!isPreviewingOtherStage && !t.IsRequired && t.Status === 'Open' && !isClosed && canManageActivities"
+									[disabled]="busy"
+									(click)="completeTask(t, 'Skipped')"
+								>
+									<ion-icon [slot]="iconSlot(iconOnlyChrome)" name="play-skip-forward-outline"></ion-icon>
+									<span class="btn-label" *ngIf="!iconOnlyChrome">{{ 'Skip' | translate }}</span>
+								</ion-button>
+							</ion-item>
+						</ion-list>
+
+						<!-- progress donut next to the checklist -->
+						<aside class="stage-donut-col" *ngIf="previewSummary.total">
+							<div class="stage-donut" [style.--pct]="previewSummary.requiredTotal ? previewSummary.requiredPercent : (previewSummary.done * 100) / previewSummary.total">
+								<div class="stage-donut-center">
+									<span class="stage-donut-count">{{ previewSummary.requiredTotal ? previewSummary.requiredDone + '/' + previewSummary.requiredTotal : previewSummary.done + '/' + previewSummary.total }}</span>
+									<small>{{ (previewSummary.requiredTotal ? 'Required' : 'Tasks') | translate }}</small>
+								</div>
+							</div>
+						</aside>
+						</div>
+						<!-- next step of the sales path once the checklist is done -->
+						<div class="stage-footer" *ngIf="!isPreviewingOtherStage && !isClosed && nextForwardStage && pageConfig.canMoveStage">
+							<span class="stage-footer-note" *ngIf="previewSummary.requiredTotal > previewSummary.requiredDone">
+								{{ previewSummary.requiredTotal - previewSummary.requiredDone }} {{ 'required tasks left' | translate }}
+							</span>
+							<ion-button size="small" [fill]="previewSummary.requiredDone >= previewSummary.requiredTotal ? 'solid' : 'outline'" [disabled]="busy" (click)="moveToStage(nextForwardStage)">
+								{{ 'Move to' | translate }}: {{ nextForwardStage.Name }}
+								<ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
+							</ion-button>
+						</div>
+						</div>
+						<!-- Lost analysis: belongs to the stage whose outcome is Lost -->
+						<div class="lost-block" *ngIf="ps.Outcome === 'Lost' && (isLostDeal || item.IDLostReason || item.LostRemark)">
+							<div class="section-head">
+								<h2 class="section-title is-danger">{{ 'Lost analysis' | translate }}</h2>
+							</div>
+							<div class="lost-body">
+									<div class="kv-row">
+										<span class="kv-label">{{ 'Stage when lost' | translate }}</span>
+										<strong *ngIf="lostInfo.stageWhenLost">{{ lostInfo.stageWhenLost }}</strong>
+										<ion-badge color="medium" *ngIf="lostInfo.isUnknownPrior">{{ 'Unknown prior stage' | translate }}</ion-badge>
+									</div>
+									<div class="kv-row">
+										<span class="kv-label">{{ 'Lost reason' | translate }}</span>
+										<strong>{{ lostReasonName || '—' }}</strong>
+									</div>
+									<div class="kv-row" *ngIf="item.LostRemark">
+										<span class="kv-label">{{ 'Lost remark' | translate }}</span>
+										<span>{{ item.LostRemark }}</span>
+									</div>
+									<div class="kv-row" *ngIf="lostInfo.lostDate">
+										<span class="kv-label">{{ 'Closed date' | translate }}</span>
+										<span>{{ lostInfo.lostDate | date: 'dd/MM/yyyy HH:mm' }}</span>
+									</div>
+							</div>
+						</div>
+					</div>
+					<button type="button" class="info-expand-link" (click)="stageExpanded = !stageExpanded">
+						{{ (stageExpanded ? 'Collapse' : 'Expand') | translate }}
+						<ion-icon [name]="stageExpanded ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
+					</button>
+				</div>
+				</ng-container>
+			</ng-container>
+
+			<ng-template #noPipelineBar>
+				<div class="stage-chain-head">
+					<ion-note color="medium">{{ 'Choose a pipeline to start the sales path' | translate }}</ion-note>
+				</div>
+			</ng-template>
+		</div>
+
+		<!-- Qualification (no pipeline yet) -->
+		<div class="safe-max-width stage-qualify-block" *ngIf="item.Id && !hasPipeline">
+			<div class="ion-padding" *ngIf="!hasPipeline">
+				<ion-grid fixed>
+					<ion-row class="hr-group">
+						<ion-col size="12" size-xl="3">
+							<ion-list-header class="ion-no-padding">
+								<ion-label color="primary">{{ 'Lead information' | translate }}</ion-label>
+							</ion-list-header>
+						</ion-col>
+						<ion-col size="12" size-sm size-xl="4">
+							<form [formGroup]="qualifyForm">
+								<app-form-control
+									[field]="{ id: 'IDServiceType', label: 'Service type', type: 'ng-select', dataSource: serviceTypeList, bindValue: 'Id', bindLabel: 'Name', form: qualifyForm, appendTo: '#opportunity-detail-page' }"
+								></app-form-control>
+								<app-form-control
+									[field]="{ id: 'CustomerType', label: 'Customer type', type: 'ng-select', dataSource: customerTypeList, bindValue: 'Code', bindLabel: 'Name', form: qualifyForm, appendTo: '#opportunity-detail-page' }"
+								></app-form-control>
+								<app-form-control [field]="{ id: 'NumberOfGuests', label: 'Expected guests', type: 'number', form: qualifyForm }"></app-form-control>
+								<app-form-control [field]="{ id: 'EventDate', label: 'Event date', type: 'date', form: qualifyForm }"></app-form-control>
+							</form>
+						</ion-col>
+						<ion-col size="12" size-sm size-xl="4">
+							<form [formGroup]="qualifyForm">
+								<app-form-control [field]="{ id: 'BookingHistory', label: 'Booking history', type: 'textarea', form: qualifyForm }"></app-form-control>
+								<app-form-control [field]="{ id: 'PastExperience', label: 'Past experience', type: 'textarea', form: qualifyForm }"></app-form-control>
+							</form>
+							<ion-button *ngIf="pageConfig.canQualify" [disabled]="busy" (click)="suggestPipeline()">
+								<ion-icon slot="start" name="sparkles-outline"></ion-icon>
+								{{ 'Suggest pipeline' | translate }}
+							</ion-button>
+						</ion-col>
+					</ion-row>
+
+					<ion-row class="hr-group" *ngIf="qualifyResult">
+						<ion-col size="12" size-xl="3">
+							<ion-list-header class="ion-no-padding">
+								<ion-label color="primary">{{ 'Suggested pipeline' | translate }}</ion-label>
+							</ion-list-header>
+						</ion-col>
+						<ion-col size="12" size-xl="8">
+							<ion-note color="warning" *ngFor="let w of qualifyResult.Warnings">{{ w }}<br /></ion-note>
+							<div class="candidate" *ngFor="let c of qualifyResult.Candidates" [class.selected]="c.IDPipeline == selectedIDPipeline" (click)="pickCandidate(c.IDPipeline)">
+								<b>{{ c.PipelineName }}</b>
+								<ion-badge class="ion-margin-start" color="success" *ngIf="c.IDPipeline == qualifyResult.Recommended?.IDPipeline">{{ 'Recommended' | translate }}</ion-badge>
+								<div><small>{{ c.Reasons?.join('; ') }}</small></div>
+							</div>
+							<ion-note *ngIf="qualifyResult.Customer">
+								{{ 'Customer' | translate }}: {{ qualifyResult.Customer.Returning ? ('Returning' | translate) : ('New' | translate) }}
+								<span *ngIf="qualifyResult.Customer.PreviousContracts"> · {{ qualifyResult.Customer.PreviousContracts }} {{ 'previous contracts' | translate }}</span>
+							</ion-note>
+						</ion-col>
+					</ion-row>
+
+					<ion-row *ngIf="plan">
+						<ion-col size="12">
+							<h4>
+								{{ plan.PipelineName }} <small>({{ plan.TotalStages }} {{ 'stages' | translate }})</small>
+							</h4>
+							<ng-container *ngTemplateOutlet="planStagesPreview; context: { plan: plan }"></ng-container>
+							<ion-button *ngIf="pageConfig.canQualify" [disabled]="busy || !selectedIDPipeline" (click)="applyPipeline()">
+								<ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+								{{ 'Apply pipeline' | translate }}
+							</ion-button>
+						</ion-col>
+					</ion-row>
+				</ion-grid>
+			</div>
+		</div>
+
+		<!-- Workspace: activity journal (composer + timeline, scoped to the stage picked above) | main information, then all documents -->
+		<div class="safe-max-width workspace-layout" *ngIf="item.Id">
+			<!-- Left: activities -->
+			<div class="workspace-main">
+				<div class="workspace-group activity-group" #activityBox>
+				<div class="section-head">
+					<h2 class="section-title">{{ 'Activities' | translate }}</h2>
+					<ion-button size="small" fill="clear" (click)="refreshTimeline()">
+						<ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+					</ion-button>
+				</div>
+				<ion-card class="workspace-card ion-no-margin activity-card">
+					<ion-card-content>
+						<!-- Quick composer: guide left; type buttons + more-options ellipsis on the same row -->
+						<div class="composer" *ngIf="!isClosed && canManageActivities">
+							<div class="composer-bar" [class.is-open]="!!composerType">
+								<span class="composer-guide">
+									<ion-icon name="add-circle-outline"></ion-icon>
+									{{ 'New activity' | translate }}
+								</span>
+								<div class="stepper">
+									<ion-button
+										*ngFor="let tp of composerTypes"
+										size="small"
+										[fill]="composerType === tp.Code ? 'solid' : 'outline'"
+										[color]="composerType === tp.Code ? 'primary' : 'medium'"
+										(click)="selectComposerType(tp.Code)"
+									>
+										<ion-icon [slot]="iconSlot(composerIconOnly)" [name]="tp.Icon"></ion-icon>
+										<span class="composer-type-label" *ngIf="!composerIconOnly">{{ tp.Code | translate }}</span>
+									</ion-button>
+									<ion-button
+										size="small"
+										fill="outline"
+										color="medium"
+										[attr.title]="'More options' | translate"
+										[attr.aria-label]="'More options' | translate"
+										(click)="openActivityModal()"
+									>
+										<ion-icon slot="icon-only" name="ellipsis-horizontal"></ion-icon>
+									</ion-button>
+								</div>
+							</div>
+							<ng-container *ngIf="composerType">
+								<form [formGroup]="composerForm">
+									<app-form-control [field]="{ id: 'Name', label: 'Content', type: 'textarea', form: composerForm }"></app-form-control>
+									<app-form-control
+										*ngIf="composerType === 'Appointment' || composerType === 'Checklist'"
+										[field]="{ id: 'DueDate', label: 'Due date', type: 'date', form: composerForm }"
+									></app-form-control>
+								</form>
+
+								<div class="composer-footer">
+									<small class="composer-stage-note" *ngIf="currentStage">{{ 'Logged to stage' | translate }}: <b>{{ currentStage.Name }}</b></small>
+									<ion-button size="small" [disabled]="busy || composerForm.invalid" (click)="submitQuickActivity()">
+										<ion-icon slot="start" name="send-outline"></ion-icon>
+										{{ 'Add activity' | translate }}
+									</ion-button>
+								</div>
+							</ng-container>
+						</div>
+
+						<!-- Inline filter: funnel label + chips/select start from the left -->
+						<div class="journal-filters">
+							<span class="journal-filter-label">
+								<ion-icon name="funnel-outline"></ion-icon>
+								{{ 'Filter' | translate }}
+							</span>
+							<ion-select
+								class="journal-type"
+								interface="popover"
+								aria-label="{{ 'Filter' | translate }}"
+								[value]="timelineFilter"
+								(ionChange)="setTimelineFilter($event.detail.value)"
+							>
+								<ion-select-option value="all">{{ 'All' | translate }}</ion-select-option>
+								<ion-select-option value="activity">{{ 'Activities' | translate }}</ion-select-option>
+								<ion-select-option *ngIf="pageConfig.canViewStageHistory" value="stage">{{ 'Stage history' | translate }}</ion-select-option>
+								<ion-select-option value="milestone">{{ 'Milestones' | translate }}</ion-select-option>
+								<ion-select-option value="edit">{{ 'Field edits' | translate }}</ion-select-option>
+							</ion-select>
+							<ion-chip *ngIf="previewStage" [color]="timelineStageOnly ? 'primary' : 'medium'" [outline]="!timelineStageOnly" (click)="toggleTimelineStageOnly()">
+								<ion-icon name="git-commit-outline"></ion-icon>
+								<ion-label>{{ previewStage.Name }}</ion-label>
+							</ion-chip>
+						</div>
+
+						<!-- Journal: entries by day along a vertical line -->
+						<div class="journal">
+							<div class="journal-day" *ngFor="let day of timelineDays; first as firstDay; last as lastDay; trackBy: trackByDayKey">
+								<div
+									class="journal-entry"
+									*ngFor="let ev of day.events; first as firstEv; last as lastEv; trackBy: trackByEventId"
+									[class.is-open]="ev.kind === 'activity' && ev.raw?.Status === 'Open'"
+									[class.is-day-start]="firstEv"
+									[class.is-list-first]="firstDay && firstEv"
+									[class.is-list-last]="lastDay && lastEv"
+									[class.gap-up]="firstEv && day.longGapBefore"
+									[class.gap-down]="lastEv && day.longGapAfter"
+								>
+									<span class="journal-day-label" *ngIf="firstEv">{{ day.dayMs | date: 'dd/MM/yyyy' }}</span>
+									<span class="journal-time">{{ ev.dateMs | date: 'HH:mm' }}</span>
+									<span class="journal-dot" [style.--dot-color]="'var(--ion-color-' + ev.color + ')'">
+										<ion-icon [name]="ev.icon"></ion-icon>
+									</span>
+									<div class="journal-body">
+										<div class="journal-title">
+											<span class="journal-title-text">{{ ev.title }}</span>
+											<ion-badge *ngIf="ev.badge" class="journal-badge" [color]="ev.color">{{ ev.badge }}</ion-badge>
+										</div>
+										<div class="journal-meta" *ngIf="ev.actor || ev.subtitle">
+											<span *ngIf="ev.actor">{{ ev.actor }}</span>
+											<span class="journal-sep" *ngIf="ev.actor && ev.subtitle"> · </span>
+											<span *ngIf="ev.subtitle">{{ ev.subtitle }}</span>
+										</div>
+										<p class="journal-note" *ngIf="ev.note">{{ ev.note }}</p>
+									</div>
+									<div class="journal-actions" *ngIf="ev.kind === 'activity' && ev.raw?.Id">
+										<ion-button
+											size="small"
+											fill="clear"
+											color="success"
+											*ngIf="ev.raw.Status === 'Open' && canManageActivities && !isClosed"
+											(click)="completeTimelineActivity(ev, 'Done')"
+										>
+											<ion-icon slot="icon-only" name="checkmark-done-outline"></ion-icon>
+										</ion-button>
+										<ion-button size="small" fill="clear" (click)="openActivityModal(ev.raw)">
+											<ion-icon slot="icon-only" name="create-outline"></ion-icon>
+										</ion-button>
+									</div>
+								</div>
+							</div>
+							<ion-note color="medium" class="journal-empty" *ngIf="!timelineDays.length">{{ 'No history yet' | translate }}</ion-note>
+						</div>
+					</ion-card-content>
+				</ion-card>
+				</div>
+				<ng-container *ngIf="docsInLeft"><ng-container *ngTemplateOutlet="docsTpl"></ng-container></ng-container>
+			</div>
+
+			<!-- Right: main information, lost analysis, documents -->
+			<div class="workspace-side">
+				<!-- Main information (read-only text; edit opens the form) -->
+				<div class="workspace-group info-group" #infoBox>
+				<div class="section-head">
+					<h2 class="section-title">{{ 'Main information' | translate }}</h2>
+					<ion-button size="small" fill="clear" *ngIf="pageConfig.canEdit" (click)="openEditInfo()">
+						<ion-icon [slot]="iconSlot(iconOnlyChrome)" name="create-outline"></ion-icon>
+						<span class="btn-label" *ngIf="!iconOnlyChrome">{{ 'Edit' | translate }}</span>
+					</ion-button>
+				</div>
+				<ion-card class="workspace-card ion-no-margin info-card">
+					<ion-card-content class="info-card-body" [attr.data-info-level]="infoLevel">
+						<!-- Always: Customer & contact -->
+						<div class="info-section">
+							<div class="info-section-title"><ion-icon name="person-circle-outline"></ion-icon>{{ 'Customer & contact' | translate }}</div>
+							<div class="info-contact">
+								<ng-container *ngIf="contactPartner as cp; else noContactTpl">
+									<div class="contact-name">
+										<a [routerLink]="['/business-partner', cp.Id]" class="link-inline">{{ cp.Name }}</a>
+										<ion-badge class="journal-badge" color="tertiary">{{ cp.IsPersonal ? ('Personal' | translate) : ('Corporate' | translate) }}</ion-badge>
+									</div>
+									<div class="contact-line" *ngIf="cp.WorkPhone">
+										<ion-icon name="call-outline"></ion-icon>
+										<a [href]="'tel:' + cp.WorkPhone">{{ cp.WorkPhone }}</a>
+									</div>
+									<div class="contact-line" *ngIf="cp.Email">
+										<ion-icon name="mail-outline"></ion-icon>
+										<a [href]="'mailto:' + cp.Email">{{ cp.Email }}</a>
+									</div>
+									<div class="contact-line" *ngIf="cp.BillingAddress">
+										<ion-icon name="location-outline"></ion-icon>
+										<span>{{ cp.BillingAddress }}</span>
+									</div>
+								</ng-container>
+								<ng-template #noContactTpl>
+									<ion-note>{{ 'No contact linked yet' | translate }}</ion-note>
+								</ng-template>
+							</div>
+						</div>
+
+						<div class="info-section" *ngIf="item.Remark">
+							<div class="info-section-title"><ion-icon name="chatbox-ellipses-outline"></ion-icon>{{ 'Remark' | translate }}</div>
+							<p class="info-text info-remark">{{ item.Remark }}</p>
+						</div>
+
+						<!-- Level ≥1: KPI tiles (level 0 peeks with fade on narrow) -->
+						<div class="info-kpis-wrap">
+							<div class="info-kpis">
+								<div class="kpi-tile">
+									<span class="info-label">{{ 'Amount' | translate }}</span>
+									<span class="kpi-value">{{ (item.Amount || 0) | number: '1.0-0' }}</span>
+								</div>
+								<div class="kpi-tile">
+									<span class="info-label">{{ 'Expected revenue' | translate }}</span>
+									<span class="kpi-value">{{ (item.ExpectedRevenue || 0) | number: '1.0-0' }}</span>
+								</div>
+								<div class="kpi-tile">
+									<span class="info-label">{{ 'Probability' | translate }}</span>
+									<span class="kpi-value">{{ item.Probability != null ? item.Probability + '%' : '—' }}</span>
+								</div>
+								<div class="kpi-tile" *ngIf="stageAge as age">
+									<span class="info-label">{{ 'Days in stage' | translate }}</span>
+									<span class="kpi-value" [class.metric-danger]="age.isOverExpected || age.isOverSla">
+										{{ age.days }}d<span class="kpi-sub" *ngIf="currentStage?.ExpectedDays"> / {{ currentStage.ExpectedDays }}d</span>
+									</span>
+								</div>
+							</div>
+						</div>
+
+						<!-- Level 2: Time / Information / audit (level 1 peeks with fade on narrow) -->
+						<div class="info-more-wrap">
+							<div class="info-more">
+								<div class="info-section">
+									<div class="info-section-title"><ion-icon name="calendar-outline"></ion-icon>{{ 'Time' | translate }}</div>
+									<div class="info-list">
+										<div class="info-row">
+											<span class="info-label">{{ 'Event date' | translate }}</span>
+											<span class="info-value" [class.is-empty]="!item.EventDate">{{ item.EventDate ? (item.EventDate | date: 'dd/MM/yyyy') : '—' }}</span>
+										</div>
+										<div class="info-row">
+											<span class="info-label">{{ 'Start date' | translate }}</span>
+											<span class="info-value" [class.is-empty]="!item.StartDate">{{ item.StartDate ? (item.StartDate | date: 'dd/MM/yyyy') : '—' }}</span>
+										</div>
+										<div class="info-row">
+											<span class="info-label">{{ 'Predicted closing date' | translate }}</span>
+											<span class="info-value" [class.is-empty]="!item.PredictedClosingDate">{{ item.PredictedClosingDate ? (item.PredictedClosingDate | date: 'dd/MM/yyyy') : '—' }}</span>
+										</div>
+									</div>
+								</div>
+
+								<div class="info-section">
+									<div class="info-section-title"><ion-icon name="information-circle-outline"></ion-icon>{{ 'Information' | translate }}</div>
+									<div class="info-list">
+										<div class="info-row">
+											<span class="info-label">{{ 'Service type' | translate }}</span>
+											<span class="info-value" [class.is-empty]="!serviceTypeName">{{ serviceTypeName || '—' }}</span>
+										</div>
+										<div class="info-row">
+											<span class="info-label">{{ 'Guests' | translate }}</span>
+											<span class="info-value" [class.is-empty]="item.NumberOfGuests == null">{{ item.NumberOfGuests ?? '—' }}</span>
+										</div>
+										<div class="info-row">
+											<span class="info-label">{{ 'Owner' | translate }}</span>
+											<span class="info-value" [class.is-empty]="!ownerStaff?.FullName && !item.IDOwner">{{ ownerStaff?.FullName || (item.IDOwner ? '#' + item.IDOwner : '—') }}</span>
+										</div>
+										<div class="info-row" *ngIf="campaignName">
+											<span class="info-label">{{ 'Campaign' | translate }}</span>
+											<span class="info-value">{{ campaignName }}</span>
+										</div>
+										<div class="info-row" *ngIf="item.Code">
+											<span class="info-label">{{ 'Code' | translate }}</span>
+											<span class="info-value info-code">{{ item.Code }}</span>
+										</div>
+										<div class="info-row" *ngIf="item.IDBranch">
+											<span class="info-label">{{ 'Branch' | translate }}</span>
+											<span class="info-value">{{ branchName }}</span>
+										</div>
+										<div class="info-row is-stack" *ngIf="item.NextStep">
+											<span class="info-label">{{ 'Next step' | translate }}</span>
+											<span class="info-value info-text">{{ item.NextStep }}</span>
+										</div>
+									</div>
+								</div>
+
+								<div class="info-audit">
+									<span *ngIf="item.CreatedBy">{{ 'Created by' | translate }}: {{ item.CreatedBy }}<ng-container *ngIf="item.CreatedDate"> · {{ item.CreatedDate | date: 'dd/MM/yyyy HH:mm' }}</ng-container></span>
+									<span *ngIf="item.ModifiedBy">{{ 'Last modified by' | translate }}: {{ item.ModifiedBy }}<ng-container *ngIf="item.ModifiedDate"> · {{ item.ModifiedDate | date: 'dd/MM/yyyy HH:mm' }}</ng-container></span>
+									<span *ngIf="item.IDLead || item.IDSource || item.Source || item.RefID">
+										<ng-container *ngIf="item.IDLead">{{ 'Lead' | translate }}: #{{ item.IDLead }} </ng-container>
+										<ng-container *ngIf="item.IDSource">{{ 'Source' | translate }}: #{{ item.IDSource }} </ng-container>
+										<ng-container *ngIf="item.Source">{{ item.Source }} </ng-container>
+										<ng-container *ngIf="item.RefID">Ref: {{ item.RefID }}</ng-container>
+									</span>
+								</div>
+							</div>
+						</div>
+
+						<button type="button" class="info-expand-link" (click)="cycleInfoLevel()">
+							{{ (infoLevel >= 2 ? 'Collapse' : 'Expand') | translate }}
+							<ion-icon [name]="infoLevel >= 2 ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
+						</button>
+					</ion-card-content>
+				</ion-card>
+				</div>
+
+
+				<ng-container *ngIf="!docsInLeft"><ng-container *ngTemplateOutlet="docsTpl"></ng-container></ng-container>
+				<ng-template #docsTpl>
+				<!-- Documents: one box -->
+				<div class="workspace-group docs-group">
+				<div class="section-head">
+					<h2 class="section-title">
+						{{ 'Documents' | translate }}
+						<ion-badge color="medium" class="section-count">{{ quotations.length + contracts.length + saleOrders.length + payments.length + invoices.length }}</ion-badge>
+					</h2>
+				</div>
+				<ion-card class="workspace-card ion-no-margin docs-card">
+					<ion-card-content>
+						<!-- Quotations -->
+						<div class="doc-group">
+							<div class="doc-group-head">
+								<span class="doc-group-title"><ion-icon name="document-text-outline" color="primary"></ion-icon>{{ 'Quotations' | translate }} ({{ quotations.length }})</span>
+								<ion-button size="small" fill="clear" *ngIf="canEditDocuments" (click)="openQuotationModal()">
+									<ion-icon [slot]="iconSlot(iconOnlyChrome)" name="add-outline"></ion-icon>
+									<span class="btn-label" *ngIf="!iconOnlyChrome">{{ 'New quotation' | translate }}</span>
+								</ion-button>
+							</div>
+							<button type="button" class="doc-row" *ngFor="let q of quotations; trackBy: trackById" (click)="openQuotationModal(q)">
+								<span class="doc-row-main">
+									<strong>{{ q.Name || q.Code || ('#' + q.Id) }}</strong>
+									<small *ngIf="q.Code || q.CreatedDate">{{ q.Code }}<ng-container *ngIf="q.Code && q.CreatedDate"> · </ng-container>{{ q.CreatedDate | date: 'dd/MM/yyyy' }}</small>
+								</span>
+								<ion-icon name="create-outline" color="medium"></ion-icon>
+							</button>
+							<ion-note class="doc-empty" *ngIf="!quotations.length">{{ 'No quotation yet' | translate }}</ion-note>
+						</div>
+
+						<!-- Contracts -->
+						<div class="doc-group">
+							<div class="doc-group-head">
+								<span class="doc-group-title">
+									<ion-icon name="document-attach-outline" color="success"></ion-icon>{{ 'Contracts' | translate }} ({{ contracts.length }})
+									<small *ngIf="contracts.length">· {{ docTotals.contracts | number: '1.0-0' }}</small>
+								</span>
+								<ion-button size="small" fill="clear" *ngIf="canEditDocuments" (click)="openContractModal()">
+									<ion-icon [slot]="iconSlot(iconOnlyChrome)" name="add-outline"></ion-icon>
+									<span class="btn-label" *ngIf="!iconOnlyChrome">{{ 'New contract' | translate }}</span>
+								</ion-button>
+							</div>
+							<button type="button" class="doc-row" *ngFor="let c of contracts; trackBy: trackById" (click)="openContractModal(c)">
+								<span class="doc-row-main">
+									<strong>{{ c.Name || c.Code || ('#' + c.Id) }}</strong>
+									<small>
+										<ng-container *ngIf="c.Code">{{ c.Code }} · </ng-container>{{ (c.Amount || 0) | number: '1.0-0' }}
+										<ng-container *ngIf="c.NumberOfGuests"> · {{ c.NumberOfGuests }} {{ 'Guests' | translate }}</ng-container>
+										<ng-container *ngIf="c.ContractDate"> · {{ c.ContractDate | date: 'dd/MM/yyyy' }}</ng-container>
+									</small>
+								</span>
+								<ion-icon name="create-outline" color="medium"></ion-icon>
+							</button>
+							<ion-note class="doc-empty" *ngIf="!contracts.length">{{ 'No contract yet' | translate }}</ion-note>
+						</div>
+
+						<!-- Sale orders -->
+						<div class="doc-group">
+							<div class="doc-group-head">
+								<span class="doc-group-title">
+									<ion-icon name="cart-outline" color="warning"></ion-icon>{{ 'Sale orders' | translate }} ({{ saleOrders.length }})
+									<small *ngIf="saleOrders.length">· {{ docTotals.orders | number: '1.0-0' }}</small>
+								</span>
+								<ion-button size="small" fill="clear" [routerLink]="['/sale-order', 0]">
+									<ion-icon [slot]="iconSlot(iconOnlyChrome)" name="add-outline"></ion-icon>
+									<span class="btn-label" *ngIf="!iconOnlyChrome">{{ 'New sale order' | translate }}</span>
+								</ion-button>
+							</div>
+							<a class="doc-row" *ngFor="let o of saleOrders; trackBy: trackById" [routerLink]="['/sale-order', o.Id]">
+								<span class="doc-row-main">
+									<strong>{{ o.Code || o.Name || ('#' + o.Id) }}</strong>
+									<small>{{ (o.TotalAfterTax || 0) | number: '1.0-0' }}<ng-container *ngIf="o.OrderDate"> · {{ o.OrderDate | date: 'dd/MM/yyyy' }}</ng-container></small>
+								</span>
+								<ion-icon name="open-outline" color="medium"></ion-icon>
+							</a>
+							<ion-note class="doc-empty" *ngIf="!saleOrders.length">{{ 'No sale order yet' | translate }}</ion-note>
+						</div>
+
+						<!-- Payments & invoices -->
+						<div class="doc-group">
+							<div class="doc-group-head">
+								<span class="doc-group-title">
+									<ion-icon name="cash-outline" color="success"></ion-icon>{{ 'Payments' | translate }} ({{ payments.length }}) &amp; {{ 'Invoices' | translate }} ({{ invoices.length }})
+									<small *ngIf="payments.length">· {{ docTotals.payments | number: '1.0-0' }}</small>
+								</span>
+							</div>
+							<a class="doc-row" *ngFor="let p of payments; trackBy: trackById" [routerLink]="['/incoming-payment', p.IDIncomingPayment || p.Id]">
+								<span class="doc-row-main">
+									<strong>{{ p.Code || p.Name || ('#' + p.Id) }}</strong>
+									<small>{{ (p.Amount || 0) | number: '1.0-0' }} · {{ p.CreatedDate | date: 'dd/MM/yyyy' }}</small>
+								</span>
+								<ion-icon name="open-outline" color="medium"></ion-icon>
+							</a>
+							<a class="doc-row" *ngFor="let inv of invoices; trackBy: trackById" [routerLink]="['/ar-invoice', inv.Id]">
+								<span class="doc-row-main">
+									<strong>{{ inv.InvoiceNo || inv.Code || inv.Name || ('#' + inv.Id) }}</strong>
+									<small>{{ (inv.TotalAfterTax || 0) | number: '1.0-0' }} · {{ inv.InvoiceDate | date: 'dd/MM/yyyy' }}</small>
+								</span>
+								<ion-icon name="receipt-outline" color="primary"></ion-icon>
+							</a>
+							<ion-note class="doc-empty" *ngIf="!payments.length && !invoices.length">{{ 'No payment or invoice yet' | translate }}</ion-note>
+						</div>
+					</ion-card-content>
+				</ion-card>
+				</div>
+				</ng-template>
+			</div>
+		</div>
+
+		<!-- Edit popup of the main information -->
+		<ion-modal class="form-2columns" [isOpen]="showEditInfo" (didDismiss)="cancelEditInfo()">
+			<ng-template>
+				<ion-header [translucent]="true" collapse="fade">
+					<ion-toolbar>
+						<ion-title>{{ 'Main information' | translate }}</ion-title>
+						<ion-buttons slot="primary">
+							<ion-button title="{{ 'Close' | translate }}" color="secondary" (click)="cancelEditInfo()">
+								<ion-icon slot="icon-only" name="close"></ion-icon>
+							</ion-button>
+						</ion-buttons>
+					</ion-toolbar>
+				</ion-header>
+				<ion-content [fullscreen]="true" appScrollbarTheme>
+					<!-- dropdown host inside the popup: the page host sits under the modal overlay -->
+					<div id="opportunity-edit-info-modal" style="position: absolute; z-index: 30005"></div>
+					<form [formGroup]="formGroup">
+						<!-- white box around the fields, same as the detail page boxes -->
+						<div class="edit-box">
+						<ion-grid fixed>
+							<!-- General information -->
+							<ion-row class="hr-group">
+								<ion-col size="12">
+									<ion-list-header class="ion-no-padding">
+										<ion-label color="primary">{{ 'General information' | translate }}</ion-label>
+									</ion-list-header>
+								</ion-col>
+								<ion-col size="12" size-sm="6">
+									<app-form-control [field]="{ id: 'Code', label: 'Code', type: 'text', form: formGroup }"></app-form-control>
+								</ion-col>
+								<ion-col size="12" size-sm="6">
+									<app-form-control [field]="{ id: 'Name', label: 'Name', type: 'text', form: formGroup }"></app-form-control>
+								</ion-col>
+								<ion-col size="12" size-sm="6">
+									<app-form-control
+										[field]="{ id: 'IDType', label: 'Service type', type: 'ng-select', dataSource: serviceTypeList, bindValue: 'Id', bindLabel: 'Name', form: formGroup, appendTo: '#opportunity-edit-info-modal' }"
+									></app-form-control>
+								</ion-col>
+								<ion-col size="12" size-sm="6">
+									<app-form-control
+										[field]="{ id: 'IDContact', label: 'Contact', type: 'ng-select-bp', dataSource: _ContactDataSource, bindValue: 'Id', bindLabel: 'Name', clearable: true, form: formGroup, appendTo: '#opportunity-edit-info-modal' }"
+									></app-form-control>
+								</ion-col>
+								<ion-col size="12" size-sm="6">
+									<app-form-control
+										[field]="{ id: 'IDOwner', label: 'Owner', type: 'ng-select-staff', dataSource: _OwnerDataSource, bindValue: 'Id', bindLabel: 'FullName', clearable: true, form: formGroup, appendTo: '#opportunity-edit-info-modal' }"
+									></app-form-control>
+								</ion-col>
+								<ion-col size="12" size-sm="6" *ngIf="campaignList.length">
+									<app-form-control
+										[field]="{ id: 'IDCampaign', label: 'Campaign', type: 'ng-select', dataSource: campaignList, bindValue: 'Id', bindLabel: 'Name', clearable: true, form: formGroup, appendTo: '#opportunity-edit-info-modal' }"
+									></app-form-control>
+								</ion-col>
+							</ion-row>
+
+							<!-- Time and scale -->
+							<ion-row class="hr-group">
+								<ion-col size="12">
+									<ion-list-header class="ion-no-padding">
+										<ion-label color="primary">{{ 'Time and scale' | translate }}</ion-label>
+									</ion-list-header>
+								</ion-col>
+								<ion-col size="12" size-sm="6">
+									<app-form-control [field]="{ id: 'EventDate', label: 'Event date', type: 'date', form: formGroup }"></app-form-control>
+								</ion-col>
+								<ion-col size="12" size-sm="6">
+									<app-form-control [field]="{ id: 'StartDate', label: 'Start date', type: 'date', form: formGroup }"></app-form-control>
+								</ion-col>
+								<ion-col size="12" size-sm="6">
+									<app-form-control [field]="{ id: 'PredictedClosingDate', label: 'Predicted closing date', type: 'date', form: formGroup }"></app-form-control>
+								</ion-col>
+								<ion-col size="12" size-sm="6">
+									<app-form-control [field]="{ id: 'NumberOfGuests', label: 'Guests', type: 'number', form: formGroup }"></app-form-control>
+								</ion-col>
+							</ion-row>
+
+							<!-- Finance -->
+							<ion-row class="hr-group">
+								<ion-col size="12">
+									<ion-list-header class="ion-no-padding">
+										<ion-label color="primary">{{ 'Finance' | translate }}</ion-label>
+									</ion-list-header>
+								</ion-col>
+								<ion-col size="12" size-sm="6">
+									<app-form-control [field]="{ id: 'Amount', label: 'Amount', type: 'number', form: formGroup }"></app-form-control>
+								</ion-col>
+								<ion-col size="12" size-sm="6">
+									<app-form-control [field]="{ id: 'ExpectedRevenue', label: 'Expected revenue', type: 'number', form: formGroup }"></app-form-control>
+								</ion-col>
+							</ion-row>
+
+							<!-- Other information: same layout as flat-detail (Branch and Remark on the right) -->
+							<ion-row class="hr-group">
+								<ion-col size="12">
+									<ion-list-header class="ion-no-padding">
+										<ion-label color="primary">{{ 'Other information' | translate }}</ion-label>
+									</ion-list-header>
+								</ion-col>
+								<ion-col size="12" size-sm="6">
+									<app-form-control [field]="{ id: 'NextStep', label: 'Next step', type: 'text', form: formGroup }"></app-form-control>
+									<app-form-control [field]="{ id: 'IsPrivate', label: 'Private', type: 'checkbox', form: formGroup }"></app-form-control>
+								</ion-col>
+								<ion-col size="12" size-sm="6">
+									<app-form-control [field]="{ id: 'IDBranch', type: 'branch-breadcrumbs', label: 'Branch', form: formGroup, dataSource: env.branchList }"></app-form-control>
+									<app-form-control [field]="{ id: 'Remark', type: 'textarea', label: 'Remark', form: formGroup }"></app-form-control>
+								</ion-col>
+							</ion-row>
+						</ion-grid>
+						</div>
+					</form>
+				</ion-content>
+				<ion-footer [translucent]="true" collapse="fade">
+					<ion-toolbar>
+						<div slot="end">
+							<ion-button fill="outline" color="warning" (click)="cancelEditInfo()">{{ 'Cancel' | translate }}</ion-button>
+							<ion-button [strong]="true" (click)="saveEditInfo()" [disabled]="!formGroup.dirty">{{ 'Save' | translate }}</ion-button>
+						</div>
+					</ion-toolbar>
+				</ion-footer>
+			</ng-template>
+		</ion-modal>
+
+		<!-- New Opportunity Creation Form (before Id exists) -->
+		<ion-grid fixed *ngIf="!item.Id">
+			<form [formGroup]="formGroup">
+				<ion-row class="hr-group">
+					<ion-col size="12" size-xl="3">
+						<ion-list-header class="ion-no-padding">
+							<ion-label color="primary">{{ 'General information' | translate }}</ion-label>
+						</ion-list-header>
+					</ion-col>
+					<ion-col size="12" size-sm size-xl="4">
+						<app-form-control [field]="{ id: 'Name', label: 'Name', type: 'text', form: formGroup }" (change)="saveChange()"></app-form-control>
+						<app-form-control
+							[field]="{ id: 'IDType', label: 'Service type', type: 'ng-select', dataSource: serviceTypeList, bindValue: 'Id', bindLabel: 'Name', form: formGroup, appendTo: '#opportunity-detail-page' }"
+							(change)="saveChange()"
+						></app-form-control>
+						<app-form-control
+							[field]="{ id: 'IDContact', label: 'Contact', type: 'ng-select-bp', dataSource: _ContactDataSource, bindValue: 'Id', bindLabel: 'Name', clearable: true, form: formGroup, appendTo: '#opportunity-detail-page' }"
+							(change)="saveChange()"
+						></app-form-control>
+						<app-form-control [field]="{ id: 'EventDate', label: 'Event date', type: 'date', form: formGroup }" (change)="saveChange()"></app-form-control>
+						<app-form-control [field]="{ id: 'NumberOfGuests', label: 'Guests', type: 'number', form: formGroup }" (change)="saveChange()"></app-form-control>
+					</ion-col>
+					<ion-col size="12" size-sm size-xl="4">
+						<app-form-control [field]="{ id: 'Amount', label: 'Amount', type: 'number', form: formGroup }" (change)="saveChange()"></app-form-control>
+						<app-form-control [field]="{ id: 'ExpectedRevenue', label: 'Expected revenue', type: 'number', form: formGroup }" (change)="saveChange()"></app-form-control>
+						<app-form-control [field]="{ id: 'PredictedClosingDate', label: 'Predicted closing date', type: 'date', form: formGroup }" (change)="saveChange()"></app-form-control>
+						<app-form-control [field]="{ id: 'Remark', type: 'textarea', label: 'Remark', form: formGroup }" (change)="saveChange()"></app-form-control>
+					</ion-col>
+				</ion-row>
+			</form>
+		</ion-grid>
+	</ng-container>
+
+	<app-page-message [itemsLength]="item ? 1 : 0" [showSpinner]="pageConfig.showSpinner"></app-page-message>
+</ion-content>
+
+<!-- All stages with their tasks (qualification preview) -->
+<ng-template #planStagesPreview let-plan="plan">
+	<ion-list lines="full">
+		<ng-container *ngFor="let s of plan.Stages; let n = index">
+			<ion-item-divider *ngIf="s.Outcome != 'Lost'">
+				<ion-label>
+					{{ n + 1 }}. {{ s.Name }}
+					<small *ngIf="s.ExpectedDays"> · {{ s.ExpectedDays }} {{ 'days' | translate }}</small>
+					<small> · {{ s.Probability }}%</small>
+				</ion-label>
+			</ion-item-divider>
+			<ng-container *ngIf="s.Outcome != 'Lost'">
+				<ion-item *ngFor="let t of s.Tasks" lines="none">
+					<ion-icon slot="start" [name]="taskIcon(t)"></ion-icon>
+					<ion-label class="ion-text-wrap">
+						{{ t.Name }}
+						<ion-badge color="danger" *ngIf="t.IsRequired" class="ion-margin-start">{{ 'Required' | translate }}</ion-badge>
+					</ion-label>
+				</ion-item>
+			</ng-container>
+		</ng-container>
+	</ion-list>
+</ng-template>

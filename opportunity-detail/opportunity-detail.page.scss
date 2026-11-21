@@ -1,0 +1,1509 @@
+.stepper {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	align-items: center;
+	ion-chip,
+	ion-button {
+		margin: 0;
+	}
+}
+
+// ---------------------------------------------------------------- stage chain (arrows pointing right)
+// same white box language as .workspace-card (no .main-view / .row-full.shadow)
+.stage-chain-shell,
+.stage-qualify-block {
+	margin-top: 8px;
+	padding: 10px 12px 12px;
+	background: var(--table-row-background);
+	border-radius: 6px;
+	border: 1px solid var(--ion-color-light-shade);
+	overflow: hidden;
+}
+
+.stage-qualify-block {
+	padding: 0;
+}
+
+.stage-chain-head {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: center;
+	gap: 6px 12px;
+	margin-bottom: 8px;
+}
+
+.stage-chain-title {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 8px;
+	min-width: 0;
+}
+
+// Name + swap icon as one hit target (opens Change pipeline); use global .clickable, no hover tint
+.pipeline-title-hit {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	max-width: 100%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	text-align: left;
+
+	b {
+		min-width: 0;
+		overflow-wrap: anywhere;
+	}
+
+	ion-icon {
+		flex: 0 0 auto;
+		font-size: 1.05rem;
+		color: var(--ion-color-medium-shade);
+	}
+
+	&:disabled {
+		opacity: 0.55;
+		cursor: default;
+	}
+}
+
+.stage-chain-actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 4px;
+	margin-left: auto;
+	ion-button {
+		margin: 0;
+	}
+}
+
+// One single row: every stage takes the same width, never wraps to a second row, no gap between arrows
+// (each arrow is pulled over the previous one by the chevron depth, only the notch separates them).
+// Bleed to shell border like .stage-chain-tab-line (cancels 12px horizontal padding).
+.stage-chain {
+	--chevron: 14px; // depth of the arrow notch / tip
+	--h: 66; // stage height in px
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: center;
+	gap: 0;
+	margin: 0 -12px;
+}
+
+// Tab underline below the chain; bleeds to shell border (cancels 12px padding).
+// Preview other stage → stage fill color. Active = current → same darkened mix as the is-current bar.
+.stage-chain-tab-line {
+	--tab-underline-color: var(--ion-color-primary);
+	height: 3px;
+	margin: 0 -12px;
+	background: var(--tab-underline-color);
+
+	&.is-on-current {
+		background: color-mix(in srgb, var(--tab-underline-color) 42%, #000);
+	}
+}
+
+// Colors: each stage uses its own `--ion-color-<Color>` (as the stage bars of the list page).
+// normal = muted, hover / previewed = a bit stronger, current stage = full color.
+.stage-step {
+	--stage-color: var(--ion-color-primary);
+	--stage-contrast: var(--ion-color-primary-contrast);
+	--fill-normal: 0.7;
+	--fill-hover: 0.88;
+	position: relative;
+	flex: 1 1 0;
+	min-width: 0;
+	// arrow depth of this stage (the current one is taller, so its depth is scaled to keep the same slope)
+	--cd: var(--chevron);
+	height: calc(var(--h) * 1px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	padding: 3px calc(var(--cd) + 4px);
+	border: 0;
+	cursor: pointer;
+	font: inherit;
+	font-size: 0.8125rem;
+	font-weight: 500;
+	line-height: 1.15;
+	text-align: center;
+	color: var(--stage-contrast);
+	background: transparent;
+	clip-path: polygon(0 0, calc(100% - var(--cd)) 0, 100% 50%, calc(100% - var(--cd)) 100%, 0 100%, var(--cd) 50%);
+	transition: none;
+
+	& + & {
+		margin-left: calc(var(--chevron) * -1 + 1px);
+	}
+
+	&:first-child {
+		padding-left: 12px;
+		clip-path: polygon(0 0, calc(100% - var(--cd)) 0, 100% 50%, calc(100% - var(--cd)) 100%, 0 100%);
+	}
+
+	// the colored fill is its own layer so the opacity never fades the label
+	&::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: 0;
+		background: var(--stage-color);
+		opacity: var(--fill-normal);
+		transition: opacity 0.15s ease;
+	}
+
+	> * {
+		position: relative;
+		z-index: 1;
+	}
+
+	&:hover::before,
+	&:focus-visible::before,
+	&.is-preview::before {
+		opacity: var(--fill-hover);
+	}
+
+	&:focus-visible {
+		outline: none;
+	}
+
+	&.is-current {
+		font-weight: 700;
+	}
+
+	&.is-current::before {
+		opacity: 1;
+		// inset so the bar stays inside the chevron clip-path (a ::after at bottom:0 is clipped to ~1px)
+		box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--stage-color) 42%, #000);
+	}
+
+	.step-label {
+		min-width: 0;
+		overflow-wrap: anywhere;
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 4;
+		overflow: hidden;
+	}
+
+	.step-num {
+		display: none;
+	}
+}
+
+// dark theme: lighten the is-current inset bar + matching full-width line when on current
+:host-context(html.dark) {
+	.stage-step.is-current::before {
+		box-shadow: inset 0 -4px 0 color-mix(in srgb, var(--stage-color) 28%, #fff);
+	}
+	.stage-chain-tab-line.is-on-current {
+		background: color-mix(in srgb, var(--tab-underline-color) 28%, #fff);
+	}
+}
+
+// Narrow screens: inactive stages keep only a compact number / check, the current and the previewed stage keep the label and take the room.
+@media (max-width: 600px) {
+	.stage-chain {
+		--chevron: 8px;
+		--h: 56;
+	}
+	.stage-step {
+		font-size: 0.75rem;
+		padding-inline: calc(var(--cd) + 2px);
+
+		&:not(.is-current):not(.is-preview) {
+			padding-inline: var(--cd);
+			.step-label {
+				display: none;
+			}
+			.step-num {
+				display: inline;
+			}
+		}
+
+		&.is-current,
+		&.is-preview {
+			flex-grow: 5;
+		}
+	}
+}
+
+.stage-chain-actions .status-chip {
+	margin: 0;
+	height: 28px;
+	min-height: 28px;
+	padding: 0 8px;
+	background: rgba(var(--ion-color-base-rgb), 0.12);
+}
+
+@media (max-width: 600px) {
+	.stage-chain-actions .status-prefix {
+		display: none;
+	}
+}
+
+.unknown-prior-note {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 8px;
+	font-size: 0.85rem;
+}
+
+// ---------------------------------------------------------------- stage checklist block
+// the checklist sits in the same box as the chain, under a subtle divider
+.stage-tasks-block {
+	margin-top: 12px;
+	padding-top: 12px;
+}
+
+.stage-tasks-head {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px 16px;
+}
+
+.stage-tasks-meta,
+.stage-tasks-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px 10px;
+}
+
+.stage-meta-chip {
+	font-size: 0.78rem;
+	font-weight: 500;
+	color: var(--ion-color-medium-shade);
+	&.is-alert {
+		color: var(--ion-color-danger);
+	}
+}
+
+// Wide: "Probability: 100%"; ≤600px: drop labels (same pattern as status-prefix)
+@media (max-width: 600px) {
+	.stage-meta-label {
+		display: none;
+	}
+}
+
+.stage-tasks-actions {
+	justify-content: flex-end;
+	margin-left: auto;
+	ion-button {
+		margin: 0;
+	}
+}
+
+.stage-progress {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px 8px;
+	margin: 12px 0 10px;
+}
+
+.stage-progress-text {
+	font-size: 0.85rem;
+	font-weight: 600;
+}
+
+.stage-progress-bar {
+	flex: 1 1 100%;
+	height: 6px;
+	border-radius: 3px;
+	--background: var(--ion-color-light-shade);
+	--progress-background: var(--ion-color-success);
+}
+
+.stage-guide-clamp {
+	margin: 0 0 10px !important;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	font-size: 0.85rem;
+	line-height: 1.5;
+	color: var(--ion-color-medium-shade);
+}
+
+.req-fields {
+	color: var(--ion-color-medium-shade);
+	margin: 0 0 12px !important;
+}
+
+// Soft rounded tiles per task (separated), light typography / no badge pile
+.stage-task-list {
+	background: transparent;
+	margin-top: 4px;
+	display: grid;
+	gap: 6px;
+}
+
+.stage-task {
+	--min-height: 44px;
+	--padding-start: 12px;
+	--padding-end: 8px;
+	--inner-padding-end: 0;
+	--background: var(--ion-color-light);
+	--border-radius: 10px;
+	border-left: 3px solid transparent;
+	border-radius: 10px;
+	overflow: hidden;
+	transition: background-color 0.15s ease;
+
+	&:hover {
+		--background: var(--ion-color-light-shade);
+	}
+
+	&.is-required {
+		border-left-color: var(--ion-color-danger);
+	}
+	&.is-overdue {
+		border-left-color: var(--ion-color-danger);
+		--background: rgba(var(--ion-color-danger-rgb), 0.08);
+	}
+
+	ion-checkbox {
+		--size: 22px;
+		--border-radius: 50%;
+		--border-width: 2px;
+		--checkmark-width: 3px;
+		margin-inline-end: 12px;
+	}
+	ion-label {
+		margin: 6px 0;
+	}
+	.task-line {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 4px 8px;
+	}
+	.task-type-icon {
+		flex: 0 0 auto;
+		font-size: 0.95rem;
+		color: var(--ion-color-medium-shade);
+	}
+	.task-name {
+		font-weight: 500;
+		font-size: 0.9rem;
+		color: var(--ion-text-color);
+	}
+	.task-req-mark {
+		margin-left: 2px;
+		font-weight: 500;
+		color: var(--ion-color-danger);
+	}
+	.task-doc-type,
+	.task-muted {
+		font-size: 0.78rem;
+		color: var(--ion-color-medium);
+	}
+	.task-due {
+		font-size: 0.78rem;
+		color: var(--ion-color-medium-shade);
+	}
+	.task-due-badge {
+		font-size: 0.72rem;
+		font-weight: 500;
+		&.is-overdue {
+			color: var(--ion-color-danger);
+		}
+		&.is-today {
+			color: var(--ion-color-warning-shade, var(--ion-color-warning));
+		}
+	}
+	.task-guide {
+		margin: 2px 0 0 30px;
+		font-size: 0.78rem;
+		color: var(--ion-color-medium-shade);
+		display: -webkit-box;
+		-webkit-line-clamp: 1;
+		line-clamp: 1;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+	ion-button {
+		--padding-start: 8px;
+		--padding-end: 8px;
+		margin: 0 0 0 4px;
+		font-size: 0.8rem;
+	}
+	&.task-finished {
+		opacity: 0.65;
+		border-left-color: var(--ion-color-success);
+	}
+	&.is-next {
+		border-left-color: var(--ion-color-primary);
+		--background: rgba(var(--ion-color-primary-rgb), 0.08);
+	}
+
+	.task-cta {
+		margin: 0 0 0 6px;
+		flex: 0 0 auto;
+	}
+}
+
+.workspace-card {
+	--background: var(--table-row-background);
+	background: var(--table-row-background);
+	border-radius: 6px;
+	border: 1px solid var(--ion-color-light-shade);
+	box-shadow: none;
+}
+
+.metric-danger {
+	color: var(--ion-color-danger);
+}
+
+.summary-badges,
+.reminder-badges,
+.contact-meta,
+.timeline-title-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+}
+
+.link-inline {
+	color: var(--ion-color-primary);
+	text-decoration: none;
+	&:hover {
+		text-decoration: underline;
+	}
+}
+
+.card-head-row {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+}
+
+.contact-name {
+	font-size: 0.95rem;
+	font-weight: 500;
+	margin-bottom: 6px;
+}
+
+.contact-line {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 6px;
+	font-size: 0.9rem;
+	a {
+		color: var(--ion-color-primary);
+		text-decoration: none;
+	}
+}
+
+// .edit-box chrome lives in theme/common.scss (shared by opportunity + CRM modals)
+
+// lost analysis sits under the checklist of the lost stage (inside the stage box)
+.lost-block {
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid var(--ion-color-light-shade);
+}
+
+.lost-body {
+	padding: 0 12px;
+}
+
+
+.kv-row {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+	padding: 4px 0;
+}
+
+.kv-label {
+	font-size: 0.85rem;
+	color: var(--ion-color-medium);
+}
+
+.sync-meta {
+	margin-top: 8px;
+	color: var(--ion-color-medium);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.composer-footer {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 4px;
+	margin-top: 8px;
+	.composer-stage-note {
+		margin: 0;
+		line-height: 1.3;
+		text-align: right;
+	}
+	ion-button {
+		margin: 0;
+	}
+}
+
+.stage-guide {
+	white-space: pre-line;
+}
+
+.task-done {
+	opacity: 0.7;
+	.task-name {
+		text-decoration: line-through;
+	}
+}
+
+.candidate {
+	border: 1px solid var(--ion-color-light-shade);
+	border-radius: 8px;
+	padding: 8px 12px;
+	margin-bottom: 8px;
+	cursor: pointer;
+	&.selected {
+		border-color: var(--ion-color-primary);
+		background: var(--ion-color-primary-tint);
+	}
+}
+
+// checklist on the left, progress donut on the right (stacks on small screens)
+.stage-body {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+	margin-top: 4px;
+}
+
+.stage-body .stage-task-list {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.stage-donut-col {
+	order: -1; // donut sits on the left of the checklist
+	flex: 0 0 120px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	padding-top: 8px;
+}
+
+.stage-donut {
+	--pct: 0;
+	--ring: var(--ion-color-success);
+	width: 104px;
+	height: 104px;
+	border-radius: 50%;
+	background: conic-gradient(var(--ring) calc(var(--pct) * 1%), var(--ion-color-light-shade) 0);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.stage-donut-center {
+	width: 80px;
+	height: 80px;
+	border-radius: 50%;
+	background: var(--ion-background-color, #fff);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	line-height: 1.1;
+
+	.stage-donut-count {
+		font-size: 1rem;
+		font-weight: 500;
+	}
+	small {
+		font-size: 0.7rem;
+		color: var(--ion-color-medium-shade);
+	}
+}
+
+@media (max-width: 600px) {
+	// stacked: progress first, then the full-width checklist
+	.stage-tasks-head {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 8px;
+	}
+	.stage-tasks-actions {
+		margin-left: 0;
+		justify-content: flex-start;
+		ion-button {
+			flex: 0 0 auto;
+		}
+	}
+	.stage-body {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 10px;
+	}
+	.stage-body .stage-task-list {
+		margin-top: 0;
+	}
+	// progress donut centered above the checklist
+	.stage-donut-col {
+		flex-direction: column;
+		flex: 0 0 auto;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+		padding-top: 0;
+		width: 100%;
+	}
+	.stage-donut {
+		width: 80px;
+		height: 80px;
+	}
+	.stage-donut-center {
+		width: 62px;
+		height: 62px;
+		.stage-donut-count {
+			font-size: 0.9rem;
+		}
+	}
+
+	.stage-task {
+		--padding-start: 10px;
+		.task-guide {
+			margin-left: 0;
+		}
+	}
+}
+
+
+// Workspace: activity journal on the left, main information + documents on the right. Cards are white on the page background.
+.workspace-layout {
+	display: grid;
+	grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+	gap: 12px;
+	margin-top: 12px;
+	padding-bottom: 16px;
+	align-items: start;
+}
+
+// iOS grouped list: the section title sits above the card, its actions on the right.
+.workspace-group {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.section-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	min-height: 32px;
+	margin-bottom: 6px;
+	padding-inline: 12px 4px;
+	ion-button {
+		margin: 0;
+		--padding-start: 8px;
+		--padding-end: 8px;
+	}
+}
+
+.section-actions {
+	display: flex;
+	align-items: center;
+	gap: 0;
+	margin-left: auto;
+}
+
+.section-title {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0;
+	font-size: 0.8125rem;
+	font-weight: 500;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--ion-color-medium-shade);
+	line-height: 1.2;
+	&.is-danger {
+		color: var(--ion-color-danger);
+	}
+	.section-count {
+		margin: 0;
+		padding: 2px 6px;
+		font-size: 0.72rem;
+		font-weight: 500;
+		letter-spacing: 0;
+		line-height: 1.2;
+		text-transform: none;
+		vertical-align: middle;
+	}
+}
+
+// edit popup: the shared form-2columns dialog is 520px tall, four groups need more room (below 768px it stays full screen)
+@media only screen and (min-width: 768px) and (min-height: 600px) {
+	ion-modal.form-2columns {
+		--height: min(720px, 90vh);
+	}
+}
+
+// edit popup: hr-group rows (title on the left, fields on the right) sized for the 760px dialog
+.edit-box .hr-group {
+	padding-top: 16px;
+	padding-bottom: 16px;
+
+	&:first-child {
+		padding-top: 12px;
+	}
+}
+
+.workspace-main,
+.workspace-side {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	min-width: 0;
+}
+
+@media (max-width: 992px) {
+	.workspace-layout {
+		grid-template-columns: minmax(0, 1fr);
+		// flatten columns so groups can be ordered: Info → Activities → Documents
+		gap: 12px;
+	}
+	.workspace-main,
+	.workspace-side {
+		display: contents;
+	}
+	.info-group {
+		order: 1;
+	}
+	.activity-group {
+		order: 2;
+	}
+	.docs-group {
+		order: 3;
+	}
+}
+
+// ---------------------------------------------------------------- main information
+// KPI tiles on top, then grouped label / value lists, customer mini-card, remark, audit.
+// always 2 x 2 (4 tiles): a fixed column count keeps the rows even at any card width
+.info-kpis {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 8px;
+	margin-top: 16px;
+}
+
+// Narrow: faded peek + Expand link (Main information 3 levels, and checklist under stage-chain).
+// Desktop: full block, link hidden.
+.info-expand-link {
+	display: none;
+}
+
+.info-kpis-wrap,
+.info-more-wrap {
+	position: relative;
+}
+
+@media (max-width: 992px) {
+	.stage-more-wrap {
+		position: relative;
+		margin-top: 4px;
+	}
+	.stage-more-wrap.is-collapsed .stage-more {
+		max-height: 72px;
+		overflow: hidden;
+	}
+	.stage-more-wrap.is-collapsed::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 22px;
+		height: 48px;
+		z-index: 1;
+		pointer-events: none;
+		background: linear-gradient(to bottom, transparent, var(--table-row-background));
+	}
+
+	// Main information: 0 = customer+remark, 1 = +KPIs, 2 = full
+	.info-card-body[data-info-level='0'] {
+		.info-kpis-wrap {
+			max-height: 52px;
+			overflow: hidden;
+			margin-top: 4px;
+			&::before {
+				content: '';
+				position: absolute;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				height: 40px;
+				z-index: 1;
+				pointer-events: none;
+				background: linear-gradient(to bottom, transparent, var(--table-row-background));
+			}
+		}
+		.info-more-wrap {
+			display: none;
+		}
+	}
+	.info-card-body[data-info-level='1'] {
+		.info-more-wrap {
+			margin-top: 4px;
+			.info-more {
+				max-height: 64px;
+				overflow: hidden;
+			}
+			&::before {
+				content: '';
+				position: absolute;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				height: 48px;
+				z-index: 1;
+				pointer-events: none;
+				background: linear-gradient(to bottom, transparent, var(--table-row-background));
+			}
+		}
+	}
+	// level 2: everything open — no clip
+
+	.info-expand-link {
+		position: relative;
+		z-index: 2;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 4px;
+		width: 100%;
+		margin-top: 6px;
+		padding: 4px 0 0;
+		border: 0;
+		background: transparent;
+		color: var(--ion-color-primary);
+		font: inherit;
+		font-size: 0.8rem;
+		font-weight: 500;
+		cursor: pointer;
+		ion-icon {
+			font-size: 0.95rem;
+		}
+	}
+}
+
+// customer & remark sit on top of the card now: no leading gap
+.info-card ion-card-content > :first-child {
+	margin-top: 0;
+}
+
+.kpi-tile {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+	padding: 10px 12px;
+	border-radius: 10px;
+	background: rgba(var(--ion-color-medium-rgb), 0.1);
+	.info-label {
+		font-size: 0.72rem;
+		text-transform: uppercase;
+		letter-spacing: 0.03em;
+	}
+}
+
+// amounts stay on one line: no mid-number wrap, a slightly smaller size keeps "85,470,000" inside a half-width tile
+.kpi-value {
+	font-size: 1rem;
+	font-weight: 600;
+	line-height: 1.2;
+	color: var(--ion-text-color);
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+.kpi-sub {
+	font-size: 0.8rem;
+	font-weight: 400;
+	color: var(--ion-color-medium);
+}
+
+.info-section {
+	margin-top: 16px;
+}
+
+.info-section-title {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 4px;
+	font-size: 0.75rem;
+	font-weight: 500;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--ion-color-medium);
+	ion-icon {
+		font-size: 1rem;
+	}
+}
+
+.info-list {
+	display: flex;
+	flex-direction: column;
+}
+
+.info-row {
+	display: grid;
+	grid-template-columns: minmax(96px, 38%) minmax(0, 1fr);
+	align-items: baseline;
+	gap: 12px;
+	padding: 7px 0;
+	border-bottom: 1px solid rgba(var(--ion-color-medium-rgb), 0.18);
+	&:last-child {
+		border-bottom: 0;
+	}
+	// long values (branch path, next step) take the full width under their label
+	&.is-stack {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 2px;
+	}
+	.info-value {
+		text-align: right;
+	}
+	&.is-stack .info-value {
+		text-align: left;
+	}
+}
+
+.info-label {
+	font-size: 0.8rem;
+	color: var(--ion-color-medium);
+}
+
+.info-value {
+	font-size: 0.9rem;
+	font-weight: 400;
+	color: var(--ion-text-color);
+	overflow-wrap: anywhere;
+	&.is-empty {
+		color: var(--ion-color-medium);
+		opacity: 0.6;
+	}
+}
+
+.info-code {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 0.8rem;
+}
+
+.info-text {
+	margin: 0;
+	white-space: pre-line;
+}
+
+.info-remark {
+	padding: 8px 12px;
+	border-radius: 8px;
+	background: rgba(var(--ion-color-medium-rgb), 0.08);
+	font-size: 0.88rem;
+	line-height: 1.45;
+	color: var(--ion-text-color);
+}
+
+.info-contact {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin-top: 4px;
+	padding: 10px 12px;
+	border: 1px solid rgba(var(--ion-color-medium-rgb), 0.25);
+	border-radius: 10px;
+	background: rgba(var(--ion-color-medium-rgb), 0.06);
+	.contact-name {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px;
+		margin: 0;
+	}
+	.contact-line {
+		margin-top: 0;
+		min-width: 0;
+		font-size: 0.85rem;
+		color: var(--ion-color-medium-shade);
+		ion-icon {
+			flex: 0 0 auto;
+			font-size: 1rem;
+			color: var(--ion-color-medium);
+		}
+		a,
+		span {
+			overflow-wrap: anywhere;
+		}
+	}
+}
+
+.info-audit {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	margin-top: 16px;
+	padding-top: 10px;
+	border-top: 1px solid rgba(var(--ion-color-medium-rgb), 0.18);
+	font-size: 0.72rem;
+	color: var(--ion-color-medium);
+	opacity: 0.85;
+	&:empty {
+		display: none;
+	}
+}
+
+@media (max-width: 600px) {
+	.info-kpis {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+	.kpi-value {
+		font-size: 1.1rem;
+	}
+	.info-row {
+		grid-template-columns: minmax(88px, 40%) minmax(0, 1fr);
+		gap: 8px;
+	}
+}
+
+// ---------------------------------------------------------------- documents (one box)
+.doc-group + .doc-group {
+	margin-top: 12px;
+	padding-top: 8px;
+	border-top: 1px solid var(--ion-color-light-shade);
+}
+
+.doc-group-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	min-height: 34px;
+	ion-button {
+		margin: 0;
+		flex: 0 0 auto;
+	}
+}
+
+.doc-group-title {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+	font-weight: 500;
+	font-size: 0.85rem;
+	small {
+		font-weight: 400;
+		color: var(--ion-color-medium);
+	}
+}
+
+.doc-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	width: 100%;
+	padding: 6px 8px;
+	border: 0;
+	border-radius: 6px;
+	background: transparent;
+	color: inherit;
+	text-align: left;
+	text-decoration: none;
+	font: inherit;
+	cursor: pointer;
+	&:hover {
+		background: rgba(var(--ion-color-primary-rgb), 0.06);
+	}
+}
+
+.doc-row-main {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	// pick weight over size: keep readable weight, don't also sit at body 16px bold
+	strong {
+		font-size: 0.875rem;
+		font-weight: 500;
+	}
+	small {
+		color: var(--ion-color-medium);
+	}
+}
+
+.doc-empty {
+	display: block;
+	padding: 4px 8px;
+	font-size: 0.85rem;
+}
+
+// ---------------------------------------------------------------- activity journal
+.composer-bar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px 12px;
+	&.is-open {
+		margin-bottom: 10px;
+	}
+	.stepper {
+		justify-content: flex-end;
+		margin-left: auto;
+	}
+}
+
+.composer-guide,
+.journal-filter-label {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	flex: 0 0 auto;
+	font-size: 0.85rem;
+	font-weight: 500;
+	color: var(--ion-color-medium-shade);
+	ion-icon {
+		font-size: 1.05rem;
+		color: var(--ion-color-primary);
+	}
+}
+
+.journal-filters {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 8px;
+	margin-bottom: 12px;
+	ion-chip {
+		margin: 0;
+	}
+	.journal-type {
+		flex: 0 0 auto;
+		width: auto;
+		min-width: 120px;
+		min-height: 32px;
+		max-width: 100%;
+		padding: 0 12px;
+		border: 1px solid var(--ion-color-light-shade);
+		border-radius: 16px;
+		font-size: 0.85rem;
+	}
+}
+
+// One continuous rail: every entry draws the connector above its dot (::before, from the top of the entry) and below it (::after, to the bottom),
+// so the line runs unbroken across days. The date label sits beside the line, never on it.
+// A connector between entries 2+ calendar days apart (.gap-up / .gap-down) is dashed.
+.journal-entry {
+	--dot-size: 28px;
+	--time-col: 64px;
+	--pad-top: 6px;
+	--line-color: rgba(var(--ion-color-medium-rgb), 0.35);
+	--dot-center: calc(var(--pad-top) + var(--dot-size) / 2);
+	position: relative;
+	display: grid;
+	grid-template-columns: var(--time-col) var(--dot-size) minmax(0, 1fr) auto;
+	column-gap: 10px;
+	align-items: start;
+	margin: 0 -8px;
+	padding: var(--pad-top) 8px 8px;
+	border-radius: 8px;
+	transition: background-color 0.15s ease;
+
+	&.is-day-start {
+		--pad-top: 26px;
+	}
+
+	&::before,
+	&::after {
+		content: '';
+		position: absolute;
+		left: calc(8px + var(--time-col) + 10px + var(--dot-size) / 2 - 1px);
+		width: 2px;
+		background: var(--line-color);
+	}
+	// from the top of the entry to the dot centre (the dot hides the end)
+	&::before {
+		top: 0;
+		height: var(--dot-center);
+	}
+	// from the dot centre to the bottom of the entry
+	&::after {
+		top: var(--dot-center);
+		bottom: 0;
+	}
+
+	&.gap-up::before,
+	&.gap-down::after {
+		background: repeating-linear-gradient(to bottom, var(--line-color) 0 5px, transparent 5px 10px);
+	}
+
+	// the rail starts at the first dot and ends at the last one
+	&.is-list-first::before,
+	&.is-list-last::after {
+		display: none;
+	}
+
+	&:hover,
+	&:focus-within {
+		background: rgba(var(--ion-color-medium-rgb), 0.08);
+	}
+}
+
+// date label: in the extra top padding of the first entry of a day, on the left of the line (left edge of the time column)
+.journal-day-label {
+	position: absolute;
+	top: 4px;
+	left: 8px;
+	width: var(--time-col);
+	text-align: right;
+	white-space: nowrap;
+	font-size: 0.75rem;
+	font-weight: 700;
+	line-height: 18px;
+	letter-spacing: 0.02em;
+	color: var(--ion-text-color);
+}
+
+.journal-time {
+	padding-top: 2px;
+	font-size: 0.72rem;
+	text-align: right;
+	color: var(--ion-color-medium);
+	font-variant-numeric: tabular-nums;
+}
+
+.journal-dot {
+	--dot-color: var(--ion-color-medium);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--dot-size);
+	height: var(--dot-size);
+	border-radius: 50%;
+	color: var(--dot-color);
+	background: color-mix(in srgb, var(--dot-color) 14%, var(--table-row-background));
+	border: 1px solid color-mix(in srgb, var(--dot-color) 40%, transparent);
+	font-size: 14px;
+	z-index: 1;
+}
+
+// open activity = dashed hollow dot
+.journal-entry.is-open .journal-dot {
+	background: var(--table-row-background);
+	border-style: dashed;
+	border-width: 1.5px;
+}
+
+.journal-body {
+	min-width: 0;
+	padding-top: 3px;
+}
+
+.journal-title {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 8px;
+	overflow-wrap: anywhere;
+}
+
+.journal-title-text {
+	font-size: 0.9rem;
+	font-weight: 500;
+	line-height: 1.35;
+	color: var(--ion-text-color);
+}
+
+.journal-badge {
+	padding: 2px 7px;
+	border-radius: 10px;
+	font-size: 0.68rem;
+	font-weight: 500;
+	line-height: 1.3;
+}
+
+.journal-meta {
+	margin-top: 1px;
+	font-size: 0.75rem;
+	line-height: 1.4;
+	color: var(--ion-color-medium);
+	overflow-wrap: anywhere;
+}
+
+.journal-sep {
+	opacity: 0.7;
+}
+
+.journal-note {
+	margin: 6px 0 0;
+	padding: 6px 10px;
+	border-radius: 6px;
+	background: rgba(var(--ion-color-medium-rgb), 0.1);
+	font-size: 0.82rem;
+	line-height: 1.45;
+	color: var(--ion-color-medium-shade);
+	white-space: pre-line;
+	overflow-wrap: anywhere;
+}
+
+// Action buttons: dim by default, fully visible on hover / focus; always visible on touch devices.
+.journal-actions {
+	display: flex;
+	align-items: center;
+	opacity: 0.35;
+	transition: opacity 0.15s ease;
+	ion-button {
+		margin: 0;
+		--padding-start: 6px;
+		--padding-end: 6px;
+	}
+}
+
+.journal-entry:hover .journal-actions,
+.journal-entry:focus-within .journal-actions {
+	opacity: 1;
+}
+
+@media (hover: none), (pointer: coarse) {
+	.journal-actions {
+		opacity: 1;
+	}
+}
+
+.journal-empty {
+	display: block;
+	padding: 8px 0;
+}
+
+@media (max-width: 600px) {
+	.journal-entry {
+		--time-col: 62px;
+		grid-template-columns: var(--time-col) var(--dot-size) minmax(0, 1fr);
+	}
+	.journal-actions {
+		grid-column: 3;
+		margin-top: 2px;
+		margin-left: -6px;
+	}
+}
+
+// Next step of the sales path under the checklist.
+.stage-footer {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 8px 12px;
+	margin-top: 12px;
+	ion-button {
+		margin: 0;
+	}
+}
+
+.stage-footer-note {
+	font-size: 0.85rem;
+	color: var(--ion-color-medium);
+}
+
+// Quick composer sits on top of the timeline inside the activity card.
+.activity-card .composer {
+	padding-bottom: 12px;
+	margin-bottom: 12px;
+	border-bottom: 1px solid var(--ion-color-light-shade);
+}
+
+@media (max-width: 600px) {
+	.composer-bar {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 8px;
+	}
+	.composer-bar .stepper {
+		justify-content: flex-start;
+		flex-wrap: nowrap;
+		margin-left: 0;
+		width: 100%;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		scrollbar-width: none;
+		&::-webkit-scrollbar {
+			display: none;
+		}
+		ion-button {
+			flex: 0 0 auto;
+		}
+	}
+}
+
+
+.composer-stage-note {
+	display: block;
+	color: var(--ion-color-medium);
+}
+
+@media (max-width: 600px) {
+	.stage-footer {
+		flex-direction: column;
+		align-items: stretch;
+		.stage-footer-note {
+			text-align: center;
+		}
+	}
+}
+
+// Same idea as data-table @425px: drop side padding / radius so boxes go edge-to-edge.
+@media screen and (max-width: calc(425px)) {
+	ion-content.ion-padding {
+		--padding-start: 0;
+		--padding-end: 0;
+	}
+
+	// title keeps a little inset so it does not stick to the bezel
+	app-page-title.ion-padding {
+		padding-inline: var(--ion-padding, 16px);
+	}
+
+	.section-head {
+		padding-inline: var(--ion-padding, 16px) 8px;
+	}
+
+	.stage-chain-shell,
+	.stage-qualify-block,
+	.workspace-card {
+		border-radius: 0;
+		border-left-width: 0;
+		border-right-width: 0;
+	}
+}

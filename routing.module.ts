@@ -29,7 +29,13 @@ export const CRMRoutes: Routes = [
     { path: 'mcp/:id', loadChildren: () => import('./mcp-detail/mcp-detail.module').then(m => m.MCPDetailPageModule), canActivate: [AuthGuard] },
 
 
-     { path: 'lead', loadChildren: () => import('./lead/lead.module').then(m => m.LeadPageModule), canActivate: [AuthGuard] },
+     { path: 'opportunity', loadChildren: () => import('./opportunity/opportunity.module').then(m => m.OpportunityPageModule), canActivate: [AuthGuard] },
+    { path: 'opportunity/:id', loadChildren: () => import('./opportunity-detail/opportunity-detail.module').then(m => m.OpportunityDetailPageModule), canActivate: [AuthGuard] },
+    { path: 'pipeline', loadChildren: () => import('./pipeline/pipeline.module').then(m => m.PipelinePageModule), canActivate: [AuthGuard] },
+    { path: 'hall', loadChildren: () => import('./hall/hall.module').then(m => m.HallPageModule), canActivate: [AuthGuard] },
+    { path: 'hall/:id', loadChildren: () => import('./hall-detail/hall-detail.module').then(m => m.HallDetailPageModule), canActivate: [AuthGuard] },
+    { path: 'pipeline/:id', loadChildren: () => import('./pipeline-detail/pipeline-detail.module').then(m => m.PipelineDetailPageModule), canActivate: [AuthGuard] },
+    { path: 'lead', loadChildren: () => import('./lead/lead.module').then(m => m.LeadPageModule), canActivate: [AuthGuard] },
     { path: 'lead/:id', loadChildren: () => import('./lead-detail/lead-detail.module').then(m => m.LeadDetailPageModule), canActivate: [AuthGuard] },
 
     { path: 'campaign', loadChildren: () => import('./campaign/campaign.module').then(m => m.CampaignPageModule), canActivate: [AuthGuard] },

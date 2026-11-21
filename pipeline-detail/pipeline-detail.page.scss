@@ -1,0 +1,253 @@
+app-data-table ion-chip ion-label {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.row-actions {
+	display: flex;
+	justify-content: flex-end;
+	width: 100%;
+}
+.inline-tag {
+	margin: 0 8px 0 0;
+	vertical-align: middle;
+}
+
+.inline-tag.after {
+	margin: 0 0 0 8px;
+}
+
+// Mobile / narrow: data-table switches to card rows with a fixed row height, so keep one line per row:
+// name is truncated, type chip shows the icon only, "required" shrinks to a red asterisk.
+@media screen and (max-width: 1164px) {
+	:host ::ng-deep app-data-table.stage-tree {
+		// The shared .responsive mixin insets the table 16px on each side and puts a 16px gap between the
+		// header and the body; the stage/rule tables sit flush with no gap.
+		padding-inline: 0;
+		gap: 0;
+		// The data-table hides its header in card mode; keep it, the add / reorder buttons live there.
+		datatable-header.row.header {
+			display: flex !important;
+			flex-wrap: nowrap;
+			align-items: center;
+			width: 100%;
+			box-sizing: border-box;
+			padding: 0 0 0 8px !important;
+			background: var(--ion-color-light, #fff);
+			border-radius: 6px 6px 0 0;
+			border-bottom: 1px solid var(--ion-color-light-shade);
+
+			.col-name {
+				order: 1;
+				flex: 1 1 auto;
+				min-width: 0 !important;
+				max-width: 100% !important;
+				display: flex;
+				align-items: center;
+			}
+			.col-icon {
+				order: 2;
+				flex: none;
+				min-width: 64px !important;
+				width: auto;
+				height: auto;
+				padding: 0 !important;
+				margin: 0;
+				top: 0;
+				align-self: center;
+				justify-content: flex-end;
+			}
+			.row-actions {
+				width: auto;
+			}
+		}
+
+		.row:not(.header) {
+			position: relative;
+			padding: 0 64px 0 8px !important;
+			border-radius: 0;
+			border-bottom: 1px solid var(--ion-color-light-shade);
+
+			.col-name {
+				min-width: 0 !important;
+				max-width: 100% !important;
+				flex: 1 1 100%;
+				display: flex;
+				flex-wrap: nowrap;
+				align-items: center;
+				white-space: nowrap;
+
+				.clickable:not(.min-btn) {
+					flex: 0 1 auto;
+					min-width: 0;
+					overflow: hidden;
+					text-overflow: ellipsis;
+				}
+				ion-icon.min-btn,
+				ion-chip,
+				ion-badge {
+					flex: none;
+				}
+			}
+
+			.col-icon {
+				position: absolute;
+				top: 50%;
+				right: 0;
+				transform: translateY(-50%);
+				min-width: 0 !important;
+				width: auto;
+			}
+		}
+
+		.inline-tag {
+			margin-top: 0;
+			margin-bottom: 0;
+			margin-right: 6px;
+		}
+		.inline-tag.after {
+			margin: 0 0 0 6px;
+		}
+		.tag-label {
+			display: none;
+		}
+		.inline-tag.req {
+			min-height: 0;
+			padding: 0 6px;
+			ion-label {
+				display: none;
+			}
+			&::before {
+				content: '*';
+				font-weight: bold;
+			}
+		}
+	}
+}
+
+// Card mode: an icon-only chip (stage task type, rule condition) is just its icon: no background, no padding,
+// at the start of the row before the name. Its text is in the popup.
+// "Required" stays after the name.
+// The rule name takes the room it needs; it is cut with an ellipsis only when chips leave no space.
+@media screen and (max-width: 1164px) {
+	:host ::ng-deep app-data-table.stage-tree .row:not(.header) .col-name {
+		// same content height as desktop (edit button 28px), so card rows do not shrink when chips turn icon-only
+		box-sizing: content-box;
+		min-height: 28px;
+		.clickable:not(.min-btn) {
+			flex: 0 1 auto !important;
+			max-width: none;
+			order: 2;
+		}
+		ion-chip.chip-type,
+		ion-chip.chip-rule:not(.chip-any) {
+			order: 1;
+			flex: 0 0 auto !important;
+			background: transparent !important;
+			box-shadow: none;
+			border-radius: 0;
+			overflow: visible;
+			padding: 0 !important;
+			width: 16px !important;
+			height: 28px !important;
+			min-height: 28px !important;
+			margin-right: 6px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			ion-icon {
+				margin-inline: 0 !important;
+				width: 16px;
+				height: 28px;
+				min-width: 16px;
+				font-size: 16px;
+				line-height: 28px;
+				flex: none;
+			}
+			ion-label {
+				display: none;
+			}
+		}
+		// "Required" after the name; on card mode it is only the red asterisk, no background (like the icons)
+		ion-chip.req {
+			order: 3;
+			background: transparent !important;
+			box-shadow: none;
+			border-radius: 0;
+			padding: 0 !important;
+			min-height: 0 !important;
+			margin-left: 4px;
+		}
+		ion-chip.chip-any {
+			flex: 0 1 auto !important;
+			min-width: 0;
+			overflow: hidden;
+		}
+		ion-chip ion-label {
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+	}
+}
+
+// Stage rows (all widths): the status and probability chips sit before the stage name.
+// Task rows keep their own order.
+:host ::ng-deep app-data-table.stage-tree .row.bold .col-name {
+	.chip-outcome,
+	.chip-prob {
+		order: 1;
+	}
+	.clickable:not(.min-btn) {
+		order: 2;
+	}
+}
+
+// Tighter rows for the stage tree (all widths).
+:host ::ng-deep app-data-table.stage-tree {
+	.row:not(.header) .cell {
+		padding-top: 2px !important;
+		padding-bottom: 2px !important;
+	}
+	// Stage rows keep their breathing room so each group stands apart; task rows stay tight.
+	.row.bold:not(.header) .cell {
+		padding-top: 8px !important;
+		padding-bottom: 8px !important;
+	}
+	.datatable-virtual-item:not(:last-child) {
+		padding-bottom: 0 !important;
+	}
+	datatable-body {
+		gap: 0 !important;
+		padding-bottom: 0 !important;
+	}
+	ion-chip {
+		margin-top: 0;
+		margin-bottom: 0;
+		min-height: 22px;
+		height: 22px;
+		border-radius: 8px;
+	}
+	ion-button {
+		margin: 0;
+	}
+}
+
+// Phones: the name gets the whole row; only the "required" asterisk stays.
+@media screen and (max-width: 425px) {
+	:host ::ng-deep app-data-table.stage-tree {
+		.chip-type,
+		.chip-prob,
+		.chip-outcome,
+		.chip-score,
+		.chip-rule {
+			display: none;
+		}
+	}
+}
+
+// Qualification rules tab reuses the stage-tree table style; only the row padding differs.
+:host ::ng-deep app-data-table.stage-tree.rule-table .row:not(.header) .cell {
+	padding-top: 8px !important;
+	padding-bottom: 8px !important;
+}

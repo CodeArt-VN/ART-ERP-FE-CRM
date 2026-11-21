@@ -1,0 +1,55 @@
+<ion-header [translucent]="true" collapse="fade">
+	<ion-toolbar>
+		<ion-title>{{ item?.Id ? item.Name : ('New activity' | translate) }}</ion-title>
+		<ion-buttons slot="primary">
+			<ion-button title="{{ 'Close' | translate }}" color="secondary" (click)="closeModal()">
+				<ion-icon slot="icon-only" name="close"></ion-icon>
+			</ion-button>
+		</ion-buttons>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" appScrollbarTheme>
+	<div id="crm-activity-modal" style="position: absolute; z-index: 30005"></div>
+	<form [formGroup]="formGroup">
+		<div class="edit-box">
+			<ion-grid fixed>
+				<ion-row>
+					<ion-col size="12">
+						<app-form-control [field]="{ id: 'Name', label: 'Name', type: 'text', form: formGroup }"></app-form-control>
+						<app-form-control
+							[field]="{ id: 'TaskType', label: 'Task type', type: 'ng-select', dataSource: taskTypeOptions, bindValue: 'Code', bindLabel: 'Name', form: formGroup, appendTo: '#crm-activity-modal' }"
+						></app-form-control>
+						<app-form-control
+							[field]="{ id: 'Status', label: 'Status', type: 'ng-select', dataSource: statusOptions, bindValue: 'Code', bindLabel: 'Name', form: formGroup, appendTo: '#crm-activity-modal' }"
+						></app-form-control>
+						<app-form-control
+							*ngIf="stages?.length"
+							[field]="{ id: 'IDStage', label: 'Stage', type: 'ng-select', dataSource: stages, bindValue: 'Id', bindLabel: 'Name', form: formGroup, appendTo: '#crm-activity-modal' }"
+						></app-form-control>
+						<app-form-control [field]="{ id: 'DueDate', label: 'Due date', type: 'date', form: formGroup }"></app-form-control>
+						<app-form-control [field]="{ id: 'EventDate', label: 'Event date', type: 'date', form: formGroup }"></app-form-control>
+						<app-form-control
+							[field]="{ id: 'IDOwner', label: 'Owner', type: 'ng-select-staff', dataSource: _OwnerDataSource, bindValue: 'Id', bindLabel: 'FullName', form: formGroup, appendTo: '#crm-activity-modal' }"
+						></app-form-control>
+						<app-form-control [field]="{ id: 'Remark', label: 'Remark', type: 'textarea', form: formGroup }"></app-form-control>
+					</ion-col>
+				</ion-row>
+			</ion-grid>
+		</div>
+	</form>
+</ion-content>
+
+<ion-footer [translucent]="true" collapse="fade">
+	<ion-toolbar>
+		<div slot="start">
+			<ion-button fill="outline" *ngIf="item?.Id && canDelete" (click)="delete()" color="danger">{{ 'Delete' | translate }}</ion-button>
+		</div>
+		<div slot="end">
+			<ion-button fill="outline" color="warning" (click)="closeModal()">{{ 'Cancel' | translate }}</ion-button>
+			<ion-button *ngIf="canEdit" [strong]="true" (click)="saveChange()" [disabled]="busy || formGroup.invalid || (item?.Id && !formGroup.dirty)">
+				{{ 'Save' | translate }}
+			</ion-button>
+		</div>
+	</ion-toolbar>
+</ion-footer>

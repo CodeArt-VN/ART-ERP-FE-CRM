@@ -1,0 +1,21 @@
+<ion-header [translucent]="true" collapse="fade">
+	<ion-toolbar>
+		<ion-title>{{ 'Reorder' | translate }}</ion-title>
+		<ion-buttons slot="primary">
+			<ion-button title="{{ 'Close' | translate }}" color="secondary" (click)="closeModal()">
+				<ion-icon slot="icon-only" name="close"></ion-icon>
+			</ion-button>
+		</ion-buttons>
+	</ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true" appScrollbarTheme class="ion-padding">
+	<app-reorder *ngIf="list.length > 0" [items]="list" sortProperty="Sort" (reoder)="onReorder($event)"></app-reorder>
+</ion-content>
+<ion-footer [translucent]="true" collapse="fade">
+	<ion-toolbar>
+		<div slot="end">
+			<ion-button fill="outline" color="warning" (click)="closeModal()">{{ 'Cancel' | translate }}</ion-button>
+			<ion-button [strong]="true" (click)="saveChange()" [disabled]="!changed.length">{{ 'Save' | translate }}</ion-button>
+		</div>
+	</ion-toolbar>
+</ion-footer>

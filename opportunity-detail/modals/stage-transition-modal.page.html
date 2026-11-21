@@ -1,0 +1,86 @@
+<ion-header [translucent]="true" collapse="fade">
+	<ion-toolbar>
+		<ion-title>{{ isLostTarget ? ('Close as lost' | translate) : ('Move to stage' | translate) }}</ion-title>
+		<ion-buttons slot="primary">
+			<ion-button title="{{ 'Close' | translate }}" color="secondary" (click)="closeModal()">
+				<ion-icon slot="icon-only" name="close"></ion-icon>
+			</ion-button>
+		</ion-buttons>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" appScrollbarTheme>
+	<div id="stage-transition-modal" style="position: absolute; z-index: 30005"></div>
+	<form [formGroup]="formGroup">
+		<ion-grid fixed>
+			<ion-row>
+				<ion-col size="12">
+					<ion-card class="ion-no-margin ion-margin-bottom" [color]="isLostTarget ? 'light' : undefined">
+						<ion-card-content>
+							<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 6px">
+								<ion-chip color="medium" outline="true" *ngIf="currentStage">
+									<ion-label>{{ currentStage.Name }}</ion-label>
+								</ion-chip>
+								<ion-icon name="arrow-forward-outline" *ngIf="currentStage"></ion-icon>
+								<ion-chip [color]="isLostTarget ? 'danger' : 'primary'" *ngIf="targetStage">
+									<ion-label>{{ targetStage.Name }}</ion-label>
+								</ion-chip>
+								<ion-badge *ngIf="targetStage" [color]="isLostTarget ? 'danger' : 'success'">{{ targetStage.Probability }}%</ion-badge>
+							</div>
+							<ion-note *ngIf="targetStage?.Guide" style="white-space: pre-line">{{ targetStage.Guide }}</ion-note>
+						</ion-card-content>
+					</ion-card>
+
+					<!-- Client pre-check warnings -->
+					<ion-card *ngIf="missingFields.length || pendingTasks.length" class="ion-no-margin ion-margin-bottom" color="warning">
+						<ion-card-content>
+							<div *ngIf="missingFields.length">
+								<b>{{ 'Missing required fields' | translate }}:</b>
+								<span> {{ missingFields.join(', ') }}</span>
+							</div>
+							<div *ngIf="pendingTasks.length">
+								<b>{{ 'Pending required tasks' | translate }}:</b>
+								<span> {{ pendingTasks.join(', ') }}</span>
+							</div>
+						</ion-card-content>
+					</ion-card>
+
+					<!-- Server gate refusal -->
+					<ion-card *ngIf="serverGateMessages.length" class="ion-no-margin ion-margin-bottom" color="danger">
+						<ion-card-content>
+							<b>{{ 'Cannot move to this stage' | translate }}:</b>
+							<div *ngFor="let m of serverGateMessages">{{ m }}</div>
+						</ion-card-content>
+					</ion-card>
+				</ion-col>
+
+				<ion-col size="12" *ngIf="isLostTarget">
+					<app-form-control
+						[field]="{ id: 'IDLostReason', label: 'Lost reason', type: 'ng-select', dataSource: lostReasonList, bindValue: 'Id', bindLabel: 'Name', form: formGroup, appendTo: '#stage-transition-modal' }"
+					></app-form-control>
+					<app-form-control [field]="{ id: 'LostRemark', label: 'Lost remark', type: 'textarea', form: formGroup }"></app-form-control>
+				</ion-col>
+
+				<ion-col size="12">
+					<app-form-control [field]="{ id: 'Note', label: 'Stage note', type: 'textarea', form: formGroup }"></app-form-control>
+					<app-form-control
+						*ngIf="canForceMoveStage && hasGateWarnings"
+						[field]="{ id: 'Force', label: 'Force move (skip gates)', type: 'checkbox', form: formGroup }"
+					></app-form-control>
+				</ion-col>
+			</ion-row>
+		</ion-grid>
+	</form>
+</ion-content>
+
+<ion-footer [translucent]="true" collapse="fade">
+	<ion-toolbar>
+		<div slot="start"></div>
+		<div slot="end">
+			<ion-button fill="outline" color="warning" (click)="closeModal()">{{ 'Cancel' | translate }}</ion-button>
+			<ion-button [strong]="true" [color]="isLostTarget ? 'danger' : 'primary'" (click)="confirmMove()" [disabled]="busy || isLostReasonMissing">
+				{{ (isLostTarget ? 'Close as lost' : 'Move stage') | translate }}
+			</ion-button>
+		</div>
+	</ion-toolbar>
+</ion-footer>

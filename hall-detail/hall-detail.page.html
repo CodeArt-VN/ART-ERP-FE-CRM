@@ -1,0 +1,188 @@
+<ion-header [translucent]="true">
+	<app-toolbar [page]="this"></app-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" appScrollbarTheme>
+	<div id="hall-detail-page" style="position: absolute; z-index: 30005"></div>
+	<!-- Title shows the hall name and remark (not pageConfig, which overwrites them). -->
+	<app-page-title
+		class="ion-padding safe-max-width"
+		[icon]="pageConfig.pageIcon"
+		[color]="pageConfig.pageColor"
+		[pageName]="pageConfig.pageName"
+		[title]="formGroup?.value?.Name || pageConfig.pageTitle"
+		[remark]="formGroup?.value?.Remark || pageConfig.pageRemark"
+	></app-page-title>
+	<app-page-message [itemsLength]="item ? 1 : 0" [showSpinner]="pageConfig.showSpinner"></app-page-message>
+
+	<div class="safe-max-width main-view" *ngIf="item && pageConfig.showSpinner == false">
+		<div class="row-full shadow full-screen">
+			<ion-toolbar color="primary">
+				<ion-segment scrollable="true" (ionChange)="segmentChanged($event)" [value]="segmentView">
+					<ion-segment-button value="s1">
+						<ion-label>{{ 'General information' | translate }}</ion-label>
+					</ion-segment-button>
+					<ion-segment-button value="s2">
+						<ion-label>
+							{{ 'Lines' | translate }}
+							<ion-badge color="warning" style="vertical-align: top">{{ lines.length }}</ion-badge>
+						</ion-label>
+					</ion-segment-button>
+				</ion-segment>
+			</ion-toolbar>
+
+			<!-- General information + capacity + audit -->
+			<div *ngIf="segmentView == 's1'">
+				<ion-grid fixed>
+					<form [formGroup]="formGroup">
+						<ion-row class="hr-group">
+							<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
+								<ion-list-header class="ion-no-padding">
+									<ion-label color="primary">{{ 'General information' | translate }}</ion-label>
+								</ion-list-header>
+							</ion-col>
+							<ion-col size="12" size-sm size-xl="4">
+								<app-form-control
+									[field]="{ id: 'IDBranch', label: 'Center', type: 'ng-select', dataSource: centerList, bindValue: 'Id', bindLabel: 'Name', form: formGroup, appendTo: '#hall-detail-page' }"
+									(change)="saveChange()"
+								></app-form-control>
+								<app-form-control [field]="{ id: 'Name', label: 'Name', type: 'text', form: formGroup }" (change)="saveChange()"></app-form-control>
+								<app-form-control [field]="{ id: 'Code', label: 'Code', type: 'text', form: formGroup }" (change)="saveChange()"></app-form-control>
+								<app-form-control [field]="{ id: 'Remark', label: 'Remark', type: 'textarea', form: formGroup }" (change)="saveChange()"></app-form-control>
+							</ion-col>
+							<ion-col size="12" size-sm size-xl="4">
+								<app-form-control
+									[field]="{ id: 'Floor', label: 'Floor', type: 'ng-select', dataSource: floorList, bindValue: 'Code', bindLabel: 'Name', clearable: true, form: formGroup, appendTo: '#hall-detail-page' }"
+									(change)="saveChange()"
+								></app-form-control>
+								<app-form-control
+									[field]="{ id: 'HallKind', label: 'Hall type', type: 'ng-select', dataSource: kindList, bindValue: 'Code', bindLabel: 'Name', form: formGroup, appendTo: '#hall-detail-page' }"
+									(change)="saveChange()"
+								></app-form-control>
+								<app-form-control [field]="{ id: 'Sort', label: 'Sort', type: 'number', mask: 'separator.0', form: formGroup }" (change)="saveChange()"></app-form-control>
+								<app-form-control *ngIf="item.Id" [field]="{ id: 'IsDisabled', label: 'Disabled', type: 'checkbox', form: formGroup }"></app-form-control>
+							</ion-col>
+						</ion-row>
+
+						<ion-row class="hr-group">
+							<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
+								<ion-list-header class="ion-no-padding">
+									<ion-label color="primary">{{ 'Capacity' | translate }}</ion-label>
+								</ion-list-header>
+							</ion-col>
+							<ion-col size="12" size-sm size-xl="4">
+								<app-form-control [field]="{ id: 'AreaSqm', label: 'Area (m²)', type: 'number', form: formGroup }" (change)="saveChange()"></app-form-control>
+								<app-form-control [field]="{ id: 'SizeText', label: 'Size', type: 'text', form: formGroup }" (change)="saveChange()"></app-form-control>
+								<app-form-control [field]="{ id: 'MinGuests', label: 'Min guests', type: 'number', mask: 'separator.0', form: formGroup }" (change)="saveChange()"></app-form-control>
+								<app-form-control [field]="{ id: 'MaxGuests', label: 'Max guests', type: 'number', mask: 'separator.0', form: formGroup }" (change)="saveChange()"></app-form-control>
+								<app-form-control [field]="{ id: 'MinTables', label: 'Min tables', type: 'number', mask: 'separator.0', form: formGroup }" (change)="saveChange()"></app-form-control>
+								<app-form-control [field]="{ id: 'MaxTables', label: 'Max tables', type: 'number', mask: 'separator.0', form: formGroup }" (change)="saveChange()"></app-form-control>
+							</ion-col>
+							<ion-col size="12" size-sm size-xl="4">
+								<ion-note class="capacity-title">{{ 'Capacity by layout' | translate }}</ion-note>
+								<app-form-control
+									*ngFor="let c of capacityFields"
+									[field]="{ id: c.id, label: c.label, type: 'number', mask: 'separator.0', form: formGroup }"
+									(change)="saveChange()"
+								></app-form-control>
+							</ion-col>
+						</ion-row>
+
+						<!-- Other information -->
+						<ion-row class="hr-group" *ngIf="item.Id">
+							<ion-col size="12" size-sm="12" size-md="12" size-xl="3">
+								<ion-list-header class="ion-no-padding">
+									<ion-label color="primary">{{ 'Other information' | translate }}</ion-label>
+								</ion-list-header>
+							</ion-col>
+							<ion-col size="12" size-sm size-xl="4">
+								<app-form-control [field]="{ id: 'CreatedBy', type: 'text', label: 'Created by', form: formGroup }"></app-form-control>
+								<app-form-control [field]="{ id: 'CreatedDate', type: 'span-datetime', label: 'Created date', form: formGroup }"></app-form-control>
+								<app-form-control [field]="{ id: 'ModifiedBy', type: 'text', label: 'Last modified by', form: formGroup }"></app-form-control>
+								<app-form-control [field]="{ id: 'ModifiedDate', type: 'span-datetime', label: 'Last modified date', form: formGroup }"></app-form-control>
+							</ion-col>
+							<ion-col size="12" size-sm size-xl="4">
+								<app-form-control [field]="{ id: 'IDBranch', type: 'branch-breadcrumbs', label: 'Branch', form: formGroup, dataSource: env.branchList }"></app-form-control>
+							</ion-col>
+						</ion-row>
+					</form>
+				</ion-grid>
+			</div>
+
+			<!-- Lines of the hall -->
+			<div *ngIf="segmentView == 's2'">
+				<ion-note *ngIf="!item.Id" class="ion-padding">{{ 'Save the hall first, then add lines' | translate }}</ion-note>
+				<ng-container *ngIf="item.Id">
+					<app-data-table class="box-shadow responsive line-table" *ngIf="lines.length" [rows]="lines" [trackBy]="'Id'" [showFilter]="false">
+						<datatable-column class="col-id" name="Line #" property="LineNo" [minWidth]="70" [canSort]="false" [canFilter]="false">
+							<ng-template let-i="row" datatable-cell-template>
+								<span class="clickable bold" (click)="editLine(i)">{{ i.LineNo }}</span>
+							</ng-template>
+						</datatable-column>
+						<datatable-column class="col-name" name="Name" property="Name" [minWidth]="200" [canSort]="false" [canFilter]="false">
+							<ng-template let-i="row" datatable-cell-template>
+								<div class="clickable" (click)="editLine(i)">
+									<a class="bold">
+										<ion-text color="dark">{{ i.Name }}</ion-text>
+									</a>
+									<p *ngIf="i.Code" class="small-code">{{ i.Code }}</p>
+								</div>
+							</ng-template>
+						</datatable-column>
+						<datatable-column class="col-number line-extra line-area" name="Area (m²)" property="AreaSqm" format="1.0-2" [minWidth]="110" [canSort]="false" [canFilter]="false"></datatable-column>
+						<datatable-column class="col-number line-extra line-cap" name="Capacity" property="MaxGuests" [minWidth]="140" [canSort]="false" [canFilter]="false">
+							<ng-template let-i="row" datatable-cell-template>
+								<ng-container *ngIf="primaryCapacity(i) as cap; else noCap">
+									<strong>{{ cap.value }}</strong>
+									<ion-chip *ngIf="cap.label" outline color="medium" class="ion-margin-start">
+										<ion-label>{{ cap.label | translate }}</ion-label>
+									</ion-chip>
+								</ng-container>
+								<ng-template #noCap><span class="empty-dash">—</span></ng-template>
+							</ng-template>
+						</datatable-column>
+						<datatable-column class="col-status line-extra" name="Status" property="IsDisabled" [minWidth]="120" [canSort]="false" [canFilter]="false">
+							<ng-template let-i="row" datatable-cell-template>
+								<ion-chip outline [color]="i.IsDisabled ? 'medium' : 'success'">
+									<ion-label>{{ (i.IsDisabled ? 'Disabled' : 'Active') | translate }}</ion-label>
+								</ion-chip>
+							</ng-template>
+						</datatable-column>
+						<datatable-column class="col-icon" name="" property="Id" [minWidth]="130" [canSort]="false" [canFilter]="false">
+							<ng-template datatable-header-template>
+								<div class="row-actions">
+									<ion-button size="small" fill="clear" [title]="'Add line' | translate" *ngIf="pageConfig.canAdd && !item.IsDisabled" (click)="addLine()">
+										<ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
+									</ion-button>
+									<ion-button size="small" fill="clear" [title]="'Quick create lines' | translate" *ngIf="pageConfig.canAdd && !item.IsDisabled" (click)="quickCreateLines()">
+										<ion-icon slot="icon-only" name="layers-outline"></ion-icon>
+									</ion-button>
+								</div>
+							</ng-template>
+							<ng-template let-i="row" datatable-cell-template>
+								<div class="row-actions">
+									<ion-button size="small" fill="clear" [title]="'Edit line' | translate" (click)="editLine(i)">
+										<ion-icon slot="icon-only" name="create-outline"></ion-icon>
+									</ion-button>
+								</div>
+							</ng-template>
+						</datatable-column>
+					</app-data-table>
+					<div class="ion-padding empty-lines" *ngIf="!lines.length">
+						<ion-note>{{ 'No line yet' | translate }}</ion-note>
+						<div class="empty-actions" *ngIf="pageConfig.canAdd && !item.IsDisabled">
+							<ion-button size="small" fill="outline" (click)="addLine()">
+								<ion-icon slot="start" name="add-circle-outline"></ion-icon>
+								{{ 'Add line' | translate }}
+							</ion-button>
+							<ion-button size="small" fill="outline" (click)="quickCreateLines()">
+								<ion-icon slot="start" name="layers-outline"></ion-icon>
+								{{ 'Quick create lines' | translate }}
+							</ion-button>
+						</div>
+					</div>
+				</ng-container>
+			</div>
+		</div>
+	</div>
+</ion-content>

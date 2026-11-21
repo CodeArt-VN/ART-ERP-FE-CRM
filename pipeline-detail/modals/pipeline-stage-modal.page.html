@@ -1,0 +1,74 @@
+<ion-header [translucent]="true" collapse="fade">
+	<ion-toolbar>
+		<ion-title>{{ item?.Id ? item.Name : ('New stage' | translate) }}</ion-title>
+		<ion-buttons slot="primary">
+			<ion-button title="{{ 'Close' | translate }}" color="secondary" (click)="closeModal()">
+				<ion-icon slot="icon-only" name="close"></ion-icon>
+			</ion-button>
+		</ion-buttons>
+	</ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true" appScrollbarTheme>
+	<div id="pipeline-stage-modal" style="position: absolute; z-index: 30005"></div>
+	<form [formGroup]="formGroup">
+		<ion-grid fixed>
+			<ion-row>
+				<ion-col size="12">
+					<app-form-control [field]="{ id: 'Name', label: 'Name', type: 'text', form: formGroup }"></app-form-control>
+					<app-form-control [field]="{ id: 'Color', label: 'Color', type: 'color', form: formGroup }"></app-form-control>
+					<app-form-control
+						[field]="{ id: 'Outcome', label: 'Outcome', type: 'ng-select', dataSource: outcomes, bindValue: 'Code', bindLabel: 'Name', form: formGroup, appendTo: '#pipeline-stage-modal' }"
+					></app-form-control>
+					<app-form-control [field]="{ id: 'Probability', label: 'Probability', type: 'number', form: formGroup }"></app-form-control>
+					<app-form-control [field]="{ id: 'ExpectedDays', label: 'Expected days', type: 'number', form: formGroup }"></app-form-control>
+					<app-form-control [field]="{ id: 'SLAHours', label: 'SLA hours', type: 'number', form: formGroup }"></app-form-control>
+				</ion-col>
+				<ion-col size="12">
+					<app-form-control [field]="{ id: 'Guide', label: 'Guide', type: 'textarea', form: formGroup }"></app-form-control>
+					<app-form-control [field]="{ id: 'ExternalNames', label: 'External names', type: 'text', form: formGroup }"></app-form-control>
+					<app-form-control [field]="{ id: 'IsRequireLostReason', label: 'Require lost reason', type: 'checkbox', form: formGroup }"></app-form-control>
+				</ion-col>
+				<ion-col size="12" *ngIf="item?.Id">
+					<!-- iOS settings style: small caps header outside an inset rounded card -->
+					<div class="ios-settings-head ion-margin-top" style="justify-content: space-between">
+						<ion-text color="medium">{{ 'Task' | translate }}</ion-text>
+						<div>
+							<ion-button size="small" fill="clear" [title]="'Add task' | translate" (click)="addTask()">
+								<ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
+							</ion-button>
+							<ion-button *ngIf="taskList.length > 1" size="small" [fill]="sorting ? 'solid' : 'clear'" [title]="'Reorder' | translate" (click)="toggleSort()">
+								<ion-icon slot="icon-only" name="swap-vertical-outline"></ion-icon>
+							</ion-button>
+						</div>
+					</div>
+					<ion-list [inset]="true" lines="inset" style="margin-inline: 0; margin-top: 0">
+						<ion-reorder-group [disabled]="!sorting" (ionItemReorder)="onTaskReorder($any($event))">
+							<ion-item *ngFor="let t of taskList">
+								<ion-icon slot="start" [name]="taskIcons[t.TaskType] || 'ellipse-outline'" color="primary"></ion-icon>
+								<ion-label class="ion-text-wrap">{{ t.Name }}</ion-label>
+								<ion-button slot="end" fill="clear" size="small" *ngIf="!sorting" [title]="'Edit task' | translate" (click)="editTask(t)">
+									<ion-icon slot="icon-only" name="create-outline"></ion-icon>
+								</ion-button>
+								<ion-reorder slot="end" *ngIf="sorting"></ion-reorder>
+							</ion-item>
+						</ion-reorder-group>
+						<ion-item *ngIf="!taskList.length" lines="none">
+							<ion-label color="medium">{{ 'No task yet' | translate }}</ion-label>
+						</ion-item>
+					</ion-list>
+				</ion-col>
+			</ion-row>
+		</ion-grid>
+	</form>
+</ion-content>
+<ion-footer [translucent]="true" collapse="fade">
+	<ion-toolbar>
+		<div slot="start">
+			<ion-button fill="outline" *ngIf="item?.Id" (click)="delete()" color="danger">{{ 'Delete' | translate }}</ion-button>
+		</div>
+		<div slot="end">
+			<ion-button fill="outline" color="warning" (click)="closeModal()">{{ 'Cancel' | translate }}</ion-button>
+			<ion-button [strong]="true" (click)="saveChange()" [disabled]="!formGroup.dirty">{{ 'Save' | translate }}</ion-button>
+		</div>
+	</ion-toolbar>
+</ion-footer>

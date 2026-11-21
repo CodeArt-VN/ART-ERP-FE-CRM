@@ -1,0 +1,197 @@
+// The list is always in card mode (responsive small-width). One datatable column per property (filters stay),
+// the card is a table of 2 rows x 2 columns whose second row is merged:
+// 1. row 1 left (floats left): id, service type, guests, event date, probability, days in stage, owner. Takes the remaining width and wraps.
+// 2. row 1 right (one float right, a rectangle of 3 lines): stage bar + label on top, the amount in its bottom line (absolute inside it).
+// 3. row 2 merged: customer + status chip, opportunity name, remark.
+//    They only clear the left floats (block 1), never the right ones: on a wide card they sit beside the amount,
+//    on a narrow one they run under it. No fixed reserved width, no negative margin: the floats let everything else fill in.
+// The amount is not a float: a float after it would not be allowed higher than it, and the customer line would wait for it.
+// Every rule of the card uses the selector app-data-table.padding-number-right so it beats the theme's nested rules (e.g. .col-remark min-width).
+:host ::ng-deep app-data-table.padding-number-right .row:not(.header) {
+	display: flow-root !important;
+	// the theme reserves 110px on the right for the absolute amount: the amount is a float now
+	padding-right: 16px !important;
+	// width of one stage bar: 10px, 13px on wide screens (the bar holder's columns and the bars both read it)
+	--bar-width: 10px;
+	@media (min-width: 600px) {
+		--bar-width: 13px;
+	}
+
+	.col-checkbox {
+		position: absolute !important;
+		left: 0;
+		top: 16px;
+		margin-left: 0 !important;
+	}
+
+	// Columns in the card lose the fixed sizes of the theme; the float decides the width.
+	.cell {
+		min-width: 0 !important;
+		max-width: 100% !important;
+	}
+
+	// Block 1: left floats
+	.col-id,
+	.col-chip.col-type,
+	.col-chip.col-guests,
+	.col-chip.col-date,
+	.col-chip.col-probability,
+	.col-chip.col-days,
+	.col-meta {
+		float: left;
+		margin: 0 6px 2px 0;
+		order: 0;
+		padding-top: 0 !important;
+		padding-bottom: 0 !important;
+		padding-right: 0 !important;
+		max-width: 100% !important;
+
+		ion-chip {
+			margin: 0;
+			max-width: 100%;
+		}
+	}
+
+	// Same 24px band as the chips, so the Id badge is centred on the chips' line.
+	.col-id {
+		display: flex;
+		align-items: center;
+		height: 24px;
+	}
+
+	.col-type ion-label {
+		max-width: 200px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	// Block 2 is one float right at the top (first in the DOM), as wide as the bars, and 3 lines high: a line of block 1 is 26px
+	// (24px chip + 2px gap), so what does not fit beside it drops by whole lines, never by half a line.
+	// The stage bar and its label take the top 2 lines, the amount sits in the last line.
+	.col-status {
+		float: right;
+		position: static !important;
+		box-sizing: border-box;
+		width: min-content;
+		height: 78px;
+		margin: 0 0 0 8px !important;
+		padding: 0 !important;
+	}
+
+	// The amount is absolute in the last line of block 2 (row padding 16px + 2 lines of 26px), right aligned with the stage.
+	.col-number {
+		position: absolute !important;
+		top: 76px;
+		right: 16px;
+		box-sizing: border-box;
+		width: auto;
+		height: 26px;
+		min-width: 0 !important;
+		max-width: none !important;
+		margin: 0 !important;
+		padding: 0 !important;
+		overflow: visible;
+		white-space: nowrap;
+		text-align: right;
+		line-height: 26px;
+	}
+
+	// Block 3: customer and status chip on one line, then full-width rows
+	.col-customer {
+		float: left;
+		// clear the left floats (block 1) only: the amount on the right must not push the customer down
+		clear: left;
+		margin: 5px 6px 4px 0;
+		padding-right: 0 !important;
+	}
+
+	.col-status-chip {
+		float: left;
+		// lines up with the customer name (its text centre is at the same height)
+		margin: 4px 0 4px 0;
+		padding-right: 0 !important;
+
+		ion-chip {
+			margin: 0;
+			height: 20px;
+			min-height: 20px;
+			padding: 0 6px;
+			// the status colour as a light tint behind the outline (alpha 12%)
+			background: rgba(var(--ion-color-base-rgb), 0.12);
+		}
+	}
+
+	// Block 3 rows clear the left floats only: they start under the customer line and sit beside the amount when the card is wide.
+	.col-deal,
+	.col-remark {
+		display: block;
+		clear: left;
+	}
+
+	// The theme gives the remark min-width: calc(100% + 110px): the remark takes the width left beside the floats.
+	.col-remark {
+		min-width: 0 !important;
+		max-width: none !important;
+		white-space: pre-line;
+	}
+
+	// The status bar: one bar per process step of the pipeline on the first line, the stage name under them.
+	// The bars keep a fixed width, so block 2 is as wide as the bars.
+	.col-status .bar-holder {
+		display: grid;
+		// columns come from the template: a flexible first column (the label can widen the block on wide screens),
+		// then one column per process step, the bars sit in the last columns
+		column-gap: 1px;
+		justify-content: end;
+		align-items: end;
+		height: auto;
+
+		.bar {
+			grid-row: 1;
+			min-width: 0;
+			width: var(--bar-width);
+			height: 12px;
+			border-radius: 2px;
+
+			&:hover {
+				height: 14px;
+			}
+
+			&.active {
+				height: 16px;
+				opacity: 0.9;
+			}
+		}
+
+		// one line, cut with an ellipsis: the stage block keeps a fixed height so the amount sits right under it.
+		// Narrow: width 0 so the label never widens the block (the bars decide). Wide: the label widens the block up to 200px.
+		.bar-title {
+			grid-row: 2;
+			grid-column: 1 / -1;
+			width: 0;
+			min-width: 100%;
+			max-width: 200px;
+			margin-top: 2px;
+			font-size: 90%;
+			line-height: 1.2;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			text-align: right;
+		}
+	}
+
+	// Wide: the stage block is at least 180px, so the label has room; the flexible first column takes the rest
+	// and the label spans it, so the text shows in full (up to 180px) and the bars stay on the right.
+	@media (min-width: 600px) {
+		.col-status .bar-holder {
+			min-width: 180px;
+		}
+
+		.col-status .bar-holder .bar-title {
+			width: auto;
+			min-width: 0;
+		}
+	}
+}

@@ -1,0 +1,86 @@
+<ion-header [translucent]="true">
+	<app-toolbar [page]="this"></app-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" appScrollbarTheme class="left scrollx" forceOverscroll="false">
+	<ion-refresher [disabled]="!pageConfig.refresher" slot="fixed" (ionRefresh)="refresh($event)">
+		<ion-refresher-content></ion-refresher-content>
+	</ion-refresher>
+
+	<app-page-title class="ion-padding safe-max-width" [pageConfig]="pageConfig"></app-page-title>
+
+	<div class="safe-max-width">
+		<app-data-table
+			class="box-shadow responsive hall-table"
+			[rows]="items"
+			[trackBy]="'Id'"
+			[(selectedRows)]="selectedItems"
+			[showSpinner]="pageConfig.showSpinner"
+			[showFilter]="pageConfig.isShowSearch"
+			[IsShowFilterPopup]="true"
+			[(query)]="query"
+			(dataInfinite)="loadData($event)"
+			(filter)="onDatatableFilter($event)"
+			(sort)="onSort($event)"
+			(selectedRowsChange)="showCommandBySelectedRows($event)"
+		>
+			<datatable-column [checkbox]="true" name=""></datatable-column>
+			<datatable-column class="col-name" name="Name" property="Name">
+				<ng-template let-i="row" datatable-cell-template>
+					<div class="clickable" [class.dimmed]="i.IsDisabled" [routerLink]="['/' + pageConfig.pageName + '/' + i.Id]">
+						<a class="bold">
+							<ion-text color="dark">{{ i.Name }}</ion-text>
+						</a>
+					</div>
+				</ng-template>
+				<!-- Name or code: the API's Keyword matches both -->
+				<ng-template datatable-filter-template>
+					<input class="c-input" [placeholder]="'Search name or code' | translate" [(ngModel)]="query.Keyword" (keyup.enter)="searchKeyword()" />
+				</ng-template>
+			</datatable-column>
+			<!-- Center and floor are shown by the dividers, not as columns; the columns stay only to carry their filter in the popup -->
+			<datatable-column class="hall-filter-only" name="Center" property="IDBranch" filterControlType="ng-select" [filterDataSource]="centerList" filterBindValue="Id" filterBindLabel="Name"></datatable-column>
+			<datatable-column class="hall-filter-only" name="Floor" property="Floor" filterControlType="ng-select" [filterDataSource]="floorList" filterBindValue="Code" filterBindLabel="Name"></datatable-column>
+			<datatable-column class="col-status hall-chip" name="Hall type" property="HallKind" filterControlType="ng-select" [filterDataSource]="kindList" filterBindValue="Code" filterBindLabel="Name">
+				<ng-template let-i="row" datatable-cell-template>
+					<div [class.dimmed]="i.IsDisabled">
+						<ion-chip outline [color]="hallKindColor(i.HallKind)">
+							<ion-icon [name]="hallKindIcon(i.HallKind)"></ion-icon>
+							<ion-label>{{ i.HallKind | translate }}</ion-label>
+						</ion-chip>
+					</div>
+				</ng-template>
+			</datatable-column>
+			<datatable-column class="col-number hall-chip hall-lines" name="Lines" property="_lineCount" [canSort]="false" [canFilter]="false">
+				<ng-template let-i="row" datatable-cell-template>
+					<div [class.dimmed]="i.IsDisabled">
+						<ion-badge color="primary" *ngIf="i._lineCount > 0">{{ i._lineCount }}</ion-badge>
+						<span class="empty-dash" *ngIf="!(i._lineCount > 0)">—</span>
+					</div>
+				</ng-template>
+			</datatable-column>
+			<datatable-column class="col-status hall-chip hall-cap" name="Capacity" property="MaxGuests" [canSort]="false" [canFilter]="false">
+				<ng-template let-i="row" datatable-cell-template>
+					<div [class.dimmed]="i.IsDisabled">
+						<ng-container *ngIf="primaryCapacity(i) as cap; else noCap">
+							<strong>{{ cap.value }}</strong>
+							<ion-chip *ngIf="cap.label" outline color="medium" class="ion-margin-start">
+								<ion-label>{{ cap.label | translate }}</ion-label>
+							</ion-chip>
+						</ng-container>
+						<ng-template #noCap><span class="empty-dash">—</span></ng-template>
+					</div>
+				</ng-template>
+			</datatable-column>
+			<datatable-column class="col-status" name="Status" property="IsDisabled" filterControlType="ng-select" [filterDataSource]="statusList" filterBindValue="Code" filterBindLabel="Name">
+				<ng-template let-i="row" datatable-cell-template>
+					<ion-chip outline [color]="i.IsDisabled ? 'medium' : 'success'">
+						<ion-label>{{ (i.IsDisabled ? 'Disabled' : 'Active') | translate }}</ion-label>
+					</ion-chip>
+				</ng-template>
+			</datatable-column>
+		</app-data-table>
+	</div>
+
+	<div class="ion-padding"></div>
+</ion-content>

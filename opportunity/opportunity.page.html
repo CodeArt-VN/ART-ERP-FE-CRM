@@ -1,0 +1,168 @@
+<ion-header [translucent]="true">
+	<app-toolbar [page]="this"></app-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" appScrollbarTheme class="left scrollx" forceOverscroll="false">
+	<ion-refresher [disabled]="!pageConfig.refresher" slot="fixed" (ionRefresh)="refresh($event)">
+		<ion-refresher-content></ion-refresher-content>
+	</ion-refresher>
+
+	<app-page-title class="ion-padding safe-max-width" [pageConfig]="pageConfig"></app-page-title>
+
+	<div class="safe-max-width">
+		<app-data-table
+			class="box-shadow responsive small-width padding-number-right"
+			[rows]="items"
+			[trackBy]="'Id'"
+			[(selectedRows)]="selectedItems"
+			[showSpinner]="pageConfig.showSpinner"
+			[showFilter]="pageConfig.isShowSearch"
+			[IsShowFilterPopup]="true"
+			[(query)]="query"
+			(dataInfinite)="loadData($event)"
+			(filter)="onDatatableFilter($event)"
+			(sort)="onSort($event)"
+			(selectedRowsChange)="showCommandBySelectedRows($event)"
+		>
+			<!-- One datatable column per property, so every property keeps its own filter.
+				 The card layout (blocks) is done in the scss, not by putting several properties in one cell. -->
+
+			<datatable-column [checkbox]="true" name=""></datatable-column>
+
+			<!-- Card = 2 rows x 2 columns, the second row merged. Block 2 comes first in the DOM so its right floats sit in the
+				 top-right corner and the left floats of block 1 flow (and wrap) in the space left of it. -->
+			<!-- Block 2 (top right, min-content): stage bar, the amount comes under it (see below) -->
+			<datatable-column
+				class="col-status"
+				name="Stage"
+				property="IDStage"
+				filterControlType="ng-select"
+				[filterDataSource]="stageFilterList"
+				[filterBindValue]="'Id'"
+			>
+				<ng-template let-i="row" datatable-cell-template>
+					<span class="bar-holder" [style.grid-template-columns]="'1fr repeat(' + (i._Stages?.length || 1) + ', var(--bar-width))'">
+						<span
+							class="bar"
+							[ngClass]="{ active: s.Id == i.IDStage }"
+							[ngStyle]="{ 'background-color': 'var(--ion-color-' + s.Color + ')' }"
+							*ngFor="let s of i._Stages; let k = index"
+							[style.grid-column]="k + 2"
+							[title]="s.Name"
+						></span>
+						<ion-text class="bar-title" [color]="i._Stage?.Color">
+							{{ i._Stage ? i._Stage.Name : ('No pipeline yet' | translate) }}
+						</ion-text>
+					</span>
+				</ng-template>
+			</datatable-column>
+
+			<!-- Block 1 (top left, takes the rest and wraps): id, service type, guests, event date, probability, days in stage, owner -->
+
+			<datatable-column class="col-id" name="#" property="Id">
+				<ng-template let-i="row" datatable-cell-template>
+					<a class="clickable" [routerLink]="['/' + pageConfig.pageName + '/' + i.Id]">{{ i.Id }}</a>
+				</ng-template>
+			</datatable-column>
+
+			<datatable-column
+				class="col-chip col-type"
+				name="Service type"
+				property="IDType"
+				filterControlType="ng-select"
+				[filterDataSource]="serviceTypeList"
+				[filterBindValue]="'Id'"
+			>
+				<ng-template let-i="row" datatable-cell-template>
+					<ion-chip outline color="primary" *ngIf="i.IDType" [title]="serviceTypeName(i.IDType)">
+						<ion-icon [name]="i._TypeIcon"></ion-icon>
+						<ion-label>{{ serviceTypeName(i.IDType) }}</ion-label>
+					</ion-chip>
+				</ng-template>
+			</datatable-column>
+
+			<datatable-column class="col-chip col-guests" name="Guests" property="NumberOfGuests" filterControlType="number">
+				<ng-template let-i="row" datatable-cell-template>
+					<ion-chip outline color="medium" *ngIf="i.NumberOfGuests" [title]="'Guests' | translate">
+						<ion-icon name="people-outline"></ion-icon>
+						<ion-label>{{ i.NumberOfGuests | number: '1.0-0' }}</ion-label>
+					</ion-chip>
+				</ng-template>
+			</datatable-column>
+
+			<datatable-column class="col-chip col-date" name="Event date" property="EventDate" filterControlType="date">
+				<ng-template let-i="row" datatable-cell-template>
+					<ion-chip class="date-chip" outline [color]="isOverdue(i) ? 'danger' : 'medium'" [title]="(isOverdue(i) ? 'Overdue' : 'Event date') | translate">
+						<ion-icon name="calendar-outline"></ion-icon>
+						<ion-label>{{ i.EventDate | date: 'dd/MM/yyyy' }}</ion-label>
+					</ion-chip>
+				</ng-template>
+			</datatable-column>
+
+			<datatable-column class="col-chip col-probability" name="Probability" property="Probability" filterControlType="number">
+				<ng-template let-i="row" datatable-cell-template>
+					<ion-chip outline color="primary" *ngIf="i.Probability != null && !i.IsClosed" [title]="'Probability' | translate">
+						<ion-label>{{ i.Probability }}%</ion-label>
+					</ion-chip>
+				</ng-template>
+			</datatable-column>
+
+			<datatable-column class="col-chip col-days" name="Days in stage" property="StageChangedDate" filterControlType="date">
+				<ng-template let-i="row" datatable-cell-template>
+					<ion-chip outline color="medium" *ngIf="daysInStage(i) != null" [title]="'Days in stage' | translate">
+						<ion-icon name="time-outline"></ion-icon>
+						<ion-label>{{ daysInStage(i) }} {{ 'days' | translate }}</ion-label>
+					</ion-chip>
+				</ng-template>
+			</datatable-column>
+
+			<datatable-column class="col-meta" name="Owner" property="IDOwner" [canSort]="false" filterControlType="ng-select" [filterDataSource]="ownerList" [filterBindValue]="'Id'">
+				<ng-template let-i="row" datatable-cell-template>
+					<ion-chip outline color="medium" *ngIf="i._Owner" [title]="'Owner' | translate">
+						<ion-icon name="person-circle-outline"></ion-icon>
+						<ion-label>{{ i._Owner }}</ion-label>
+					</ion-chip>
+				</ng-template>
+			</datatable-column>
+
+			<!-- Block 2, last line: the amount. Absolute inside the stage float (3 lines high), so it takes no part in the float rules
+				 and the customer line is free to sit beside the stage. -->
+			<datatable-column class="col-number bold" format="1.0-0" name="Amount" property="Amount"></datatable-column>
+
+			<!-- Block 3 (second row, merged = full width): customer and status chip, opportunity name, remark -->
+			<datatable-column class="col-name col-customer" name="Customer" property="IDContact" [canSort]="false">
+				<ng-template let-i="row" datatable-cell-template>
+					<a class="clickable bold" [routerLink]="['/' + pageConfig.pageName + '/' + i.Id]">
+						<ion-text color="dark">{{ i._Customer }}</ion-text>
+					</a>
+				</ng-template>
+			</datatable-column>
+
+			<datatable-column
+				class="col-chip col-status-chip"
+				name="Status"
+				property="IsClosed"
+				filterControlType="ng-select"
+				[filterDataSource]="statusFilterList"
+				[filterBindValue]="'Id'"
+				[canSort]="false"
+			>
+				<ng-template let-i="row" datatable-cell-template>
+					<ion-chip outline [color]="opportunityStatus(i).color">
+						<ion-label>{{ opportunityStatus(i).label | translate }}</ion-label>
+					</ion-chip>
+				</ng-template>
+			</datatable-column>
+
+			<datatable-column class="col-name col-deal" name="Name" property="Name">
+				<ng-template let-i="row" datatable-cell-template>
+					<span>{{ i.Name }}</span>
+				</ng-template>
+			</datatable-column>
+
+			<datatable-column class="col-remark" name="Remark" property="Remark"></datatable-column>
+		</app-data-table>
+	</div>
+
+	<div class="ion-padding"></div>
+</ion-content>

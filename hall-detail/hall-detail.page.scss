@@ -1,0 +1,140 @@
+app-data-table ion-chip ion-label {
+	white-space: nowrap;
+}
+
+.row-actions {
+	display: flex;
+	justify-content: flex-end;
+	width: 100%;
+}
+
+.small-code {
+	margin: 2px 0 0;
+	font-size: 12px;
+	color: var(--ion-color-medium);
+}
+
+.capacity-title {
+	display: block;
+	margin: 16px 0 8px;
+}
+
+.empty-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 8px;
+}
+
+// The line table sits in the tab card: no second inset (see skill fe-data-table, "Table inside a card or tab").
+// Card mode (the theme lays every .col-status / .col-number / .col-icon on the right edge, one on top of the other):
+// one hall line per card: number and name, then status / capacity / area chips below; the edit button keeps the right edge.
+@media screen and (max-width: 1164px) {
+	:host ::ng-deep app-data-table.line-table {
+		padding-inline: 0;
+		gap: 0;
+
+		// The theme hides the header in card mode; keep it for the add / quick-create buttons only.
+		datatable-header.row.header {
+			display: flex !important;
+			width: 100%;
+			box-sizing: border-box;
+			padding: 0 8px !important;
+			justify-content: flex-end;
+			border-bottom: 1px solid var(--ion-color-light-shade);
+
+			.cell:not(.col-icon) {
+				display: none;
+			}
+
+			.col-icon {
+				position: static;
+				min-width: 0 !important;
+				width: auto;
+				height: auto;
+				padding: 0 !important;
+			}
+
+			.row-actions {
+				width: auto;
+			}
+		}
+
+		datatable-body {
+			gap: 0 !important;
+			padding-bottom: 0 !important;
+		}
+
+		.row:not(.header) {
+			position: relative;
+			padding: 8px 48px 8px 35px !important;
+			border-radius: 0;
+			border-bottom: 1px solid var(--ion-color-light-shade);
+
+			.col-id {
+				order: 1;
+				margin-left: -35px;
+				min-width: 35px !important;
+				max-width: 35px !important;
+				justify-content: center;
+
+				> span {
+					padding: 0 !important;
+					background: transparent !important;
+					color: var(--ion-color-dark) !important;
+				}
+			}
+
+			.col-name {
+				order: 2;
+				flex: 1 1 100%;
+				min-width: 0 !important;
+				max-width: 100% !important;
+			}
+
+			.line-extra {
+				order: 3;
+				position: static;
+				right: auto;
+				margin: 0;
+				min-width: fit-content !important;
+				max-width: fit-content !important;
+				justify-content: flex-start;
+				font-size: inherit;
+				font-weight: normal;
+				color: inherit !important;
+			}
+
+			// An empty value is only a placeholder in the desktop columns.
+			.empty-dash {
+				display: none;
+			}
+
+			.col-icon {
+				position: absolute;
+				top: 4px;
+				right: 4px;
+				min-width: 0 !important;
+				width: auto;
+			}
+		}
+	}
+}
+
+// Phones: area is in the popup.
+@media screen and (max-width: 425px) {
+	:host ::ng-deep app-data-table.line-table .row .line-area {
+		display: none;
+	}
+}
+
+// The audit branch path can be longer than its field (phones, tablets): let it wrap instead of being cut.
+:host ::ng-deep app-branch-breadcrumbs {
+	height: auto !important;
+	min-height: 38px;
+
+	ion-breadcrumbs {
+		flex-wrap: wrap !important; // the component sets flex-wrap inline
+		height: auto !important;
+	}
+}

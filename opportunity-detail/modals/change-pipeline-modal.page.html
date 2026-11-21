@@ -1,0 +1,118 @@
+<ion-header [translucent]="true" collapse="fade">
+	<ion-toolbar>
+		<ion-title>{{ 'Change pipeline' | translate }}</ion-title>
+		<ion-buttons slot="primary">
+			<ion-button title="{{ 'Close' | translate }}" color="secondary" (click)="closeModal()">
+				<ion-icon slot="icon-only" name="close"></ion-icon>
+			</ion-button>
+		</ion-buttons>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" appScrollbarTheme>
+	<!-- Available pipelines: iOS settings group (fe-popup child list) -->
+	<div class="ios-settings-head ion-margin-top">
+		<ion-text color="medium">{{ 'Available pipelines' | translate }}</ion-text>
+	</div>
+	<ion-note color="warning" class="ion-padding-horizontal" *ngFor="let w of warnings">{{ w }}</ion-note>
+	<ion-list [inset]="true" lines="full">
+		<ion-item *ngIf="loading" lines="none">
+			<ion-spinner slot="start" name="dots"></ion-spinner>
+			<ion-label color="medium">{{ 'Loading' | translate }}</ion-label>
+		</ion-item>
+
+		<ion-item
+			button
+			detail="false"
+			class="pipeline-option"
+			*ngFor="let o of options; trackBy: trackByPipeline"
+			[color]="selectedId === o.IDPipeline ? 'primary' : undefined"
+			(click)="select(o)"
+		>
+			<ion-icon slot="start" [name]="o.Icon || 'git-branch-outline'" [color]="selectedId === o.IDPipeline ? 'light' : o.Color || 'primary'"></ion-icon>
+			<ion-label class="ion-text-wrap">
+				<h3>
+					{{ o.Name }}
+					<ion-chip class="rec-chip" outline color="success" *ngIf="o.isRecommended">
+						<ion-label>{{ 'Recommended' | translate }}</ion-label>
+					</ion-chip>
+				</h3>
+				<p *ngIf="o.stageCount != null">{{ o.stageCount }} {{ 'stages' | translate }}</p>
+				<p *ngIf="o.reasons.length">{{ o.reasons.join('; ') }}</p>
+			</ion-label>
+			<ion-icon
+				slot="end"
+				*ngIf="o.isCurrent"
+				name="checkmark-circle"
+				[color]="selectedId === o.IDPipeline ? 'light' : 'success'"
+				[attr.title]="'Current' | translate"
+				[attr.aria-label]="'Current' | translate"
+			></ion-icon>
+		</ion-item>
+
+		<ion-item *ngIf="!loading && !options.length" lines="none">
+			<ion-label color="medium">{{ 'No pipeline available' | translate }}</ion-label>
+		</ion-item>
+	</ion-list>
+
+	<!-- Preview tree: same markup / classes as pipeline-detail stage-tree (no edit actions) -->
+	<ng-container *ngIf="previewPlan">
+		<div class="ios-settings-head ion-margin-top">
+			<ion-icon [name]="selectedOption?.Icon || 'git-branch-outline'" [color]="selectedOption?.Color || 'primary'"></ion-icon>
+			<ion-text color="medium">{{ previewPlan.PipelineName }} · {{ previewPlan.TotalStages }} {{ 'stages' | translate }}</ion-text>
+		</div>
+
+		<app-data-table
+			class="box-shadow responsive stage-tree"
+			*ngIf="stageRows.length"
+			[rows]="stageRows"
+			[trackBy]="'Id'"
+			[isTreeList]="true"
+			[showFilter]="false"
+		>
+			<datatable-column class="col-name" name="Name" property="Name" [minWidth]="320" [canSort]="false" [canFilter]="false">
+				<ng-template datatable-header-template>
+					<ion-icon class="min-btn clickable" [name]="!isAllRowOpened ? 'add-circle-outline' : 'remove-circle-outline'" (click)="toggleRowAll(stageRows)"></ion-icon>
+					<span class="clickable" (click)="toggleRowAll(stageRows)">{{ 'Name' | translate }}</span>
+				</ng-template>
+				<ng-template let-i="row" datatable-cell-template>
+					<ng-container *ngFor="let w of i.levels; let k = index"><span class="spacing" *ngIf="k > 0"></span></ng-container>
+					<ion-icon
+						(click)="toggleRow(stageRows, i, true)"
+						class="min-btn clickable"
+						[name]="!i.showdetail ? 'chevron-forward-outline' : 'chevron-down-outline'"
+						*ngIf="i.HasChild"
+					></ion-icon>
+					<ion-icon class="min-btn" [name]="''" *ngIf="!i.HasChild"></ion-icon>
+					<ng-container *ngIf="i.Kind == 'task'">
+						<ion-chip class="inline-tag chip-type" color="medium">
+							<ion-icon [name]="taskIcons[i.TaskType] || 'ellipse-outline'"></ion-icon>
+							<ion-label class="tag-label">{{ i.TaskType }}<ng-container *ngIf="i.TaskType == 'Document' && i.DocumentType"> · {{ i.DocumentType }}</ng-container></ion-label>
+						</ion-chip>
+					</ng-container>
+					<span class="clickable" [ngClass]="i.Kind == 'stage' ? 'bold' : ''">{{ i.Name }}</span>
+					<ion-badge class="inline-tag after chip-outcome" *ngIf="i.Kind == 'stage'" [color]="outcomeColor(i.Outcome)">{{ i.Outcome | translate }}</ion-badge>
+					<ion-chip class="inline-tag after chip-prob" color="primary" *ngIf="i.Kind == 'stage'">
+						<ion-label>{{ i.Probability }}%</ion-label>
+					</ion-chip>
+					<ion-chip class="inline-tag after req" color="danger" *ngIf="i.Kind == 'task' && i.IsRequired">
+						<ion-label>{{ 'Required' | translate }}</ion-label>
+					</ion-chip>
+				</ng-template>
+			</datatable-column>
+		</app-data-table>
+		<ion-note class="ion-padding-horizontal" *ngIf="!stageRows.length">{{ 'No stage yet' | translate }}</ion-note>
+	</ng-container>
+
+	<ion-note color="danger" class="ion-padding-horizontal" *ngIf="errorMessage" style="white-space: pre-line">{{ errorMessage | translate }}</ion-note>
+</ion-content>
+
+<ion-footer [translucent]="true" collapse="fade">
+	<ion-toolbar>
+		<div slot="start"></div>
+		<div slot="end">
+			<ion-button fill="outline" color="warning" (click)="closeModal()">{{ 'Cancel' | translate }}</ion-button>
+			<ion-button [strong]="true" (click)="confirm()" [disabled]="!canConfirm">{{ 'Apply pipeline' | translate }}</ion-button>
+		</div>
+	</ion-toolbar>
+</ion-footer>

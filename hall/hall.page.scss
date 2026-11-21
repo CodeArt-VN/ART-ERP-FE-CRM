@@ -1,0 +1,78 @@
+app-data-table ion-chip ion-label {
+	white-space: nowrap;
+}
+
+// A disabled hall stays visible but muted.
+.dimmed {
+	opacity: 0.5;
+}
+
+// Center and floor are shown by the dividers; their columns exist only to carry the filter in the popup.
+:host ::ng-deep app-data-table.hall-table .hall-filter-only {
+	display: none !important;
+}
+
+// Dividers (PageBase pageConfig.dividers): quiet section headers, not data rows.
+// Level 2 (floor) is the base style: smaller and lighter. A divider directly followed by another divider is
+// level 1 (center): a center change always brings its first floor divider with it, a floor change alone does not.
+// (Virtual scroll wraps each divider in .datatable-virtual-item.divider-item.)
+:host ::ng-deep app-data-table.hall-table .row.divider .cell {
+	padding: 8px 16px 2px 24px !important;
+	font-size: 11px;
+	font-weight: normal;
+	color: var(--ion-color-medium-tint);
+}
+
+:host ::ng-deep app-data-table.hall-table .row.divider:has(+ .row.divider) .cell,
+:host ::ng-deep app-data-table.hall-table .divider-item:has(+ .divider-item) .row.divider .cell {
+	padding: 14px 16px 4px 16px !important;
+	font-size: 12px;
+	font-weight: bold;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--ion-color-medium);
+}
+
+// Card mode (the theme turns rows into cards at 1164px and lays every .col-status / .col-number on the right edge, one on top of the other).
+// One line per hall: name, then floor / kind / lines / capacity chips; the status keeps the theme's right-edge slot.
+@media screen and (max-width: 1164px) {
+	:host ::ng-deep app-data-table.hall-table .row:not(.header):not(.divider) {
+		.col-name {
+			order: 1;
+			min-width: 100% !important;
+			max-width: 100% !important;
+			box-sizing: border-box;
+			padding-right: 110px !important;
+		}
+
+		.hall-chip {
+			order: 2;
+			position: static;
+			right: auto;
+			margin: 0;
+			min-width: fit-content !important;
+			max-width: fit-content !important;
+			justify-content: flex-start;
+			font-size: inherit;
+			font-weight: normal;
+			color: inherit !important;
+		}
+
+		// An empty value is only a placeholder in the desktop columns.
+		.empty-dash {
+			display: none;
+		}
+
+		.col-status:not(.hall-chip) {
+			top: 10px;
+		}
+	}
+}
+
+// Phones: only floor, kind and status; line count and capacity are in the detail page.
+@media screen and (max-width: 425px) {
+	:host ::ng-deep app-data-table.hall-table .row .hall-lines,
+	:host ::ng-deep app-data-table.hall-table .row .hall-cap {
+		display: none;
+	}
+}
