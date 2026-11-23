@@ -484,30 +484,44 @@
 					<ion-card-content class="info-card-body" [attr.data-info-level]="infoLevel">
 						<!-- Always: Customer & contact -->
 						<div class="info-section">
-							<div class="info-section-title"><ion-icon name="person-circle-outline"></ion-icon>{{ 'Customer & contact' | translate }}</div>
-							<div class="info-contact">
-								<ng-container *ngIf="contactPartner as cp; else noContactTpl">
-									<div class="contact-name">
-										<a [routerLink]="['/business-partner', cp.Id]" class="link-inline">{{ cp.Name }}</a>
-										<ion-badge class="journal-badge" color="tertiary">{{ cp.IsPersonal ? ('Personal' | translate) : ('Corporate' | translate) }}</ion-badge>
-									</div>
-									<div class="contact-line" *ngIf="cp.WorkPhone">
-										<ion-icon name="call-outline"></ion-icon>
-										<a [href]="'tel:' + cp.WorkPhone">{{ cp.WorkPhone }}</a>
-									</div>
-									<div class="contact-line" *ngIf="cp.Email">
-										<ion-icon name="mail-outline"></ion-icon>
-										<a [href]="'mailto:' + cp.Email">{{ cp.Email }}</a>
-									</div>
-									<div class="contact-line" *ngIf="cp.BillingAddress">
-										<ion-icon name="location-outline"></ion-icon>
-										<span>{{ cp.BillingAddress }}</span>
-									</div>
-								</ng-container>
-								<ng-template #noContactTpl>
-									<ion-note>{{ 'No contact linked yet' | translate }}</ion-note>
-								</ng-template>
+							<div class="info-section-title">
+								<span class="info-section-heading">
+									<ion-icon name="person-circle-outline"></ion-icon>{{ 'Customer & contact' | translate }}
+								</span>
+								<button
+									type="button"
+									class="info-section-nav"
+									*ngIf="canManageOppContact && !isClosed"
+									[attr.title]="'Add contact' | translate"
+									[attr.aria-label]="'Add contact' | translate"
+									(click)="openOppContactModal()"
+								>
+									<ion-icon name="add-outline"></ion-icon>
+									<span>{{ 'Add contact' | translate }}</span>
+								</button>
 							</div>
+							<div class="info-contact opp-contact-card" *ngFor="let oc of oppContactDisplay; trackBy: trackById" (click)="onOppContactClick(oc)">
+								<div class="contact-name">
+									<a *ngIf="oc.IDContact" [routerLink]="['/business-partner', oc.IDContact]" class="link-inline" (click)="$event.stopPropagation()">{{ oc.ContactName }}</a>
+									<span *ngIf="!oc.IDContact">{{ oc.ContactName || '—' }}</span>
+									<ion-badge class="journal-badge" color="tertiary" *ngIf="oc.IsPersonal != null">{{ oc.IsPersonal ? ('Personal' | translate) : ('Corporate' | translate) }}</ion-badge>
+									<ion-badge class="journal-badge" color="warning" *ngIf="oc.IsPrimary">{{ 'Primary contact' | translate }}</ion-badge>
+									<ion-badge class="journal-badge" color="medium" *ngIf="oc.Role">{{ oc.Role }}</ion-badge>
+								</div>
+								<div class="contact-line" *ngIf="oc.WorkPhone">
+									<ion-icon name="call-outline"></ion-icon>
+									<a [href]="'tel:' + oc.WorkPhone" (click)="$event.stopPropagation()">{{ oc.WorkPhone }}</a>
+								</div>
+								<div class="contact-line" *ngIf="oc.Email">
+									<ion-icon name="mail-outline"></ion-icon>
+									<a [href]="'mailto:' + oc.Email" (click)="$event.stopPropagation()">{{ oc.Email }}</a>
+								</div>
+								<div class="contact-line" *ngIf="oc.BillingAddress">
+									<ion-icon name="location-outline"></ion-icon>
+									<span>{{ oc.BillingAddress }}</span>
+								</div>
+							</div>
+							<ion-note *ngIf="!oppContactDisplay.length">{{ 'No contact linked yet' | translate }}</ion-note>
 						</div>
 
 						<div class="info-section" *ngIf="item.Remark">
@@ -560,6 +574,42 @@
 									</div>
 								</div>
 
+								<div class="info-section" *ngIf="hallBookings.length">
+									<div class="info-section-title">
+										<span class="info-section-heading">
+											<ion-icon name="business-outline"></ion-icon>{{ 'Hall information' | translate }}
+										</span>
+										<button
+											type="button"
+											class="info-section-nav"
+											[attr.title]="'Choose hall' | translate"
+											[attr.aria-label]="'Choose hall' | translate"
+											(click)="openHallBookingCalendar()"
+										>
+											<ion-icon name="calendar-outline"></ion-icon>
+											<span>{{ 'Choose hall' | translate }}</span>
+										</button>
+									</div>
+									<div class="info-list" *ngFor="let b of hallBookings; trackBy: trackById" [hidden]="!isActiveHallBooking(b)">
+										<div class="info-row">
+											<span class="info-label">{{ 'Branch' | translate }}</span>
+											<span class="info-value">{{ hallBookingCenterName(b) || '—' }}</span>
+										</div>
+										<div class="info-row">
+											<span class="info-label">{{ 'Hall' | translate }}</span>
+											<span class="info-value">{{ hallBookingDisplayName(b) }}</span>
+										</div>
+										<div class="info-row">
+											<span class="info-label">{{ 'From' | translate }}</span>
+											<span class="info-value">{{ b.DateTimeFrom | date: 'dd/MM/yyyy HH:mm' }}</span>
+										</div>
+										<div class="info-row">
+											<span class="info-label">{{ 'To' | translate }}</span>
+											<span class="info-value">{{ b.DateTimeTo | date: 'dd/MM/yyyy HH:mm' }}</span>
+										</div>
+									</div>
+								</div>
+
 								<div class="info-section">
 									<div class="info-section-title"><ion-icon name="information-circle-outline"></ion-icon>{{ 'Information' | translate }}</div>
 									<div class="info-list">
@@ -572,7 +622,7 @@
 											<span class="info-value" [class.is-empty]="item.NumberOfGuests == null">{{ item.NumberOfGuests ?? '—' }}</span>
 										</div>
 										<div class="info-row">
-											<span class="info-label">{{ 'Owner' | translate }}</span>
+											<span class="info-label">{{ 'Person in charge' | translate }}</span>
 											<span class="info-value" [class.is-empty]="!ownerStaff?.FullName && !item.IDOwner">{{ ownerStaff?.FullName || (item.IDOwner ? '#' + item.IDOwner : '—') }}</span>
 										</div>
 										<div class="info-row" *ngIf="campaignName">
@@ -582,10 +632,6 @@
 										<div class="info-row" *ngIf="item.Code">
 											<span class="info-label">{{ 'Code' | translate }}</span>
 											<span class="info-value info-code">{{ item.Code }}</span>
-										</div>
-										<div class="info-row" *ngIf="item.IDBranch">
-											<span class="info-label">{{ 'Branch' | translate }}</span>
-											<span class="info-value">{{ branchName }}</span>
 										</div>
 										<div class="info-row is-stack" *ngIf="item.NextStep">
 											<span class="info-label">{{ 'Next step' | translate }}</span>
@@ -771,7 +817,7 @@
 								</ion-col>
 								<ion-col size="12" size-sm="6">
 									<app-form-control
-										[field]="{ id: 'IDOwner', label: 'Owner', type: 'ng-select-staff', dataSource: _OwnerDataSource, bindValue: 'Id', bindLabel: 'FullName', clearable: true, form: formGroup, appendTo: '#opportunity-edit-info-modal' }"
+										[field]="{ id: 'IDOwner', label: 'Person in charge', type: 'ng-select-staff', dataSource: _OwnerDataSource, bindValue: 'Id', bindLabel: 'FullName', clearable: true, form: formGroup, appendTo: '#opportunity-edit-info-modal' }"
 									></app-form-control>
 								</ion-col>
 								<ion-col size="12" size-sm="6" *ngIf="campaignList.length">

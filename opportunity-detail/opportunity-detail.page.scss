@@ -957,6 +957,11 @@
 	margin-top: 16px;
 }
 
+.doc-row.is-readonly {
+	cursor: default;
+	pointer-events: none;
+}
+
 .info-section-title {
 	display: flex;
 	align-items: center;
@@ -969,6 +974,35 @@
 	color: var(--ion-color-medium);
 	ion-icon {
 		font-size: 1rem;
+	}
+
+	.info-section-heading {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		min-width: 0;
+	}
+
+	.info-section-nav {
+		margin-left: auto;
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: var(--ion-color-primary);
+		font-size: 0.8rem;
+		font-weight: 500;
+		letter-spacing: normal;
+		text-transform: none;
+		cursor: pointer;
+		line-height: 1;
+
+		ion-icon {
+			font-size: 1rem;
+			color: inherit;
+		}
 	}
 }
 
@@ -1044,6 +1078,12 @@
 	border: 1px solid rgba(var(--ion-color-medium-rgb), 0.25);
 	border-radius: 10px;
 	background: rgba(var(--ion-color-medium-rgb), 0.06);
+	&.opp-contact-card {
+		cursor: pointer;
+		& + & {
+			margin-top: 8px;
+		}
+	}
 	.contact-name {
 		display: flex;
 		flex-wrap: wrap;

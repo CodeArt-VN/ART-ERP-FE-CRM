@@ -1,5 +1,9 @@
 <ion-header [translucent]="true">
-	<app-toolbar [page]="this"></app-toolbar>
+	<app-toolbar [page]="this">
+		<ion-button endSlot title="{{ 'Hall booking' | translate }}" [routerLink]="['/hall-booking']">
+			<ion-icon slot="icon-only" name="calendar-outline"></ion-icon>
+		</ion-button>
+	</app-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" appScrollbarTheme class="left scrollx" forceOverscroll="false">

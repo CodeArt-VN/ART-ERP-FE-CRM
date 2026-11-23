@@ -1,0 +1,54 @@
+<ion-header [translucent]="true" collapse="fade">
+	<ion-toolbar>
+		<ion-title>{{ booking?.Id ? ('Edit hall booking' | translate) : ('Book hall' | translate) }}</ion-title>
+		<ion-buttons slot="primary">
+			<ion-button title="{{ 'Close' | translate }}" color="secondary" (click)="closeModal()">
+				<ion-icon slot="icon-only" name="close"></ion-icon>
+			</ion-button>
+		</ion-buttons>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" appScrollbarTheme>
+	<div id="hall-book-modal" style="position: absolute; z-index: 30005"></div>
+	<form [formGroup]="formGroup">
+		<div class="edit-box">
+			<ion-grid fixed>
+				<ion-row>
+					<ion-col size="12">
+						<app-form-control
+							[field]="{ id: 'IDOpportunity', label: 'Opportunity', type: 'ng-select-async', dataSource: _OppDataSource, bindValue: 'Id', bindLabel: 'Name', form: formGroup, appendTo: '#hall-book-modal' }"
+						></app-form-control>
+						<app-form-control
+							[field]="{ id: 'IDHall', label: 'Hall', type: 'ng-select', dataSource: hallList, bindValue: 'Id', bindLabel: 'Name', form: formGroup, appendTo: '#hall-book-modal' }"
+						></app-form-control>
+						<app-form-control [field]="{ id: 'DateTimeFrom', label: 'From', type: 'datetime-local', form: formGroup }"></app-form-control>
+						<app-form-control [field]="{ id: 'DateTimeTo', label: 'To', type: 'datetime-local', form: formGroup }"></app-form-control>
+						<app-form-control
+							[field]="{ id: 'Status', label: 'Status', type: 'ng-select', dataSource: statusOptions, bindValue: 'Code', bindLabel: 'Name', form: formGroup, appendTo: '#hall-book-modal' }"
+							(change)="onStatusChange()"
+						></app-form-control>
+						<app-form-control *ngIf="formGroup.value.Status === 'Hold'" [field]="{ id: 'HoldExpiredAt', label: 'Hold until', type: 'datetime-local', form: formGroup }"></app-form-control>
+						<app-form-control [field]="{ id: 'Tables', label: 'Tables', type: 'number', form: formGroup }"></app-form-control>
+						<app-form-control [field]="{ id: 'Guests', label: 'Guests', type: 'number', form: formGroup }"></app-form-control>
+						<app-form-control [field]="{ id: 'Remark', label: 'Remark', type: 'textarea', form: formGroup }"></app-form-control>
+					</ion-col>
+				</ion-row>
+			</ion-grid>
+		</div>
+	</form>
+</ion-content>
+
+<ion-footer [translucent]="true" collapse="fade">
+	<ion-toolbar>
+		<div slot="start">
+			<ion-button *ngIf="canCancel" fill="clear" color="danger" (click)="cancelBooking()" [disabled]="busy">
+				{{ 'Cancel booking' | translate }}
+			</ion-button>
+		</div>
+		<div slot="end">
+			<ion-button fill="outline" color="warning" (click)="closeModal()">{{ 'Close' | translate }}</ion-button>
+			<ion-button [strong]="true" (click)="saveChange()" [disabled]="busy || formGroup.invalid">{{ 'Save' | translate }}</ion-button>
+		</div>
+	</ion-toolbar>
+</ion-footer>

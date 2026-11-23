@@ -1,0 +1,93 @@
+<ion-header [translucent]="true">
+	<app-toolbar [page]="this">
+		<ion-button (click)="fcPrev()" title="{{ 'Previous week' | translate }}">
+			<ion-icon slot="icon-only" name="chevron-back"></ion-icon>
+		</ion-button>
+		<ion-button (click)="fcToday()" title="{{ 'Today' | translate }}">{{ 'Today' | translate }}</ion-button>
+		<ion-button (click)="fcNext()" title="{{ 'Next week' | translate }}">
+			<ion-icon slot="icon-only" name="chevron-forward"></ion-icon>
+		</ion-button>
+
+		<span class="split ion-hide-sm-down">|</span>
+
+		<ion-button (click)="fcDay()" title="{{ 'Day' | translate }}">{{ 'Day' | translate }}</ion-button>
+		<ion-button (click)="fcWeek()" title="{{ 'Week' | translate }}">{{ 'Week' | translate }}</ion-button>
+		<ion-button (click)="fcMonth()" title="{{ 'Month' | translate }}">{{ 'Month' | translate }}</ion-button>
+
+		<span class="split ion-hide-sm-down">|</span>
+
+		<ion-button endSlot title="{{ 'Filter' | translate }}" (click)="openFilter()">
+			<ion-icon slot="icon-only" [name]="filterActive || hideUnbooked ? 'search' : 'search-outline'"></ion-icon>
+			<ion-badge *ngIf="filterActive || hideUnbooked" color="warning">!</ion-badge>
+		</ion-button>
+		<ion-button
+			endSlot
+			title="{{ (hideUnbooked ? 'Show unbooked halls' : 'Hide unbooked halls') | translate }}"
+			(click)="toggleHideUnbooked()"
+		>
+			<ion-icon slot="icon-only" [name]="hideUnbooked ? 'eye-off' : 'eye-off-outline'"></ion-icon>
+		</ion-button>
+		<ion-button endSlot title="{{ 'Hall catalogue' | translate }}" (click)="goCatalogue()">
+			<ion-icon slot="icon-only" name="business-outline"></ion-icon>
+		</ion-button>
+		<ion-button endSlot title="{{ 'Active bookings' | translate }}" (click)="openBookingList()">
+			<ion-icon slot="icon-only" name="list-outline"></ion-icon>
+			<ion-badge *ngIf="bookingRows.length" color="warning">{{ bookingRows.length }}</ion-badge>
+		</ion-button>
+		<ion-button endSlot title="{{ 'Book hall' | translate }}" (click)="openBook()">
+			<ion-icon slot="icon-only" name="add-outline"></ion-icon>
+		</ion-button>
+	</app-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" appScrollbarTheme class="_left">
+	<!-- Spinner only — empty overlay is handled below so the date grid stays mounted. -->
+	<app-page-message [showSpinner]="pageConfig.showSpinner" [itemsLength]="1"></app-page-message>
+
+	<div class="hall-calendar-shell" *ngIf="!pageConfig.showSpinner">
+		<full-calendar #calendar [options]="calendarOptions"></full-calendar>
+
+		<div class="hall-calendar-empty" *ngIf="visibleHallCount === 0">
+			<app-page-message
+				[showSpinner]="false"
+				[itemsLength]="0"
+				[message]="'No data'"
+				[subMessage]="emptySubMessage"
+				[minHeight]="'36vh'"
+			>
+				<div class="active-filters" *ngIf="activeFilterChips.length">
+					<div class="active-filters-header">
+						<span class="active-filters-kicker">
+							{{ (activeFilterChips.length === 1 ? 'Active filter' : 'Active filters') | translate }}
+						</span>
+						<span class="active-filters-count" aria-hidden="true">{{ activeFilterChips.length }}</span>
+					</div>
+
+					<ul class="active-filter-list">
+						<li class="active-filter-chip" *ngFor="let f of activeFilterChips">
+							<div class="chip-body">
+								<span class="chip-label">{{ f.label | translate }}</span>
+								<span class="chip-value">{{ f.displayValue | translate }}</span>
+							</div>
+							<ion-button
+								class="chip-clear"
+								size="small"
+								fill="clear"
+								[attr.aria-label]="('Clear' | translate) + ' ' + (f.label | translate)"
+								(click)="clearFilterChip(f.key)"
+							>
+								<ion-icon slot="icon-only" name="close-outline"></ion-icon>
+							</ion-button>
+						</li>
+					</ul>
+
+					<div class="active-filters-footer" *ngIf="activeFilterChips.length > 1">
+						<button type="button" class="clear-all-link" (click)="clearAllFilters()">
+							{{ 'Clear all filters' | translate }}
+						</button>
+					</div>
+				</div>
+			</app-page-message>
+		</div>
+	</div>
+</ion-content>

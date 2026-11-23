@@ -1,0 +1,35 @@
+<ion-header [translucent]="true" collapse="fade">
+	<ion-toolbar>
+		<ion-title>{{ 'Active bookings' | translate }} ({{ bookings?.length || 0 }})</ion-title>
+		<ion-buttons slot="primary">
+			<ion-button title="{{ 'Close' | translate }}" color="secondary" (click)="closeModal()">
+				<ion-icon slot="icon-only" name="close"></ion-icon>
+			</ion-button>
+		</ion-buttons>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" appScrollbarTheme>
+	<ion-list *ngIf="bookings?.length; else empty">
+		<ion-item button detail lines="full" *ngFor="let b of bookings" (click)="pick(b)">
+			<ion-label class="ion-text-wrap">
+				<h3>{{ b.HallName }} · {{ b.Status | translate }}</h3>
+				<p>{{ b.OpportunityName || ('Booking' | translate) }}</p>
+				<p>{{ b.DateTimeFrom | date: 'dd/MM/yyyy HH:mm' }} – {{ b.DateTimeTo | date: 'dd/MM/yyyy HH:mm' }}</p>
+			</ion-label>
+		</ion-item>
+	</ion-list>
+	<ng-template #empty>
+		<div class="ion-padding ion-text-center">
+			<ion-text color="medium">{{ 'No data' | translate }}</ion-text>
+		</div>
+	</ng-template>
+</ion-content>
+
+<ion-footer [translucent]="true" collapse="fade">
+	<ion-toolbar>
+		<div slot="end">
+			<ion-button fill="outline" color="warning" (click)="closeModal()">{{ 'Close' | translate }}</ion-button>
+		</div>
+	</ion-toolbar>
+</ion-footer>

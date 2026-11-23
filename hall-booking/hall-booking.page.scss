@@ -1,0 +1,398 @@
+.split {
+	opacity: 0.45;
+	margin: 0 4px;
+}
+
+.hall-calendar-shell {
+	position: relative;
+	height: 100%;
+}
+
+/* Keep FC date header visible; empty state sits over the resource body (datatable-style). */
+.hall-calendar-empty {
+	position: absolute;
+	top: 52px;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 6;
+	overflow: auto;
+	background: var(--ion-background-color, #fff);
+	border-top: 1px solid var(--ion-color-step-150, rgba(0, 0, 0, 0.08));
+}
+
+.active-filters {
+	margin: 0 auto 16px;
+	max-width: 420px;
+	padding: 0 16px 8px;
+	text-align: left;
+}
+
+.active-filters-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 8px;
+}
+
+.active-filters-kicker {
+	font-size: 0.85rem;
+	opacity: 0.8;
+}
+
+.active-filters-count {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 1.4rem;
+	height: 1.4rem;
+	padding: 0 6px;
+	border-radius: 999px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	background: var(--ion-color-warning);
+	color: var(--ion-color-warning-contrast, #000);
+}
+
+.active-filter-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.active-filter-chip {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 6px 8px 6px 12px;
+	border-radius: 8px;
+	border: 1px solid var(--ion-color-step-150, rgba(0, 0, 0, 0.12));
+	background: var(--ion-color-step-50, rgba(0, 0, 0, 0.03));
+}
+
+.chip-body {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.chip-label {
+	font-size: 0.75rem;
+	opacity: 0.7;
+}
+
+.chip-value {
+	font-size: 0.9rem;
+	word-break: break-word;
+}
+
+.chip-clear {
+	margin: 0;
+	--padding-start: 4px;
+	--padding-end: 4px;
+}
+
+.active-filters-footer {
+	margin-top: 10px;
+	text-align: center;
+}
+
+.clear-all-link {
+	border: 0;
+	background: transparent;
+	color: var(--ion-color-warning-shade, var(--ion-color-warning));
+	font: inherit;
+	font-weight: 600;
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+:host ::ng-deep {
+	.fc {
+		height: 100%;
+	}
+
+	.fc .fc-datagrid-cell-cushion {
+		padding: 6px 8px;
+	}
+
+	/*
+	 * Name column: FC renders expander + label as inline/baseline — icon sits lower than text.
+	 * Flex-align cushion (and expander icons) so icon + name share one vertical center.
+	 */
+	.fc-datagrid-header .fc-datagrid-cell:not(.hall-col-subtotal) .fc-datagrid-cell-cushion,
+	.fc-datagrid-body .fc-datagrid-cell:not(.hall-col-subtotal) .fc-datagrid-cell-cushion {
+		display: flex !important;
+		align-items: center !important;
+		gap: 0;
+	}
+
+	.fc-datagrid-cell:not(.hall-col-subtotal) .fc-datagrid-cell-cushion > .fc-icon,
+	.fc-datagrid-cell:not(.hall-col-subtotal) .fc-datagrid-expander,
+	.fc-datagrid-cell:not(.hall-col-subtotal) .fc-datagrid-expander .fc-icon {
+		display: inline-flex !important;
+		align-items: center;
+		justify-content: center;
+		flex: 0 0 auto;
+		align-self: center !important;
+		line-height: 1 !important;
+		margin-top: 0 !important;
+		position: relative;
+		top: 0 !important;
+	}
+
+	.fc-datagrid-cell:not(.hall-col-subtotal) .fc-datagrid-cell-main {
+		display: flex !important;
+		align-items: center !important;
+		min-width: 0;
+		line-height: 1.2;
+		align-self: center;
+	}
+
+	.hall-name-header {
+		display: block;
+		line-height: 1.2;
+	}
+
+	/* Expand-all replaces FC header expander so label aligns with body resource names. */
+	.fc-datagrid-header .fc-datagrid-expander.hall-header-expander {
+		cursor: pointer;
+		display: inline-flex;
+		align-items: center;
+	}
+
+	.hall-expand-toggle {
+		border: 0;
+		background: transparent;
+		padding: 0;
+		margin: 0;
+		cursor: pointer;
+		opacity: 0.75;
+		line-height: 1;
+		color: inherit;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.hall-expand-toggle:hover {
+		opacity: 1;
+	}
+
+	/*
+	 * Same tokens as app-data-table — ONLY on datagrid cells + .fc-timeline-lane.
+	 * Never paint .fc-timeline-slot / slots overlay: those TDs span the full height and
+	 * an opaque fill hides lane borders (= lost horizontal grid).
+	 */
+	.fc {
+		--hall-row-bg: var(--table-row-background);
+		--hall-header-bg: rgba(var(--table-header-background-rgb, 248, 249, 251), 0.55);
+		--hall-row-hover-bg: var(--table-row-hover-background);
+		--fc-page-bg-color: var(--table-row-background);
+		--fc-neutral-bg-color: transparent;
+		--fc-border-color: var(--menu-right-border-color);
+		--fc-neutral-text-color: var(--ion-color-dark);
+		color: var(--ion-color-dark);
+	}
+
+	/* Slots overlay must stay transparent so lane row borders show through as the grid. */
+	.fc-timeline-slots,
+	.fc-timeline-slots td,
+	.fc-timeline-body .fc-timeline-slot {
+		background: transparent !important;
+		background-color: transparent !important;
+	}
+
+	/* Normal resource lines (left cells + right lanes only) */
+	.fc-datagrid-body .fc-datagrid-cell:not(.hall-row-subtotal),
+	.fc-timeline-lane.fc-resource:not(.hall-row-subtotal) {
+		background-color: var(--hall-row-bg) !important;
+		color: var(--ion-color-dark);
+		border-color: var(--menu-right-border-color) !important;
+	}
+
+	/* Header + branch/floor subtotal = datatable header wash */
+	.fc-datagrid-header .fc-datagrid-cell,
+	.fc-timeline-header,
+	.fc-scrollgrid-section-header > th,
+	.fc-datagrid-body .fc-datagrid-cell.hall-row-subtotal,
+	.fc-datagrid-body tr:has(.hall-row-subtotal) > .fc-datagrid-cell,
+	.fc-timeline-lane.hall-row-subtotal {
+		background-color: var(--hall-header-bg) !important;
+		-webkit-backdrop-filter: saturate(180%) blur(20px);
+		backdrop-filter: saturate(180%) blur(20px);
+		color: var(--ion-color-dark);
+		border-color: var(--menu-right-border-color) !important;
+	}
+
+	/* Keep day-column vertical lines on the header strip */
+	.fc-timeline-header .fc-timeline-slot {
+		border-color: var(--menu-right-border-color) !important;
+		background: transparent !important;
+	}
+
+	/*
+	 * Row hover — ONLY via .hall-row-hover on datagrid cell + timeline lane.
+	 * Same token as app-data-table `.row:not(.header):hover`.
+	 * Specificity must beat `.fc-timeline-lane.fc-resource:not(.hall-row-subtotal)`
+	 * or the calendar lane keeps the normal row bg (left OK, right looks broken).
+	 */
+	.fc-datagrid-body .fc-datagrid-cell.hall-row-hover,
+	.fc-datagrid-body .fc-datagrid-cell.hall-row-subtotal.hall-row-hover,
+	.fc-datagrid-body tr:has(.hall-row-hover) > .fc-datagrid-cell,
+	.fc-timeline-lane.fc-resource.hall-row-hover,
+	.fc-timeline-lane.fc-resource.hall-row-subtotal.hall-row-hover,
+	.fc-timeline-lane.hall-row-hover {
+		background-color: var(--hall-row-hover-bg) !important;
+		-webkit-backdrop-filter: none;
+		backdrop-filter: none;
+	}
+
+	.hall-resource-name {
+		font-weight: 500;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		line-height: 1.2;
+		display: block;
+	}
+
+	.hall-resource-name.is-branch,
+	.hall-resource-name.is-floor {
+		font-weight: 700;
+	}
+
+	.hall-resource-name.is-hall-group {
+		font-weight: 600;
+	}
+
+	.hall-resource-name.is-line {
+		font-weight: 400;
+		opacity: 0.92;
+	}
+
+	/*
+	 * Tổng column: full width + right-align.
+	 * Do NOT set height:100% on .fc-datagrid-cell-cushion — it is also
+	 * .fc-scrollgrid-sync-inner; FC measures that for row sync, so height:100%
+	 * ratchets tall rows (collapse-all keeps empty branch lines inflated).
+	 */
+	.fc-datagrid-cell.hall-col-subtotal .fc-datagrid-cell-frame {
+		display: flex;
+		align-items: center;
+	}
+
+	.fc-datagrid-cell.hall-col-subtotal .fc-datagrid-cell-cushion {
+		display: flex !important;
+		align-items: center;
+		justify-content: flex-end;
+		text-align: right !important;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.fc-datagrid-cell.hall-col-subtotal .fc-datagrid-cell-main {
+		display: block !important;
+		width: 100% !important;
+	}
+
+	.hall-resource-subtotal-header,
+	.hall-resource-subtotal {
+		display: block;
+		box-sizing: border-box;
+		width: 100%;
+		font-variant-numeric: tabular-nums;
+		font-size: 0.85em;
+		font-weight: 600;
+		opacity: 0.9;
+		text-align: right !important;
+		white-space: nowrap;
+		line-height: 1;
+	}
+
+	/*
+	 * Do NOT force lane/cell heights — FC scrollgrid syncs left/right from natural
+	 * packing. Subtotals stay display:background (no stack). Booking overlaps stack
+	 * and expand the row so every event stays visible.
+	 * Drop FC's default padding-bottom:10px on .fc-timeline-events so a single
+	 * booking row stays ~same height as an empty row (stacked overlaps still grow).
+	 */
+	.fc-timeline-events.fc-scrollgrid-sync-inner {
+		padding-bottom: 0 !important;
+	}
+	.fc-event.hall-slot-subtotal,
+	.fc-bg-event.hall-slot-subtotal {
+		background: transparent !important;
+		border: 0 !important;
+		box-shadow: none !important;
+		outline: none !important;
+		opacity: 1;
+		pointer-events: none;
+		padding: 0 6px !important;
+		margin: 0 !important;
+		min-height: 0 !important;
+		display: flex !important;
+		align-items: center;
+		box-sizing: border-box;
+	}
+
+	.fc-event.hall-slot-subtotal .fc-event-main,
+	.fc-bg-event.hall-slot-subtotal .fc-event-main {
+		background: transparent !important;
+		padding: 0 !important;
+		width: 100%;
+		display: flex;
+		align-items: center;
+	}
+
+	.fc-event.hall-slot-subtotal .fc-event-main-frame,
+	.fc-event.hall-slot-subtotal .fc-event-title-container,
+	.fc-bg-event.hall-slot-subtotal .fc-event-main-frame,
+	.fc-bg-event.hall-slot-subtotal .fc-event-title-container {
+		width: 100%;
+		display: flex;
+		align-items: center;
+	}
+
+	.hall-slot-subtotal-num {
+		width: 100%;
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+		font-weight: 600;
+		font-size: 0.85em;
+		line-height: 1;
+		opacity: 0.9;
+		color: inherit;
+	}
+
+	/* Deep-link from opportunity: make that booking pop out of the crowd */
+	.fc-event.hall-event-focus {
+		z-index: 6 !important;
+		outline: 2px solid #fff;
+		outline-offset: 1px;
+		box-shadow:
+			0 0 0 3px var(--ion-color-primary),
+			0 0 14px rgba(var(--ion-color-primary-rgb), 0.75);
+		filter: brightness(1.12) saturate(1.15);
+		animation: hall-event-focus-pulse 1.4s ease-in-out 2;
+	}
+}
+
+@keyframes hall-event-focus-pulse {
+	0%,
+	100% {
+		box-shadow:
+			0 0 0 3px var(--ion-color-primary),
+			0 0 10px rgba(var(--ion-color-primary-rgb), 0.55);
+	}
+	50% {
+		box-shadow:
+			0 0 0 5px var(--ion-color-primary),
+			0 0 18px rgba(var(--ion-color-primary-rgb), 0.9);
+	}
+}

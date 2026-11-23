@@ -1,0 +1,93 @@
+<ion-header [translucent]="true" collapse="fade">
+	<ion-toolbar>
+		<ion-title>{{ 'Filter' | translate }}</ion-title>
+		<ion-buttons slot="primary">
+			<ion-button title="{{ 'Close' | translate }}" color="secondary" (click)="closeModal()">
+				<ion-icon slot="icon-only" name="close"></ion-icon>
+			</ion-button>
+		</ion-buttons>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" appScrollbarTheme>
+	<div id="hall-booking-filter-modal" style="position: absolute; z-index: 30005"></div>
+	<form [formGroup]="formGroup" (ngSubmit)="apply()">
+		<div class="edit-box">
+			<ion-grid fixed>
+				<ion-row>
+					<ion-col size="12">
+						<app-form-control [field]="{ id: 'Keyword', label: 'Search', type: 'text', form: formGroup }"></app-form-control>
+						<app-form-control
+							[field]="{
+								id: 'IDBranches',
+								label: 'Center',
+								type: 'ng-select',
+								dataSource: centers,
+								bindValue: 'Id',
+								bindLabel: 'Name',
+								multiple: true,
+								clearable: true,
+								form: formGroup,
+								appendTo: '#hall-booking-filter-modal'
+							}"
+						></app-form-control>
+						<app-form-control
+							[field]="{
+								id: 'Floors',
+								label: 'Floor',
+								type: 'ng-select',
+								dataSource: floors,
+								bindValue: 'Code',
+								bindLabel: 'Name',
+								multiple: true,
+								clearable: true,
+								form: formGroup,
+								appendTo: '#hall-booking-filter-modal'
+							}"
+						></app-form-control>
+						<app-form-control
+							[field]="{
+								id: 'HallKinds',
+								label: 'Hall type',
+								type: 'ng-select',
+								dataSource: kinds,
+								bindValue: 'Code',
+								bindLabel: 'Name',
+								multiple: true,
+								clearable: true,
+								form: formGroup,
+								appendTo: '#hall-booking-filter-modal'
+							}"
+						></app-form-control>
+						<app-form-control
+							[field]="{
+								id: 'Statuses',
+								label: 'Status',
+								type: 'ng-select',
+								dataSource: statuses,
+								bindValue: 'Code',
+								bindLabel: 'Name',
+								multiple: true,
+								clearable: true,
+								form: formGroup,
+								appendTo: '#hall-booking-filter-modal'
+							}"
+						></app-form-control>
+					</ion-col>
+				</ion-row>
+			</ion-grid>
+		</div>
+		<button type="submit" hidden>Apply</button>
+	</form>
+</ion-content>
+
+<ion-footer [translucent]="true" collapse="fade">
+	<ion-toolbar>
+		<div slot="start">
+			<ion-button fill="clear" color="warning" (click)="clearAll()">{{ 'Clear all filters' | translate }}</ion-button>
+		</div>
+		<div slot="end">
+			<ion-button [strong]="true" (click)="apply()">{{ 'Apply' | translate }}</ion-button>
+		</div>
+	</ion-toolbar>
+</ion-footer>

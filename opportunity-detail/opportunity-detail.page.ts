@@ -15,6 +15,7 @@ import {
 	CRM_CampaignProvider,
 	CRM_ContactProvider,
 	CRM_ContractProvider,
+	CRM_HallBookingProvider,
 	CRM_OpportunityProvider,
 	CRM_OpportunityStageHistoryProvider,
 	CRM_PipelineProvider,
@@ -66,12 +67,18 @@ import {
 	iconButtonSlot,
 	nextInfoLevel,
 } from './pipeline-view.util';
+import { hallBookingCalendarUrl, hallBookingDisplayName, isActiveHallBooking, sortOppHallBookings } from './opportunity-hall-booking.util';
+import { resolveOppContactDisplay } from './opportunity-contact.util';
 import { opportunityStatus } from '../opportunity/opportunity-list.util';
+import { centerOptions } from '../hall-detail/hall.util';
+import { HallBookModalPage } from '../hall-booking/hall-book-modal.page';
 import { StageTransitionModalPage } from './modals/stage-transition-modal.page';
 import { ChangePipelineModalPage } from './modals/change-pipeline-modal.page';
 import { CrmQuotationModalPage } from './modals/crm-quotation-modal.page';
 import { CrmContractModalPage } from './modals/crm-contract-modal.page';
 import { ActivityModalPage } from './modals/activity-modal.page';
+import { OppContactModalPage } from './modals/opp-contact-modal.page';
+import { APIList } from 'src/app/services/static/global-variable';
 
 @Component({
 	selector: 'app-opportunity-detail',
@@ -108,9 +115,15 @@ export class OpportunityDetailPage extends PageBase {
 	saleOrders: any[] = [];
 	payments: any[] = [];
 	invoices: any[] = [];
+	hallBookings: any[] = [];
 
 	contactPartner: any = null;
 	ownerStaff: any = null;
+	oppContacts: any[] = [];
+	oppContactDisplay: any[] = [];
+
+	hallBookingDisplayName = hallBookingDisplayName;
+	isActiveHallBooking = isActiveHallBooking;
 
 	busy = false;
 	timelineFilter: TimelineFilter = 'all';
@@ -270,6 +283,7 @@ export class OpportunityDetailPage extends PageBase {
 		public saleOrderProvider: SALE_OrderProvider,
 		public paymentDetailProvider: BANK_IncomingPaymentDetailProvider,
 		public arInvoiceProvider: AC_ARInvoiceProvider,
+		public hallBookingProvider: CRM_HallBookingProvider,
 		public contactProvider: CRM_ContactProvider,
 		public staffProvider: HRM_StaffProvider,
 		public campaignProvider: CRM_CampaignProvider,
@@ -378,10 +392,15 @@ export class OpportunityDetailPage extends PageBase {
 				EventDate: toDateInputValue(this.item.EventDate),
 			});
 			this.loadPartnerAndOwner();
+			this.loadOppContacts();
 			this.refreshProcess();
 			this.loadDocuments();
+			this.loadHallBookings();
 			this.loadEntityLogs();
 		} else {
+			this.hallBookings = [];
+			this.oppContacts = [];
+			this.oppContactDisplay = [];
 			this._ContactDataSource.initSearch();
 			this._OwnerDataSource.initSearch();
 		}
@@ -436,7 +455,53 @@ export class OpportunityDetailPage extends PageBase {
 			this._OwnerDataSource.selected = [];
 		}
 		this._OwnerDataSource.initSearch();
+		this.oppContactDisplay = resolveOppContactDisplay(this.contactPartner, this.oppContacts);
 		this.cdr.detectChanges();
+	}
+
+	private async loadOppContacts() {
+		if (!this.item?.Id) {
+			this.oppContacts = [];
+			this.oppContactDisplay = resolveOppContactDisplay(this.contactPartner, []);
+			return;
+		}
+		try {
+			const api = APIList.CRM_OpportunityContact.getList;
+			const rows: any = await this.pageProvider.commonService.connect(api.method, api.url(), { IDOpportunity: this.item.Id }).toPromise();
+			this.oppContacts = Array.isArray(rows) ? rows : rows?.data || [];
+		} catch {
+			this.oppContacts = [];
+		}
+		this.oppContactDisplay = resolveOppContactDisplay(this.contactPartner, this.oppContacts);
+		this.cdr.detectChanges();
+	}
+
+	onOppContactClick(row: any) {
+		if (!this.canManageOppContact || this.isClosed) return;
+		this.openOppContactModal(row);
+	}
+
+	async openOppContactModal(row?: any) {
+		if (!this.item?.Id || !this.canManageOppContact || this.isClosed) return;
+		const modal = await this.modalController.create({
+			component: OppContactModalPage,
+			componentProps: {
+				opportunity: this.item,
+				item: row ? { ...row } : null,
+				canEdit: this.canManageOppContact,
+				canDelete: !!(row?.Id && (this.pageConfig?.canDelete || this.pageConfig?.canManageOppContact)),
+			},
+			cssClass: 'form-1column',
+			breakpoints: [0, 0.25, 0.5, 0.75, 1],
+			initialBreakpoint: 0.75,
+			handleBehavior: 'cycle',
+			expandToScroll: false,
+		});
+		await modal.present();
+		const { role } = await modal.onWillDismiss();
+		if (role === 'saved') {
+			await Promise.all([this.loadOppContacts(), this.loadPartnerAndOwner(), this.refreshProcess()]);
+		}
 	}
 
 	async saveChange(): Promise<boolean> {
@@ -527,6 +592,10 @@ export class OpportunityDetailPage extends PageBase {
 
 	get canDeleteDocuments(): boolean {
 		return !!(this.pageConfig?.canDelete || this.pageConfig?.canManageQuotation || this.pageConfig?.canManageContract);
+	}
+
+	get canManageOppContact(): boolean {
+		return !!(this.pageConfig?.canEdit || this.pageConfig?.canManageOppContact);
 	}
 
 	get hasPipeline(): boolean {
@@ -760,6 +829,74 @@ export class OpportunityDetailPage extends PageBase {
 		this.cdr.detectChanges();
 	}
 
+	async loadHallBookings() {
+		if (!this.item?.Id) {
+			this.hallBookings = [];
+			return;
+		}
+		try {
+			const api = APIList.CRM_HallBooking.getByOpportunity;
+			const rows: any = await this.hallBookingProvider.commonService.connect(api.method, api.url(), { IDOpportunity: this.item.Id }).toPromise();
+			this.hallBookings = sortOppHallBookings(Array.isArray(rows) ? rows : rows?.data || []);
+		} catch {
+			// Fallback when ByOpportunity is not on the server yet (GenCode list lacks DateTimeFrom/To).
+			try {
+				const res: any = await this.hallBookingProvider.read({ IDOpportunity: this.item.Id, Take: 50 }, true);
+				this.hallBookings = sortOppHallBookings(
+					(res?.data || []).map((b: any) => ({
+						...b,
+						HallName: b.HallName || b.Name,
+						DateTimeFrom: b.DateTimeFrom || b.EventDate,
+						DateTimeTo: b.DateTimeTo || b.EventDate,
+					}))
+				);
+			} catch {
+				this.hallBookings = [];
+			}
+		}
+		this.cdr.detectChanges();
+	}
+
+	/** Center name for a hall booking row (branch of the hall). */
+	hallBookingCenterName(row: any): string {
+		return branchNameById(this.env.branchList, row?.IDBranch) || '';
+	}
+
+	/** Title action: open hall calendar week view and highlight this opp's booking. */
+	openHallBookingCalendar(booking?: any) {
+		const active = (this.hallBookings || []).find((b) => isActiveHallBooking(b));
+		const row = booking || active || this.hallBookings?.[0];
+		this.nav(
+			hallBookingCalendarUrl(row?.DateTimeFrom || this.item?.EventDate, {
+				bookingId: row?.Id,
+				opportunityId: row?.IDOpportunity || this.item?.Id,
+			})
+		);
+	}
+
+	async openHallBookModal(booking?: any) {
+		if (!this.item?.Id) return;
+		const centers = centerOptions(this.env.branchList);
+		const modal = await this.modalController.create({
+			component: HallBookModalPage,
+			cssClass: 'form-1column',
+			componentProps: {
+				booking: booking
+					? { ...booking, OpportunityName: this.item.Name, OpportunityCode: this.item.Code }
+					: { IDOpportunity: this.item.Id, OpportunityName: this.item.Name, OpportunityCode: this.item.Code },
+				centers,
+				defaultBranch: booking?.IDBranch || this.item.IDBranch || this.env.selectedBranch,
+			},
+			breakpoints: [0, 0.25, 0.5, 0.75, 1],
+			initialBreakpoint: 0.75,
+			handleBehavior: 'cycle',
+			expandToScroll: false,
+		});
+		await modal.present();
+		const { data } = await modal.onWillDismiss();
+		if (data?.saved) await this.loadHallBookings();
+	}
+
 	/** Reload the opportunity row (stage, probability, closed flags) and its plan after an action. */
 	async reloadAfterAction() {
 		const fresh: any = await this.api<any>('GET', 'CRM/Opportunity/' + this.item.Id);
@@ -768,7 +905,7 @@ export class OpportunityDetailPage extends PageBase {
 		this.formGroup.patchValue(fresh, { emitEvent: false });
 		this.normalizeFormDates();
 		this.previewStageId = null;
-		await Promise.all([this.refreshProcess(), this.loadDocuments()]);
+		await Promise.all([this.refreshProcess(), this.loadDocuments(), this.loadHallBookings()]);
 		if (this.entityLogsLoaded) {
 			await this.loadEntityLogs();
 		}

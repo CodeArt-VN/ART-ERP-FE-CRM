@@ -1,0 +1,59 @@
+<ion-header [translucent]="true" collapse="fade">
+	<ion-toolbar>
+		<ion-title>{{ item?.Id ? ('Edit contact' | translate) : ('Add contact' | translate) }}</ion-title>
+		<ion-buttons slot="primary">
+			<ion-button title="{{ 'Close' | translate }}" color="secondary" (click)="closeModal()">
+				<ion-icon slot="icon-only" name="close"></ion-icon>
+			</ion-button>
+		</ion-buttons>
+	</ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" appScrollbarTheme>
+	<div id="opp-contact-modal" style="position: absolute; z-index: 30005"></div>
+	<form [formGroup]="formGroup">
+		<div class="edit-box">
+			<ion-grid fixed>
+				<ion-row>
+					<ion-col size="12">
+						<div class="stepper ion-margin-bottom" *ngIf="!item?.Id">
+							<ion-button size="small" [fill]="mode === 'pick' ? 'solid' : 'outline'" (click)="setMode('pick')">
+								{{ 'Select existing' | translate }}
+							</ion-button>
+							<ion-button size="small" [fill]="mode === 'create' ? 'solid' : 'outline'" (click)="setMode('create')">
+								{{ 'Create new' | translate }}
+							</ion-button>
+						</div>
+
+						<app-form-control
+							*ngIf="mode === 'pick'"
+							[field]="{ id: 'IDContact', label: 'Contact', type: 'ng-select-bp', dataSource: _ContactDataSource, bindValue: 'Id', bindLabel: 'Name', clearable: true, form: formGroup, appendTo: '#opp-contact-modal' }"
+						></app-form-control>
+
+						<ng-container *ngIf="mode === 'create'">
+							<app-form-control [field]="{ id: 'Name', label: 'Name', type: 'text', form: formGroup }"></app-form-control>
+							<app-form-control [field]="{ id: 'WorkPhone', label: 'Phone', type: 'text', form: formGroup }"></app-form-control>
+							<app-form-control [field]="{ id: 'Email', label: 'Email', type: 'text', form: formGroup }"></app-form-control>
+							<app-form-control [field]="{ id: 'IsPersonal', label: 'Personal', type: 'checkbox', form: formGroup }"></app-form-control>
+						</ng-container>
+
+						<app-form-control [field]="{ id: 'Role', label: 'Role', type: 'text', form: formGroup }"></app-form-control>
+						<app-form-control [field]="{ id: 'IsPrimary', label: 'Primary contact', type: 'checkbox', form: formGroup }"></app-form-control>
+					</ion-col>
+				</ion-row>
+			</ion-grid>
+		</div>
+	</form>
+</ion-content>
+
+<ion-footer [translucent]="true" collapse="fade">
+	<ion-toolbar>
+		<div slot="start">
+			<ion-button fill="outline" *ngIf="item?.Id && canDelete" (click)="delete()" color="danger">{{ 'Delete' | translate }}</ion-button>
+		</div>
+		<div slot="end">
+			<ion-button fill="outline" color="warning" (click)="closeModal()">{{ 'Cancel' | translate }}</ion-button>
+			<ion-button *ngIf="canEdit" [strong]="true" [disabled]="busy || formGroup.invalid" (click)="saveChange()">{{ 'Save' | translate }}</ion-button>
+		</div>
+	</ion-toolbar>
+</ion-footer>

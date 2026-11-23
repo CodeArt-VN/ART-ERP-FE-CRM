@@ -34,6 +34,7 @@ export const CRMRoutes: Routes = [
     { path: 'pipeline', loadChildren: () => import('./pipeline/pipeline.module').then(m => m.PipelinePageModule), canActivate: [AuthGuard] },
     { path: 'hall', loadChildren: () => import('./hall/hall.module').then(m => m.HallPageModule), canActivate: [AuthGuard] },
     { path: 'hall/:id', loadChildren: () => import('./hall-detail/hall-detail.module').then(m => m.HallDetailPageModule), canActivate: [AuthGuard] },
+    { path: 'hall-booking', loadChildren: () => import('./hall-booking/hall-booking.module').then(m => m.HallBookingPageModule), canActivate: [AuthGuard] },
     { path: 'pipeline/:id', loadChildren: () => import('./pipeline-detail/pipeline-detail.module').then(m => m.PipelineDetailPageModule), canActivate: [AuthGuard] },
     { path: 'lead', loadChildren: () => import('./lead/lead.module').then(m => m.LeadPageModule), canActivate: [AuthGuard] },
     { path: 'lead/:id', loadChildren: () => import('./lead-detail/lead-detail.module').then(m => m.LeadDetailPageModule), canActivate: [AuthGuard] },
