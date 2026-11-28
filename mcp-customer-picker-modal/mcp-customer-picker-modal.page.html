@@ -58,7 +58,7 @@
 			</div>
 
 			<div class="col-code cell" (click)="sortToggle('Code')">
-				{{'Vendor code' | translate}}
+				{{'Code' | translate}}
 				<ion-icon class="min-btn" *ngIf="sort.Code" [name]="sort.Code == 'Code'?'arrow-down': 'arrow-up'"></ion-icon>
 				<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Code" name="search" color="primary"></ion-icon>
 			</div>

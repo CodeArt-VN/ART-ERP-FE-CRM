@@ -37,7 +37,7 @@
 					<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Owner" name="search" color="primary"></ion-icon>
 				</div>
 				<div class="col-code cell" (click)="sortToggle('Code')">
-					{{'Vendor code' | translate}}
+					{{'Code' | translate}}
 					<ion-icon class="min-btn" *ngIf="sort.Code" [name]="sort.Code == 'Code'?'arrow-down': 'arrow-up'"></ion-icon>
 					<ion-icon class="min-btn" (click)="pageConfig.isShowSearch = !pageConfig.isShowSearch" *ngIf="query.Code" name="search" color="primary"></ion-icon>
 				</div>
@@ -92,7 +92,7 @@
 					<div class="col-code cell col-hide-small">
 						<input
 							(keydown.enter)="refresh()"
-							placeholder="{{'Vendor code' | translate}}"
+							placeholder="{{'Code' | translate}}"
 							[ngModelOptions]="{standalone: true}"
 							[(ngModel)]="query.Code"
 							class="c-input"
@@ -145,7 +145,10 @@
 						</div>
 					</div>
 				</div>
-				<div class="col-saleMan cell">{{i._Owner? i._Owner.FullName :''}}</div>
+				<div class="col-saleMan cell" *ngIf="i._Owner">
+					<ion-icon class="show-small-inline" name="person-circle-outline"></ion-icon>
+					<span>{{ i._Owner.FullName }}</span>
+				</div>
 				<div class="col-code col-vendorCode cell">
 					<span *ngIf="i.Code">{{i.Code}}</span>
 				</div>
